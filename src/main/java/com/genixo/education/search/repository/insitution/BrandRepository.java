@@ -47,15 +47,14 @@ public interface BrandRepository extends JpaRepository<Brand, Long> {
     @Query("UPDATE Brand b SET b.viewCount = b.viewCount + 1 WHERE b.id = :id")
     void incrementViewCount(@Param("id") Long id);
 
-    @Query("SELECT new com.genixo.education.search.dto.institution.BrandSummaryDto(" +
-            "b.id, b.name, b.slug, b.logoUrl, b.ratingAverage, " +
-            "COALESCE((SELECT COUNT(c) FROM Campus c WHERE c.brand.id = b.id AND c.isActive = true), 0L), " +
-            "COALESCE((SELECT COUNT(s) FROM School s WHERE s.campus.brand.id = b.id AND s.isActive = true), 0L)) " +
-            "FROM Brand b WHERE b.isActive = true ORDER BY b.name ASC")
-    List<BrandSummaryDto> findBrandSummaries();
+
+
 
     @Query("SELECT b FROM Brand b WHERE b.isActive = true AND " +
             "(:searchTerm IS NULL OR LOWER(b.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
             "LOWER(b.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
     List<Brand> searchBrands(@Param("searchTerm") String searchTerm);
+
+    @Query("SELECT b.id FROM Brand b WHERE b.isActive = true")
+    List<Long> findAllActiveBrandIds();
 }

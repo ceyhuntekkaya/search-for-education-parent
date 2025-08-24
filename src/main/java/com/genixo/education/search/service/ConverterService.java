@@ -443,7 +443,7 @@ public class ConverterService {
                 .slug(brand.getSlug())
                 .logoUrl(brand.getLogoUrl())
                 .ratingAverage(brand.getRatingAverage())
-                .campusCount((long) (brand.getCampuses() != null ? brand.getCampuses().size() : 0))
+                .campusCount((brand.getCampuses() != null ? brand.getCampuses().size() : 0))
                 .build();
     }
 

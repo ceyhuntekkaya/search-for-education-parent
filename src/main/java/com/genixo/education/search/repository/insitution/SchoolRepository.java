@@ -175,4 +175,13 @@ public interface SchoolRepository extends JpaRepository<School, Long> {
     @Query("SELECT s FROM School s WHERE s.isActive = true AND s.campus.isSubscribed = true " +
             "ORDER BY s.createdAt DESC")
     List<School> findLatestSubscribedSchools(Pageable pageable);
+
+    List<Long> findIdsByCampus_Brand_Id(Long entityId);
+
+    Optional<Object> findByIdAndIsActiveTrueAndCampusIsSubscribedTrue(Long schoolId);
+
+    @Query("SELECT s.id FROM School s WHERE s.isActive = true")
+    List<Long> findAllActiveSchoolIds();
+
+    List<Long> findIdsByCampusId(Long entityId);
 }

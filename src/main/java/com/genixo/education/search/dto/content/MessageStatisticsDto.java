@@ -11,25 +11,27 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class MessageStatisticsDto {
-    private Long totalMessages;
-    private Long newMessages;
-    private Long inProgressMessages;
-    private Long resolvedMessages;
-    private Long overdueMessages;
-    private Double averageResponseTimeHours;
-    private Double averageResolutionTimeHours;
-    private Double satisfactionRating;
-    private Long messagesRequiringFollowUp;
+    private Integer totalMessages;
+    private Integer newMessages;
+    private Integer inProgressMessages;
+    private Integer resolvedMessages;
+    private Integer overdueMessages;
+    private Integer averageResponseTimeHours;
+    private Integer averageResolutionTimeHours;
+    private Integer satisfactionRating;
+    private Integer messagesRequiringFollowUp;
 
     // By type
-    private Long inquiryMessages;
-    private Long complaintMessages;
-    private Long appointmentRequests;
-    private Long callbackRequests;
+    private Integer inquiryMessages;
+    private Integer complaintMessages;
+    private Integer appointmentRequests;
+    private Integer callbackRequests;
 
     // By priority
-    private Long urgentMessages;
-    private Long highPriorityMessages;
-    private Long normalPriorityMessages;
-    private Long lowPriorityMessages;
+    private Integer urgentMessages;
+    private Integer highPriorityMessages;
+    private Integer normalPriorityMessages;
+    private Integer lowPriorityMessages;
 }
+
+

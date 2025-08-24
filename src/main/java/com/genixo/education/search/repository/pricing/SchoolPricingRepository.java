@@ -103,19 +103,20 @@ public interface SchoolPricingRepository extends JpaRepository<SchoolPricing, Lo
     // Analytics queries
     @Query("SELECT new com.genixo.education.search.dto.pricing.PricingAnalyticsDto(" +
             "COUNT(sp), " +
-            "COALESCE(AVG(sp.monthlyTuition), 0), " +
-            "COALESCE(MIN(sp.monthlyTuition), 0), " +
-            "COALESCE(MAX(sp.monthlyTuition), 0), " +
-            "COALESCE(AVG(sp.annualTuition), 0), " +
-            "COALESCE(MIN(sp.annualTuition), 0), " +
-            "COALESCE(MAX(sp.annualTuition), 0), " +
-            "COALESCE(AVG(sp.registrationFee), 0), " +
-            "COALESCE(AVG(sp.totalAnnualCost), 0), " +
+            "COALESCE(CAST(AVG(sp.monthlyTuition) AS double), 0.0), " +
+            "COALESCE(CAST(MIN(sp.monthlyTuition) AS double), 0.0), " +
+            "COALESCE(CAST(MAX(sp.monthlyTuition) AS double), 0.0), " +
+            "COALESCE(CAST(AVG(sp.annualTuition) AS double), 0.0), " +
+            "COALESCE(CAST(MIN(sp.annualTuition) AS double), 0.0), " +
+            "COALESCE(CAST(MAX(sp.annualTuition) AS double), 0.0), " +
+            "COALESCE(CAST(AVG(sp.registrationFee) AS double), 0.0), " +
+            "COALESCE(CAST(AVG(sp.totalAnnualCost) AS double), 0.0), " +
             "COUNT(DISTINCT sp.gradeLevel), " +
             "COUNT(DISTINCT sp.academicYear)) " +
             "FROM SchoolPricing sp " +
             "WHERE sp.school.id = :schoolId AND sp.isActive = true AND sp.status = 'ACTIVE'")
     PricingAnalyticsDto getPricingAnalytics(@Param("schoolId") Long schoolId);
+
 
     @Query("SELECT new com.genixo.education.search.dto.pricing.MarketAveragesDto(" +
             "COALESCE(AVG(sp.monthlyTuition), 0), " +

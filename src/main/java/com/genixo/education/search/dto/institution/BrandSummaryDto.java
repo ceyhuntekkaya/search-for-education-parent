@@ -15,6 +15,6 @@ public class BrandSummaryDto {
     private String slug;
     private String logoUrl;
     private Double ratingAverage;
-    private Long campusCount;
-    private Long schoolCount;
+    private Integer campusCount;
+    private Integer schoolCount;
 }

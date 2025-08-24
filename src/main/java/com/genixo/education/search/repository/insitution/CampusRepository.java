@@ -75,4 +75,9 @@ public interface CampusRepository extends JpaRepository<Campus, Long> {
     @Query("SELECT DISTINCT c.province FROM Campus c WHERE c.isActive = true AND c.isSubscribed = true " +
             "AND c.province IS NOT NULL ORDER BY c.province.name ASC")
     List<String> findDistinctActiveCities();
+
+    List<Long> findIdsByBrandId(Long entityId);
+
+    @Query("SELECT c.id FROM Campus c WHERE c.isActive = true")
+    List<Long> findAllActiveCampusIds();
 }

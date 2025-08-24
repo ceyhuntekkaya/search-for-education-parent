@@ -11,19 +11,19 @@ import lombok.NoArgsConstructor;
 @Builder
 public class PricingAnalyticsDto {
 
-    private Long schoolPricingCount;
-    private Integer averageMonthlyTuition;
-    private Integer minimumMonthlyTuition;
-    private Integer maximumMonthlyTuition;
-    private Integer averageAnnualTuition;
-    private Integer minimumAnnualTuition;
-
-
-    private Integer maximumAnnualTuition;
-    private Integer averageRegistrationFee;
-    private Integer averageTotalAnnualCost;
+    private Long totalPricingEntries;
+    private Double averageMonthlyTuition;
+    private Double minimumMonthlyTuition;
+    private Double maximumMonthlyTuition;
+    private Double averageAnnualTuition;
+    private Double minimumAnnualTuition;
+    private Double maximumAnnualTuition;
+    private Double averageRegistrationFee;
+    private Double averageTotalAnnualCost;
     private Long distinctGradeLevels;
     private Long distinctAcademicYears;
+
+
 
 
 

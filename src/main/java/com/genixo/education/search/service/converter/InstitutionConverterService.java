@@ -364,8 +364,8 @@ public class InstitutionConverterService {
                 .slug(entity.getSlug())
                 .logoUrl(entity.getLogoUrl())
                 .ratingAverage(entity.getRatingAverage())
-                .campusCount(campusCount)
-                .schoolCount(schoolCount)
+                .campusCount((int) campusCount)
+                .schoolCount((int) schoolCount)
                 .build();
     }
 
@@ -1187,8 +1187,8 @@ public class InstitutionConverterService {
                 .slug(brand.getSlug())
                 .logoUrl(brand.getLogoUrl())
                 .ratingAverage(brand.getRatingAverage())
-                .campusCount(campusCount)
-                .schoolCount(schoolCount)
+                .campusCount((int) campusCount)
+                .schoolCount((int) schoolCount)
                 .build();
     }
 
