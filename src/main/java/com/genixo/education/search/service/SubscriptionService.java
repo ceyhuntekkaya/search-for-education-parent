@@ -946,6 +946,18 @@ public class SubscriptionService {
         try {
 // Process payment through gateway
             PaymentGatewayResponse gatewayResponse = paymentGatewayService.processPayment(payment, paymentDto);
+/*
+            switch(paymentProvider) {
+                case "IYZICO":
+                    return iyzicoAdapter.processPayment(payment);
+                case "STRIPE":
+                    return stripeAdapter.processPayment(payment);
+                case "PAYU":
+                    return payuAdapter.processPayment(payment);
+            }
+            ceyhun
+ */
+
 
 // Update payment with gateway response
             payment.setExternalPaymentId(gatewayResponse.getTransactionId());

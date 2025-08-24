@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -984,4 +986,92 @@ public class PricingConverterService {
     }
 
 
+    public PriceTrendsDto mapToPriceTrendsDto(List<PriceHistory> history, LocalDateTime startDate, LocalDateTime endDate) {
+        if (ConversionUtils.isEmpty(history) || startDate == null || endDate == null || startDate.isAfter(endDate)) {
+            return null;
+        }
+
+        List<PriceTrendPoint> trendPoints = history.stream()
+                .filter(h -> h.getChangeDate() != null &&
+                        !h.getChangeDate().isBefore(startDate) &&
+                        !h.getChangeDate().isAfter(endDate))
+                .map(h -> new PriceTrendPoint(h.getChangeDate(), h.getNewValue()))
+                .sorted(Comparator.comparing(PriceTrendPoint::getDate))
+                .collect(Collectors.toList());
+
+        return PriceTrendsDto.builder()
+                .startDate(startDate)
+                .endDate(endDate)
+                .trendPoints(trendPoints)
+                .build();
+    }
+
+    public MarketComparisonDto mapToMarketComparisonDto(SchoolPricing schoolPricing, MarketAveragesDto marketAverages) {
+        if (schoolPricing == null || marketAverages == null) {
+            return null;
+        }
+
+        BigDecimal schoolMonthly = schoolPricing.getMonthlyTuition();
+        BigDecimal schoolAnnual = schoolPricing.getAnnualTuition();
+
+        // Ceyhun
+
+        return MarketComparisonDto.builder()
+                .schoolId(schoolPricing.getSchool().getId())
+                .schoolName(schoolPricing.getSchool().getName())
+                .districtName(getDistrictName(schoolPricing.getSchool()))
+                .institutionTypeName(getInstitutionTypeName(schoolPricing.getSchool()))
+                .schoolMonthlyTuition(schoolMonthly)
+                .schoolAnnualTuition(schoolAnnual)
+                .competitiveAdvantage(determineCompetitiveAdvantage(schoolPricing, new ArrayList<>()))
+                .nearbyCompetitors(new ArrayList<>()) // Will be set in service layer
+                .build();
+    }
+
+    public PricingReportDto mapToPricingReportDto(List<SchoolPricing> pricings, PricingReportRequestDto reportRequest) {
+        if (ConversionUtils.isEmpty(pricings) || reportRequest == null) {
+            return null;
+        }
+
+        List<SchoolPricingDto> pricingDtos = mapToDto(pricings);
+        PricingStatisticsDto statistics = buildPricingStatistics(pricings);
+
+        return PricingReportDto.builder()
+                .reportName("Fiyatlandırma Raporu")
+                .generatedAt(LocalDate.now())
+                .generatedBy("Sistem") // Will be set in service layer
+                .filterSchoolIds(reportRequest.getSchoolIds())
+                .filterGradeLevels(reportRequest.getGradeLevels())
+                .filterAcademicYears(reportRequest.getAcademicYears())
+                .filterStartDate(reportRequest.getStartDate())
+                .filterEndDate(reportRequest.getEndDate())
+                .pricingDetails(pricingDtos)
+                .statistics(statistics)
+                .build();
+    }
+
+    public byte[] exportPricingData(List<SchoolPricing> pricings, String format) {
+
+        return null;
+    }
+
+    public PriceTrendsDto mapToPricingTrendsDto(List<PriceHistory> history, LocalDateTime startDate, LocalDateTime endDate) {
+        return mapToPriceTrendsDto(history, startDate, endDate);
+    }
+
+    public PricingComparisonDto mapToDto(List<SchoolPricing> pricings, String gradeLevel, String academicYear) {
+        if (ConversionUtils.isEmpty(pricings) || pricings.size() < 2) {
+            return null;
+        }
+
+        SchoolPricing fromPricing = pricings.stream()
+                .filter(p -> p.getAcademicYear().equals(academicYear) && p.getGradeLevel().equals(gradeLevel))
+                .findFirst().orElse(null);
+
+        SchoolPricing toPricing = pricings.stream()
+                .filter(p -> !p.getAcademicYear().equals(academicYear) && p.getGradeLevel().equals(gradeLevel))
+                .findFirst().orElse(null);
+
+        return buildPricingComparison(fromPricing, toPricing);
+    }
 }

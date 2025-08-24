@@ -122,4 +122,9 @@ public class SchoolPricingDto {
 
     // Custom fees
     private List<CustomFeeDto> customFees;
+
+
+    private String internalNotes;
+    private String competitorAnalysis;
+    private String approvalNotes;
 }

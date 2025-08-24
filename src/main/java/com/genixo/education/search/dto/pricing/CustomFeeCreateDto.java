@@ -1,5 +1,6 @@
 package com.genixo.education.search.dto.pricing;
 
+import com.genixo.education.search.enumaration.CustomFeeStatus;
 import com.genixo.education.search.enumaration.CustomFeeType;
 import com.genixo.education.search.enumaration.PaymentFrequency;
 import lombok.AllArgsConstructor;
@@ -44,4 +45,7 @@ public class CustomFeeCreateDto {
     private Integer displayOrder;
     private Boolean parentNotificationRequired;
     private Integer advanceNoticeDays;
+
+    private Boolean requiresApproval;
+    private CustomFeeStatus status;
 }

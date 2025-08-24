@@ -3,6 +3,7 @@ package com.genixo.education.search.dto.institution;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.genixo.education.search.dto.pricing.PricingSummaryDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -59,7 +60,7 @@ public class SchoolDto {
     private CampusSummaryDto campus;
     private InstitutionTypeDto institutionType;
     private List<InstitutionPropertyValueDto> propertyValues;
-    private List<SchoolPricingSummaryDto> pricings;
+    private List<PricingSummaryDto> pricings;
     private List<CampaignSummaryDto> activeCampaigns;
     private Boolean isActive;
     private LocalDateTime createdAt;

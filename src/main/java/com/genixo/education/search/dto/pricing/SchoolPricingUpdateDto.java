@@ -1,7 +1,11 @@
 package com.genixo.education.search.dto.pricing;
 
+import com.genixo.education.search.enumaration.Currency;
 import com.genixo.education.search.enumaration.PaymentFrequency;
 import com.genixo.education.search.enumaration.PricingStatus;
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -59,4 +63,11 @@ public class SchoolPricingUpdateDto {
     // Notes
     private String internalNotes;
     private String publicDescription;
+
+
+    private String gradeLevel;
+
+    private String classLevel;
+
+    private Currency currency;
 }
