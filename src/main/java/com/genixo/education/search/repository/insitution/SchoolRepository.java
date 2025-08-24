@@ -178,10 +178,12 @@ public interface SchoolRepository extends JpaRepository<School, Long> {
 
     List<Long> findIdsByCampus_Brand_Id(Long entityId);
 
-    Optional<Object> findByIdAndIsActiveTrueAndCampusIsSubscribedTrue(Long schoolId);
+    Optional<School> findByIdAndIsActiveTrueAndCampusIsSubscribedTrue(Long schoolId);
 
     @Query("SELECT s.id FROM School s WHERE s.isActive = true")
     List<Long> findAllActiveSchoolIds();
 
     List<Long> findIdsByCampusId(Long entityId);
+
+    Optional<Long> findIdsByBrandId(Long entityId);
 }

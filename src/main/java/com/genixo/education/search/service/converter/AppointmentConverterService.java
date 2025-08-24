@@ -1112,4 +1112,50 @@ public class AppointmentConverterService {
         }
         return false;
     }
+
+    public AppointmentDto mapToPublicAppointmentDto(Appointment appointment) {
+        if (appointment == null) {
+            return null;
+        }
+
+        return AppointmentDto.builder()
+                .id(appointment.getId())
+                .appointmentNumber(appointment.getAppointmentNumber())
+                .appointmentDate(appointment.getAppointmentDate())
+                .startTime(appointment.getStartTime())
+                .endTime(appointment.getEndTime())
+                .status(appointment.getStatus())
+                .statusDisplayName(ConversionUtils.getDisplayName(appointment.getStatus()))
+                .appointmentType(appointment.getAppointmentType())
+                .location(appointment.getLocation())
+                .isOnline(ConversionUtils.defaultIfNull(appointment.getIsOnline(), false))
+                .meetingUrl(appointment.getMeetingUrl())
+                .meetingId(appointment.getMeetingId())
+                .meetingPassword(appointment.getMeetingPassword())
+                .parentName(appointment.getParentName())
+                .parentEmail(appointment.getParentEmail())
+                .parentPhone(appointment.getParentPhone())
+                .studentName(appointment.getStudentName())
+                .studentAge(appointment.getStudentAge())
+                .studentGender(appointment.getStudentGender())
+                .currentSchool(appointment.getCurrentSchool())
+                .gradeInterested(appointment.getGradeInterested())
+                .specialRequests(appointment.getSpecialRequests())
+                .notes(appointment.getNotes()) // Hide internal notes
+                .internalNotes(appointment.getInternalNotes()) // Hide internal notes
+                .outcome(appointment.getOutcome()) // Hide outcome
+                .outcomeNotes(appointment.getOutcomeNotes()) // Hide outcome notes
+                .enrollmentLikelihood(appointment.getEnrollmentLikelihood()) // Hide likelihood
+                .nextSteps(null) // Hide next steps
+                .followUpRequired(null) // Hide follow-up
+                .followUpDate(null) // Hide follow-up date
+                .createdAt(null) // Hide creation date
+                .updatedAt(null) // Hide update date
+                .canCancel(false) // No public cancellation
+                .canReschedule(false) // No public rescheduling
+                .canComplete(false) // No public completion
+                .hoursUntilAppointment(calculateHoursUntilAppointment(appointment))
+                .participants(new ArrayList<>()) // Hide participants
+                .build();
+    }
 }
