@@ -1,0 +1,30 @@
+
+// ================================ SUPPORTING DTOs ================================
+
+@lombok.Data
+@lombok.Builder
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
+class ProratedAmount {
+    private BigDecimal amount;
+    private BigDecimal refundAmount;
+    private BigDecimal chargeAmount;
+    private long daysRemaining;
+}
+
+@lombok.Data
+@lombok.Builder
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
+class PaymentGatewayResponse {
+    private boolean successful;
+    private String transactionId;
+    private String gatewayName;
+    private String errorMessage;
+    private String rawResponse;
+}
+
+enum UsageLimitType {
+    SCHOOLS, USERS, APPOINTMENTS, GALLERY_ITEMS, POSTS, STORAGE
+}
+
