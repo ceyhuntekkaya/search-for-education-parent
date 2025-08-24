@@ -1,5 +1,9 @@
 package com.genixo.education.search.dto.user;
 
+import com.genixo.education.search.entity.user.Department;
+import com.genixo.education.search.entity.user.Permission;
+import com.genixo.education.search.entity.user.Role;
+import com.genixo.education.search.entity.user.UserRole;
 import com.genixo.education.search.enumaration.UserType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -40,6 +44,6 @@ public class UserDto {
     private Double longitude;
 
     // Relationships
-    private List<UserRoleDto> roles;
+    private List<UserRole> userRoles;
     private List<UserInstitutionAccessDto> institutionAccess;
 }

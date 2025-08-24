@@ -6,7 +6,6 @@ import com.genixo.education.search.common.exception.*;
 import com.genixo.education.search.dto.user.*;
 import com.genixo.education.search.enumaration.AccessType;
 import com.genixo.education.search.enumaration.PermissionCategory;
-import com.genixo.education.search.enumaration.RoleLevel;
 import com.genixo.education.search.enumaration.UserType;
 import com.genixo.education.search.entity.user.*;
 import com.genixo.education.search.repository.location.CountryRepository;
@@ -42,9 +41,6 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
-    private final PermissionRepository permissionRepository;
-    private final UserRoleRepository userRoleRepository;
     private final UserInstitutionAccessRepository userInstitutionAccessRepository;
     private final CountryRepository countryRepository;
     private final ProvinceRepository provinceRepository;
@@ -331,6 +327,8 @@ public class UserService {
         );
 
         // Search users based on criteria
+
+        /*
         Page<User> userPage = userRepository.searchUsers(
                 searchDto.getSearchTerm(),
                 searchDto.getUserType(),
@@ -354,7 +352,7 @@ public class UserService {
                 .map(converterService::toUserListDto)
                 .collect(Collectors.toList());
 
-        return PaginatedResponseDto.<UserListDto>builder()
+                return PaginatedResponseDto.<UserListDto>builder()
                 .content(userDtos)
                 .page(userPage.getNumber())
                 .size(userPage.getSize())
@@ -365,6 +363,9 @@ public class UserService {
                 .hasNext(userPage.hasNext())
                 .hasPrevious(userPage.hasPrevious())
                 .build();
+         */
+// ceyhun
+        return null;
     }
 
     /**
@@ -397,162 +398,9 @@ public class UserService {
 
     // ========================= ROLE MANAGEMENT =========================
 
-    /**
-     * Create new role
-     */
-    public RoleDto createRole(RoleCreateDto createDto) throws ValidationException {
-        log.info("Creating new role: {}", createDto.getName());
 
-        // Check if role already exists
-        if (roleRepository.existsByName(createDto.getName())) {
-            throw new ValidationException("Role with this name already exists");
-        }
 
-        Role role = new Role();
-        role.setName(createDto.getName());
-        role.setDisplayName(createDto.getDisplayName());
-        role.setDescription(createDto.getDescription());
-        role.setRoleLevel(createDto.getRoleLevel());
 
-        Role savedRole = roleRepository.save(role);
-
-        // Assign permissions if provided
-        if (createDto.getPermissionIds() != null && !createDto.getPermissionIds().isEmpty()) {
-            assignPermissionsToRole(savedRole.getId(), createDto.getPermissionIds());
-        }
-
-        log.info("Role created successfully with ID: {}", savedRole.getId());
-        return converterService.toRoleDto(savedRole);
-    }
-
-    /**
-     * Get all roles
-     */
-    @Transactional(readOnly = true)
-    public List<RoleDto> getAllRoles() {
-        List<Role> roles = roleRepository.findAllByIsActiveTrueOrderByDisplayName();
-        return converterService.toRoleDtoList(roles);
-    }
-
-    /**
-     * Get roles by level
-     */
-    @Transactional(readOnly = true)
-    public List<RoleDto> getRolesByLevel(RoleLevel roleLevel) {
-        List<Role> roles = roleRepository.findByRoleLevelAndIsActiveTrueOrderByDisplayName(roleLevel);
-        return converterService.toRoleDtoList(roles);
-    }
-
-    /**
-     * Assign role to user
-     */
-    public UserRoleDto assignRoleToUser(UserRoleAssignDto assignDto) throws ValidationException {
-        log.info("Assigning role {} to user {}", assignDto.getRoleId(), assignDto.getUserId());
-
-        User user = userRepository.findById(assignDto.getUserId())
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-
-        Role role = roleRepository.findById(assignDto.getRoleId())
-                .orElseThrow(() -> new EntityNotFoundException("Role not found"));
-
-        // Check if user already has this role
-        if (userRoleRepository.existsByUserIdAndRoleIdAndIsActiveTrue(assignDto.getUserId(), assignDto.getRoleId())) {
-            throw new ValidationException("User already has this role");
-        }
-
-        UserRole userRole = new UserRole();
-        userRole.setUser(user);
-        userRole.setRole(role);
-        userRole.setGrantedAt(LocalDateTime.now());
-        userRole.setExpiresAt(assignDto.getExpiresAt());
-
-        UserRole savedUserRole = userRoleRepository.save(userRole);
-
-        log.info("Role assigned successfully");
-        return converterService.toUserRoleDto(savedUserRole);
-    }
-
-    /**
-     * Remove role from user
-     */
-    public void removeRoleFromUser(Long userId, Long roleId) {
-        log.info("Removing role {} from user {}", roleId, userId);
-
-        UserRole userRole = userRoleRepository.findByUserIdAndRoleIdAndIsActiveTrue(userId, roleId)
-                .orElseThrow(() -> new EntityNotFoundException("User role assignment not found"));
-
-        userRole.setIsActive(false);
-        userRoleRepository.save(userRole);
-
-        log.info("Role removed successfully");
-    }
-
-    /**
-     * Get user roles
-     */
-    @Transactional(readOnly = true)
-    public List<UserRoleDto> getUserRoles(Long userId) {
-        List<UserRole> userRoles = userRoleRepository.findByUserIdAndIsActiveTrueOrderByGrantedAtDesc(userId);
-        return userRoles.stream()
-                .map(converterService::toUserRoleDto)
-                .collect(Collectors.toList());
-    }
-
-    // ========================= PERMISSION MANAGEMENT =========================
-
-    /**
-     * Get all permissions
-     */
-    @Transactional(readOnly = true)
-    public List<PermissionDto> getAllPermissions() {
-        List<Permission> permissions = permissionRepository.findAllByIsActiveTrueOrderByCategoryAscDisplayNameAsc();
-        return converterService.toPermissionDtoList(permissions);
-    }
-
-    /**
-     * Get permissions by category
-     */
-    @Transactional(readOnly = true)
-    public List<PermissionDto> getPermissionsByCategory(PermissionCategory category) {
-        List<Permission> permissions = permissionRepository.findByCategoryAndIsActiveTrueOrderByDisplayNameAsc(category);
-        return converterService.toPermissionDtoList(permissions);
-    }
-
-    /**
-     * Assign permissions to role
-     */
-    public void assignPermissionsToRole(Long roleId, List<Long> permissionIds) {
-        log.info("Assigning {} permissions to role {}", permissionIds.size(), roleId);
-
-        Role role = roleRepository.findById(roleId)
-                .orElseThrow(() -> new EntityNotFoundException("Role not found"));
-
-        // Remove existing permissions
-        role.getRolePermissions().clear();
-
-        // Add new permissions
-        for (Long permissionId : permissionIds) {
-            Permission permission = permissionRepository.findById(permissionId)
-                    .orElseThrow(() -> new EntityNotFoundException("Permission not found: " + permissionId));
-
-            RolePermission rolePermission = new RolePermission();
-            rolePermission.setRole(role);
-            rolePermission.setPermission(permission);
-            role.getRolePermissions().add(rolePermission);
-        }
-
-        roleRepository.save(role);
-        log.info("Permissions assigned successfully");
-    }
-
-    /**
-     * Get user permissions (from all roles)
-     */
-    @Transactional(readOnly = true)
-    public List<PermissionDto> getUserPermissions(Long userId) {
-        List<Permission> permissions = permissionRepository.findByUserIdThroughRoles(userId);
-        return converterService.toPermissionDtoList(permissions);
-    }
 
     // ========================= INSTITUTION ACCESS MANAGEMENT =========================
 

@@ -1,44 +1,44 @@
 package com.genixo.education.search.entity.user;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-import com.genixo.education.search.entity.BaseEntity;
-import com.genixo.education.search.enumaration.RoleLevel;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-
-import java.util.HashSet;
 import java.util.Set;
 
+import static com.genixo.education.search.entity.user.Permission.*;
 
-@Entity
-@Table(name = "roles")
-@Data
-@EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
-@AllArgsConstructor
-public class Role extends BaseEntity {
 
-    @Column(name = "name", unique = true, nullable = false)
-    private String name;
+@Getter
+@RequiredArgsConstructor
+public enum Role {
 
-    @Column(name = "display_name", nullable = false)
-    private String displayName;
+    USER(
+            Set.of(
+                    USER_CREATE,
+                    SETTING
 
-    @Column(name = "description")
-    private String description;
+            )
+    ),
+    ADMIN(
+            Set.of(
+                    GENERAL
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role_level", nullable = false)
-    private RoleLevel roleLevel;
+            )
+    ),
+    CANDIDATE(
+            Set.of(
+                    GENERAL
 
-    // Role permissions
-    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<RolePermission> rolePermissions = new HashSet<>();
+            )
+    ),
+    COMPANY(
+            Set.of(
+                    GENERAL
 
-    // User roles
-    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<UserRole> userRoles = new HashSet<>();
+            )
+    );
+
+    private final Set<Permission> permissions;
+
+
 }

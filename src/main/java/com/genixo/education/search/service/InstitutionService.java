@@ -651,7 +651,7 @@ public class InstitutionService {
 
     private boolean hasSystemRole(User user) {
         return user.getUserRoles().stream()
-                .anyMatch(userRole -> userRole.getRole().getRoleLevel() == RoleLevel.SYSTEM);
+                .anyMatch(userRole -> userRole.getRoleLevel() == RoleLevel.SYSTEM);
     }
 
     private boolean hasAccessToBrand(User user, Long brandId) {
@@ -663,7 +663,7 @@ public class InstitutionService {
 
     private boolean hasManageAccessToBrand(User user, Long brandId) {
         return user.getUserRoles().stream()
-                .anyMatch(userRole -> userRole.getRole().getRoleLevel() == RoleLevel.BRAND) &&
+                .anyMatch(userRole -> userRole.getRoleLevel() == RoleLevel.BRAND) &&
                 hasAccessToBrand(user, brandId);
     }
 

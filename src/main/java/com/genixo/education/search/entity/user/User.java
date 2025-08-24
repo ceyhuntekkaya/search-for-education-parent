@@ -100,13 +100,13 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "longitude")
     private Double longitude;
 
-    // User roles and permissions
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<UserRole> userRoles = new HashSet<>();
 
     // User institution access
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<UserInstitutionAccess> institutionAccess = new HashSet<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Set<UserRole> userRoles = new HashSet<>();
 
 
     @Override

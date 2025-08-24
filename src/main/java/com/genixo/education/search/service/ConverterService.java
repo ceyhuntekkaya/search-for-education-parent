@@ -6,10 +6,11 @@ package com.genixo.education.search.service;
 import com.genixo.education.search.dto.institution.*;
 import com.genixo.education.search.dto.location.*;
 import com.genixo.education.search.dto.user.*;
+import com.genixo.education.search.entity.user.UserInstitutionAccess;
 import com.genixo.education.search.enumaration.PropertyDataType;
 import com.genixo.education.search.entity.institution.*;
 import com.genixo.education.search.entity.location.*;
-import com.genixo.education.search.entity.user.*;
+import com.genixo.education.search.entity.user.User;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -116,50 +117,10 @@ public class ConverterService {
                 .build();
     }
 
-    public RoleDto toRoleDto(Role role) {
-        if (role == null) return null;
 
-        return RoleDto.builder()
-                .id(role.getId())
-                .name(role.getName())
-                .displayName(role.getDisplayName())
-                .description(role.getDescription())
-                .roleLevel(role.getRoleLevel())
-                .isActive(role.getIsActive())
-                .createdAt(role.getCreatedAt())
-                .build();
-    }
 
-    public PermissionDto toPermissionDto(Permission permission) {
-        if (permission == null) return null;
 
-        return PermissionDto.builder()
-                .id(permission.getId())
-                .name(permission.getName())
-                .displayName(permission.getDisplayName())
-                .description(permission.getDescription())
-                .category(permission.getCategory())
-                .isActive(permission.getIsActive())
-                .createdAt(permission.getCreatedAt())
-                .build();
-    }
 
-    public UserRoleDto toUserRoleDto(UserRole userRole) {
-        if (userRole == null) return null;
-
-        return UserRoleDto.builder()
-                .id(userRole.getId())
-                .userId(userRole.getUser().getId())
-                .userFullName(getFullName(userRole.getUser().getFirstName(), userRole.getUser().getLastName()))
-                .roleId(userRole.getRole().getId())
-                .roleName(userRole.getRole().getName())
-                .roleDisplayName(userRole.getRole().getDisplayName())
-                .roleLevel(userRole.getRole().getRoleLevel())
-                .grantedAt(userRole.getGrantedAt())
-                .expiresAt(userRole.getExpiresAt())
-                .isActive(userRole.getIsActive())
-                .build();
-    }
 
     public UserInstitutionAccessDto toUserInstitutionAccessDto(UserInstitutionAccess access) {
         if (access == null) return null;
@@ -704,13 +665,7 @@ public class ConverterService {
         return users != null ? users.stream().map(this::toUserListDto).collect(Collectors.toList()) : null;
     }
 
-    public List<RoleDto> toRoleDtoList(List<Role> roles) {
-        return roles != null ? roles.stream().map(this::toRoleDto).collect(Collectors.toList()) : null;
-    }
 
-    public List<PermissionDto> toPermissionDtoList(List<Permission> permissions) {
-        return permissions != null ? permissions.stream().map(this::toPermissionDto).collect(Collectors.toList()) : null;
-    }
 
     public List<CountryDto> toCountryDtoList(List<Country> countries) {
         return countries != null ? countries.stream().map(this::toCountryDto).collect(Collectors.toList()) : null;

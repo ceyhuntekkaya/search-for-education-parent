@@ -1,8 +1,6 @@
 package com.genixo.education.search.service.converter;
 
 import com.genixo.education.search.dto.user.*;
-import com.genixo.education.search.entity.user.Permission;
-import com.genixo.education.search.entity.user.Role;
 import com.genixo.education.search.entity.user.User;
 import com.genixo.education.search.entity.user.UserInstitutionAccess;
 import com.genixo.education.search.entity.user.UserRole;
@@ -54,7 +52,7 @@ public class UserConverterService {
                 .postalCode(entity.getPostalCode())
                 .latitude(entity.getLatitude())
                 .longitude(entity.getLongitude())
-                .roles(mapUserRolesToDto(entity.getUserRoles()))
+                .userRoles(entity.getUserRoles().stream().toList())
                 .institutionAccess(mapInstitutionAccessToDto(entity.getInstitutionAccess()))
                 .build();
     }
@@ -88,9 +86,9 @@ public class UserConverterService {
 
         if (entity.getUserRoles() != null && !entity.getUserRoles().isEmpty()) {
             UserRole firstRole = entity.getUserRoles().iterator().next();
-            if (firstRole.getRole() != null) {
-                primaryRole = firstRole.getRole().getDisplayName();
-                primaryRoleLevel = firstRole.getRole().getRoleLevel();
+            if (firstRole != null) {
+                primaryRole = firstRole.getRole().name();
+                primaryRoleLevel = firstRole.getRoleLevel();
             }
         }
 
@@ -253,121 +251,12 @@ public class UserConverterService {
 
     // ================== ROLE CONVERTERS ==================
 
-    public RoleDto mapToDto(Role entity) {
-        if (entity == null) {
-            return null;
-        }
 
-        return RoleDto.builder()
-                .id(entity.getId())
-                .name(entity.getName())
-                .displayName(entity.getDisplayName())
-                .description(entity.getDescription())
-                .roleLevel(entity.getRoleLevel())
-                .isActive(ConversionUtils.defaultIfNull(entity.getIsActive(), true))
-                .createdAt(entity.getCreatedAt())
-                .permissions(mapPermissionsToDto(entity.getRolePermissions()))
-                .build();
-    }
 
-    public Role mapToEntity(RoleCreateDto dto) {
-        if (dto == null) {
-            return null;
-        }
-
-        Role entity = new Role();
-        entity.setName(dto.getName().toUpperCase().trim().replaceAll("\\s+", "_"));
-        entity.setDisplayName(ConversionUtils.capitalizeWords(dto.getDisplayName().trim()));
-        entity.setDescription(dto.getDescription());
-        entity.setRoleLevel(dto.getRoleLevel());
-        entity.setIsActive(true);
-
-        return entity;
-    }
-
-    public void updateEntity(RoleUpdateDto dto, Role entity) {
-        if (dto == null || entity == null) {
-            return;
-        }
-
-        if (StringUtils.hasText(dto.getDisplayName())) {
-            entity.setDisplayName(ConversionUtils.capitalizeWords(dto.getDisplayName().trim()));
-        }
-
-        if (StringUtils.hasText(dto.getDescription())) {
-            entity.setDescription(dto.getDescription().trim());
-        }
-    }
 
     // ================== PERMISSION CONVERTERS ==================
 
-    public PermissionDto mapToDto(Permission entity) {
-        if (entity == null) {
-            return null;
-        }
 
-        return PermissionDto.builder()
-                .id(entity.getId())
-                .name(entity.getName())
-                .displayName(entity.getDisplayName())
-                .description(entity.getDescription())
-                .category(entity.getCategory())
-                .isActive(ConversionUtils.defaultIfNull(entity.getIsActive(), true))
-                .createdAt(entity.getCreatedAt())
-                .build();
-    }
-
-    public Permission mapToEntity(PermissionCreateDto dto) {
-        if (dto == null) {
-            return null;
-        }
-
-        Permission entity = new Permission();
-        entity.setName(dto.getName().toUpperCase().trim().replaceAll("\\s+", "_"));
-        entity.setDisplayName(ConversionUtils.capitalizeWords(dto.getDisplayName().trim()));
-        entity.setDescription(dto.getDescription());
-        entity.setCategory(dto.getCategory());
-        entity.setIsActive(true);
-
-        return entity;
-    }
-
-    // ================== USER ROLE CONVERTERS ==================
-
-    public UserRoleDto mapToDto(UserRole entity) {
-        if (entity == null) {
-            return null;
-        }
-
-        return UserRoleDto.builder()
-                .id(entity.getId())
-                .userId(entity.getUser() != null ? entity.getUser().getId() : null)
-                .userFullName(entity.getUser() != null ?
-                        buildFullName(entity.getUser().getFirstName(), entity.getUser().getLastName()) : null)
-                .roleId(entity.getRole() != null ? entity.getRole().getId() : null)
-                .roleName(entity.getRole() != null ? entity.getRole().getName() : null)
-                .roleDisplayName(entity.getRole() != null ? entity.getRole().getDisplayName() : null)
-                .roleLevel(entity.getRole() != null ? entity.getRole().getRoleLevel() : null)
-                .grantedAt(entity.getGrantedAt())
-                .expiresAt(entity.getExpiresAt())
-                .isActive(isUserRoleActive(entity))
-                .build();
-    }
-
-    public UserRole mapToEntity(UserRoleAssignDto dto, User user, Role role) {
-        if (dto == null || user == null || role == null) {
-            return null;
-        }
-
-        UserRole entity = new UserRole();
-        entity.setUser(user);
-        entity.setRole(role);
-        entity.setGrantedAt(LocalDateTime.now());
-        entity.setExpiresAt(dto.getExpiresAt());
-        entity.setIsActive(true);
-
-        return entity;
-    }
 
     // ================== USER INSTITUTION ACCESS CONVERTERS ==================
 
@@ -526,55 +415,7 @@ public class UserConverterService {
                 .collect(Collectors.toList());
     }
 
-    public List<RoleDto> mapRolesToDto(List<Role> entities) {
-        if (ConversionUtils.isEmpty(entities)) {
-            return new ArrayList<>();
-        }
 
-        return entities.stream()
-                .filter(Objects::nonNull)
-                .map(this::mapToDto)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
-
-    public List<PermissionDto> mapPermissionsToDto(List<Permission> entities) {
-        if (ConversionUtils.isEmpty(entities)) {
-            return new ArrayList<>();
-        }
-
-        return entities.stream()
-                .filter(Objects::nonNull)
-                .map(this::mapToDto)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
-
-    public List<PermissionDto> mapPermissionsToDto(Set<com.genixo.education.search.entity.user.RolePermission> rolePermissions) {
-        if (rolePermissions == null || rolePermissions.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        return rolePermissions.stream()
-                .filter(Objects::nonNull)
-                .map(rp -> rp.getPermission())
-                .filter(Objects::nonNull)
-                .map(this::mapToDto)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
-
-    public List<UserRoleDto> mapUserRolesToDto(Set<UserRole> userRoles) {
-        if (userRoles == null || userRoles.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        return userRoles.stream()
-                .filter(Objects::nonNull)
-                .map(this::mapToDto)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
 
     public List<UserInstitutionAccessDto> mapInstitutionAccessToDto(Set<UserInstitutionAccess> institutionAccess) {
         if (institutionAccess == null || institutionAccess.isEmpty()) {

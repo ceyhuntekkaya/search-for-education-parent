@@ -615,7 +615,7 @@ public class SubscriptionService {
 
     private void validateUserIsSystemAdmin(User user) {
         boolean isSystemAdmin = user.getUserRoles().stream()
-                .anyMatch(userRole -> userRole.getRole().getRoleLevel() == RoleLevel.SYSTEM);
+                .anyMatch(userRole -> userRole.getRoleLevel() == RoleLevel.SYSTEM);
 
         if (!isSystemAdmin) {
             throw new BusinessException("System administrator access required");

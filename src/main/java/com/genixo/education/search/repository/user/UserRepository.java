@@ -32,38 +32,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByPasswordResetToken(String token);
 
-    @Query("""
-    SELECT DISTINCT u
-    FROM User u
-    LEFT JOIN u.userRoles ur
-    LEFT JOIN ur.role r
-    LEFT JOIN u.institutionAccess ia
-    WHERE (:searchTerm IS NULL OR 
-           LOWER(u.firstName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR 
-           LOWER(u.lastName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR 
-           LOWER(u.email) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
-           LOWER(u.phone) LIKE LOWER(CONCAT('%', :searchTerm, '%')))
-      AND (:userType IS NULL OR u.userType = :userType)
-      AND (:isActive IS NULL OR u.isActive = :isActive)
-      AND (:roleId IS NULL OR r.id = :roleId)
-      AND (:roleLevel IS NULL OR r.roleLevel = :roleLevel)
-      AND (:institutionId IS NULL OR ia.entityId = :institutionId)
-      AND (:accessType IS NULL OR ia.accessType = :accessType)
-      AND (:createdAfter IS NULL OR u.createdAt >= :createdAfter)
-      AND (:createdBefore IS NULL OR u.createdAt <= :createdBefore)
-      AND (:lastLoginAfter IS NULL OR u.lastLoginAt >= :lastLoginAfter)
-      AND (:lastLoginBefore IS NULL OR u.lastLoginAt <= :lastLoginBefore)
-      AND (:countryId IS NULL OR u.country.id = :countryId)
-      AND (:provinceId IS NULL OR u.province.id = :provinceId)
-      AND (:districtId IS NULL OR u.district.id = :districtId)
-      AND (:neighborhoodId IS NULL OR u.neighborhood.id = :neighborhoodId)
-""")
+/* ceyhun
     Page<User> searchUsers(String searchTerm, UserType userType, Boolean isActive, Long roleId,
                            RoleLevel roleLevel, Long institutionId, AccessType accessType,
                            LocalDateTime createdAfter, LocalDateTime createdBefore,
                            LocalDateTime lastLoginAfter, LocalDateTime lastLoginBefore,
                            Long countryId, Long provinceId, Long districtId, Long neighborhoodId,
                            Pageable pageable);
+
+ */
 
     Long countByIsActive(Boolean isActive);
 
