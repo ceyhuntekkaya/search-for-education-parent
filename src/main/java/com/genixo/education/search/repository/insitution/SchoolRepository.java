@@ -187,7 +187,9 @@ public interface SchoolRepository extends JpaRepository<School, Long> {
 
     List<Long> findIdsByCampusId(Long entityId);
 
-    Optional<Long> findIdsByBrandId(Long entityId);
 
+
+    @Query("SELECT s.id FROM School s WHERE s.campus.brand.id = :brandId AND s.isActive = true")
+    List<Long> findIdsByBrandId(@Param("brandId") Long brandId);
 
 }

@@ -1,5 +1,6 @@
 package com.genixo.education.search.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.genixo.education.search.common.exception.BusinessException;
 import com.genixo.education.search.common.exception.ResourceNotFoundException;
 import com.genixo.education.search.dto.appointment.*;
@@ -12,6 +13,8 @@ import com.genixo.education.search.repository.insitution.SchoolRepository;
 import com.genixo.education.search.repository.user.UserRepository;
 import com.genixo.education.search.service.auth.JwtService;
 import com.genixo.education.search.service.converter.AppointmentConverterService;
+import lombok.Builder;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -24,14 +27,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.time.*;
 import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,6 +48,7 @@ public class AppointmentService {
     private final UserRepository userRepository;
     private final AppointmentConverterService converterService;
     private final JwtService jwtService;
+    private final ObjectMapper objectMapper;
 
 
     @Transactional
@@ -133,41 +134,7 @@ public class AppointmentService {
                 .collect(Collectors.toList());
     }
 
-    @Cacheable(value = "school_availability", key = "#schoolId + '_' + #startDate + '_' + #endDate")
-    public List<AppointmentAvailabilityDto> getAppointmentAvailability(Long schoolId, LocalDate startDate,
-                                                                       LocalDate endDate, HttpServletRequest request) {
-        log.info("Fetching appointment availability for school: {} from {} to {}", schoolId, startDate, endDate);
 
-        User user = jwtService.getUser(request);
-        validateUserCanAccessSchool(user, schoolId);
-
-        List<AppointmentAvailabilityDto> availability = appointmentRepository.getAvailabilityBetweenDatesRaw(schoolId, startDate, endDate)
-                .stream()
-                .map(result -> {
-                    DayOfWeek dayOfWeek = (DayOfWeek) result[0];
-                    LocalTime startTime = (LocalTime) result[1];
-                    LocalTime endTime = (LocalTime) result[2];
-                    Integer capacity = (Integer) result[3];
-                    Long bookedCount = ((Number) result[4]).longValue();
-                    Integer availableCount = capacity - bookedCount.intValue();
-                    boolean isFull = bookedCount >= capacity;
-
-                    return AppointmentAvailabilityDto.builder()
-                            .dayOfWeek(dayOfWeek)
-                            .startTime(startTime)
-                            .endTime(endTime)
-                            .totalCapacity(capacity)
-                            .bookedCount(bookedCount)
-                            .availableCount(availableCount)
-                            .isFull(isFull)
-                            .build();
-                })
-                .collect(Collectors.toList());
-
-        return availability.stream()
-                .map(this::enrichAvailabilityData)
-                .collect(Collectors.toList());
-    }
 
     // ================================ APPOINTMENT OPERATIONS ================================
 
@@ -1230,13 +1197,13 @@ public class AppointmentService {
 
     // ================================ PUBLIC METHODS (NO AUTH REQUIRED) ================================
 
-    public List<AppointmentAvailabilityDto> getPublicSchoolAvailability(Long schoolId, LocalDate startDate, LocalDate endDate) {
-        log.info("Fetching public availability for school: {} from {} to {}", schoolId, startDate, endDate);
+    public List<AppointmentAvailabilityDto> getPublicSchoolAvailability(Long schoolId, LocalDate date) {
+        log.info("Fetching public availability for school: {} to {}", schoolId, date);
 
         School school = schoolRepository.findByIdAndIsActiveTrueAndCampusIsSubscribedTrue(schoolId)
                 .orElseThrow(() -> new ResourceNotFoundException("School not found or not available for public booking"));
 
-        return appointmentRepository.getPublicAvailability(schoolId, startDate, endDate);
+        return appointmentRepository.getPublicAvailability(schoolId, date);
     }
 
     @Transactional
@@ -1333,6 +1300,8 @@ public class AppointmentService {
 
     // ================================ METRICS AND INSIGHTS ================================
 
+    /* ceyhun
+
     @Cacheable(value = "appointment_metrics", key = "#schoolId + '_' + #periodStart + '_' + #periodEnd + '_' + #metricType")
     public List<AppointmentMetricsDto> getAppointmentMetrics(Long schoolId, LocalDate periodStart,
                                                              LocalDate periodEnd, String metricType,
@@ -1344,6 +1313,8 @@ public class AppointmentService {
 
         return appointmentRepository.getAppointmentMetrics(schoolId, periodStart, periodEnd, metricType);
     }
+
+     */
 
     public List<TimeSlotAnalysisDto> getTimeSlotAnalysis(Long schoolId, LocalDate periodStart,
                                                          LocalDate periodEnd, HttpServletRequest request) {
@@ -1504,5 +1475,286 @@ public class AppointmentService {
         log.info("Cleaned up {} expired appointment slots", cleanedCount);
 
         return result;
+    }
+
+
+
+
+
+    // ceyhun
+
+
+    public List<AppointmentAvailabilityDto> getAvailabilityBetweenDates(
+            Long schoolId, String schoolName, LocalDate startDate, LocalDate endDate) {
+
+        log.debug("Getting optimized availability for school {} between {} and {}",
+                schoolId, startDate, endDate);
+
+        // 1. Tüm aktif slot'ları al
+        Map<DayOfWeek, List<SlotInfo>> slotsByDay = getAllSlotsGroupedByDay(schoolId);
+
+        // 2. Excluded dates bilgisini al
+        Map<Long, Set<LocalDate>> excludedDatesBySlot = getExcludedDatesBySlot(schoolId);
+
+        // 3. Tarih aralığındaki tüm rezervasyonları al
+        Map<LocalDate, Map<Long, Long>> bookedCountsByDate = getBookedCountsByDateRange(
+                schoolId, startDate, endDate);
+
+        // 4. Her gün için availability hesapla
+        List<AppointmentAvailabilityDto> availabilityList = new ArrayList<>();
+
+        LocalDate currentDate = startDate;
+        while (!currentDate.isAfter(endDate)) {
+            AppointmentAvailabilityDto dayAvailability = calculateDayAvailability(
+                    schoolId, schoolName, currentDate, slotsByDay,
+                    excludedDatesBySlot, bookedCountsByDate);
+
+            // Sadece müsait slotu olan günleri ekle
+            if (dayAvailability.getAvailableCount() > 0 &&
+                    !dayAvailability.getAvailableSlots().isEmpty()) {
+                availabilityList.add(dayAvailability);
+            }
+
+            currentDate = currentDate.plusDays(1);
+        }
+
+        log.debug("Found {} available days for school {}", availabilityList.size(), schoolId);
+        return availabilityList;
+    }
+
+    /**
+     * Tüm slot'ları günlere göre gruplandırır
+     */
+    private Map<DayOfWeek, List<SlotInfo>> getAllSlotsGroupedByDay(Long schoolId) {
+        List<Object[]> allSlots = appointmentRepository.getAllActiveSlotsForSchool(
+                schoolId, LocalDate.now());
+
+        Map<DayOfWeek, List<SlotInfo>> slotsByDay = new HashMap<>();
+
+        for (Object[] row : allSlots) {
+            DayOfWeek dayOfWeek = (DayOfWeek) row[0];
+            SlotInfo slotInfo = SlotInfo.builder()
+                    .slotId((Long) row[1])
+                    .startTime((LocalTime) row[2])
+                    .endTime((LocalTime) row[3])
+                    .durationMinutes((Integer) row[4])
+                    .appointmentType((AppointmentType) row[5])
+                    .location((String) row[6])
+                    .isOnline((Boolean) row[7])
+                    .staffUserName((String) row[8])
+                    .capacity((Integer) row[9])
+                    .requiresApproval((Boolean) row[10])
+                    .build();
+
+            slotsByDay.computeIfAbsent(dayOfWeek, k -> new ArrayList<>()).add(slotInfo);
+        }
+
+        return slotsByDay;
+    }
+
+    /**
+     * Excluded dates bilgisini parse eder
+     */
+    private Map<Long, Set<LocalDate>> getExcludedDatesBySlot(Long schoolId) {
+        List<Object[]> slotsWithExcludedDates = appointmentRepository.getSlotsWithExcludedDates(schoolId);
+        Map<Long, Set<LocalDate>> excludedDatesBySlot = new HashMap<>();
+
+        for (Object[] row : slotsWithExcludedDates) {
+            Long slotId = (Long) row[0];
+            String excludedDatesJson = (String) row[1];
+
+            try {
+                if (excludedDatesJson != null && !excludedDatesJson.trim().isEmpty()) {
+                    LocalDate[] dates = objectMapper.readValue(excludedDatesJson, LocalDate[].class);
+                    excludedDatesBySlot.put(slotId, Set.of(dates));
+                }
+            } catch (Exception e) {
+                log.warn("Failed to parse excluded dates for slot {}: {}", slotId, e.getMessage());
+                excludedDatesBySlot.put(slotId, Set.of());
+            }
+        }
+
+        return excludedDatesBySlot;
+    }
+
+    /**
+     * Tarih aralığındaki rezervasyonları gruplandırır
+     */
+    private Map<LocalDate, Map<Long, Long>> getBookedCountsByDateRange(
+            Long schoolId, LocalDate startDate, LocalDate endDate) {
+
+        List<Object[]> bookedData = appointmentRepository.getBookedCountsByDateRange(
+                schoolId, startDate, endDate);
+
+        Map<LocalDate, Map<Long, Long>> result = new HashMap<>();
+
+        for (Object[] row : bookedData) {
+            LocalDate date = (LocalDate) row[0];
+            Long slotId = (Long) row[1];
+            Long count = ((Number) row[2]).longValue();
+
+            result.computeIfAbsent(date, k -> new HashMap<>()).put(slotId, count);
+        }
+
+        return result;
+    }
+
+    /**
+     * Belirli bir gün için availability hesaplar
+     */
+    private AppointmentAvailabilityDto calculateDayAvailability(
+            Long schoolId, String schoolName, LocalDate date,
+            Map<DayOfWeek, List<SlotInfo>> slotsByDay,
+            Map<Long, Set<LocalDate>> excludedDatesBySlot,
+            Map<LocalDate, Map<Long, Long>> bookedCountsByDate) {
+
+        DayOfWeek dayOfWeek = date.getDayOfWeek();
+        List<SlotInfo> daySlots = slotsByDay.getOrDefault(dayOfWeek, new ArrayList<>());
+        Map<Long, Long> dayBookedCounts = bookedCountsByDate.getOrDefault(date, new HashMap<>());
+
+        // Available slots hesapla
+        List<AvailableSlotDto> availableSlots = daySlots.stream()
+                .filter(slot -> !isSlotExcludedForDate(slot.getSlotId(), date, excludedDatesBySlot))
+                .filter(slot -> isSlotBookable(slot, date))
+                .map(slot -> {
+                    Long bookedCount = dayBookedCounts.getOrDefault(slot.getSlotId(), 0L);
+                    int availableCapacity = slot.getCapacity() - bookedCount.intValue();
+
+                    if (availableCapacity <= 0) {
+                        return null; // Bu slot müsait değil
+                    }
+
+                    String timeRange = slot.getStartTime() + " - " + slot.getEndTime();
+                    Boolean isRecommended = availableCapacity > slot.getCapacity() * 0.5;
+
+                    return AvailableSlotDto.builder()
+                            .slotId(slot.getSlotId())
+                            .startTime(slot.getStartTime())
+                            .endTime(slot.getEndTime())
+                            .durationMinutes(slot.getDurationMinutes())
+                            .appointmentType(slot.getAppointmentType())
+                            .location(slot.getLocation())
+                            .isOnline(slot.getIsOnline())
+                            .staffUserName(slot.getStaffUserName())
+                            .availableCapacity(availableCapacity)
+                            .requiresApproval(slot.getRequiresApproval())
+                            .timeRange(timeRange)
+                            .isRecommended(isRecommended)
+                            .build();
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        // İstatistikler
+        Integer totalSlots = daySlots.size();
+        Integer bookedSlots = dayBookedCounts.values().stream()
+                .mapToInt(Long::intValue)
+                .sum();
+        int availableCount = availableSlots.size();
+
+        // Availability status
+        String availability = calculateAvailabilityStatus(availableCount, totalSlots);
+
+        return AppointmentAvailabilityDto.builder()
+                .schoolId(schoolId)
+                .schoolName(schoolName)
+                .date(date)
+                .availableSlots(availableSlots)
+                .totalSlots(totalSlots)
+                .bookedSlots(bookedSlots)
+                .availableCount(availableCount)
+                .availability(availability)
+                .build();
+    }
+
+    /**
+     * Slot'un belirli tarih için excluded olup olmadığını kontrol eder
+     */
+    private boolean isSlotExcludedForDate(Long slotId, LocalDate date,
+                                          Map<Long, Set<LocalDate>> excludedDatesBySlot) {
+        Set<LocalDate> excludedDates = excludedDatesBySlot.get(slotId);
+        return excludedDates != null && excludedDates.contains(date);
+    }
+
+    /**
+     * Slot'un rezerve edilebilir olup olmadığını kontrol eder
+     */
+    private boolean isSlotBookable(SlotInfo slot, LocalDate requestDate) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime slotDateTime = LocalDateTime.of(requestDate, slot.getStartTime());
+
+        // Geçmiş tarih kontrolü
+        if (slotDateTime.isBefore(now)) {
+            return false;
+        }
+
+        // Advance booking kontrolü (varsayılan değerler kullanılıyor)
+        long hoursUntilSlot = Duration.between(now, slotDateTime).toHours();
+
+        // Minimum 24 saat önceden rezervasyon
+        if (hoursUntilSlot < 24) {
+            return false;
+        }
+
+        // Maksimum 30 gün önceden rezervasyon
+        if (hoursUntilSlot > (30 * 24)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Availability status hesaplar
+     */
+    private String calculateAvailabilityStatus(int availableCount, int totalSlots) {
+        if (availableCount == 0) {
+            return "FULLY_BOOKED";
+        } else if (availableCount <= totalSlots * 0.25) {
+            return "LIMITED";
+        } else if (availableCount <= totalSlots * 0.75) {
+            return "AVAILABLE";
+        } else {
+            return "ABUNDANT";
+        }
+    }
+
+    // Mevcut tek tarih metodu (değişiklik yok)
+    public AppointmentAvailabilityDto getAvailabilityForDate(Long schoolId, String schoolName, LocalDate date) {
+        // Mevcut implementasyonunuz burada kalabilir
+        // veya optimize edilmiş versiyonu tek tarih için kullanabilirsiniz
+        List<AppointmentAvailabilityDto> result = getAvailabilityBetweenDates(
+                schoolId, schoolName, date, date);
+
+        return result.isEmpty() ? createEmptyAvailability(schoolId, schoolName, date) : result.get(0);
+    }
+
+    private AppointmentAvailabilityDto createEmptyAvailability(Long schoolId, String schoolName, LocalDate date) {
+        return AppointmentAvailabilityDto.builder()
+                .schoolId(schoolId)
+                .schoolName(schoolName)
+                .date(date)
+                .availableSlots(new ArrayList<>())
+                .totalSlots(0)
+                .bookedSlots(0)
+                .availableCount(0)
+                .availability("FULLY_BOOKED")
+                .build();
+    }
+
+
+    @Data
+    @Builder
+    private static class SlotInfo {
+        private Long slotId;
+        private LocalTime startTime;
+        private LocalTime endTime;
+        private Integer durationMinutes;
+        private AppointmentType appointmentType;
+        private String location;
+        private Boolean isOnline;
+        private String staffUserName;
+        private Integer capacity;
+        private Boolean requiresApproval;
     }
 }

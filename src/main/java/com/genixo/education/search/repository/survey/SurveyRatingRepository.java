@@ -43,19 +43,18 @@ public interface SurveyRatingRepository extends JpaRepository<SurveyRating, Long
     Double getAverageRatingBySchoolAndCategory(@Param("schoolId") Long schoolId, @Param("category") RatingCategory category);
 
     @Query("SELECT new com.genixo.education.search.dto.survey.SatisfactionTrendDto(" +
-            "CAST(sr.createdAt AS date), " +
-            "AVG(CASE WHEN sr.ratingCategory = 'OVERALL_SATISFACTION' THEN sr.ratingValue ELSE NULL END), " +
-            "AVG(CASE WHEN sr.ratingCategory = 'CLEANLINESS' THEN sr.ratingValue ELSE NULL END), " +
-            "AVG(CASE WHEN sr.ratingCategory = 'STAFF_FRIENDLINESS' THEN sr.ratingValue ELSE NULL END), " +
-            "AVG(CASE WHEN sr.ratingCategory = 'FACILITIES' THEN sr.ratingValue ELSE NULL END), " +
-            "AVG(CASE WHEN sr.ratingCategory = 'COMMUNICATION' THEN sr.ratingValue ELSE NULL END), " +
+            "COALESCE(CAST(AVG(CASE WHEN sr.ratingCategory = 'OVERALL_SATISFACTION' THEN CAST(sr.ratingValue AS DOUBLE) ELSE NULL END) AS DOUBLE), 0.0), " +
+            "COALESCE(CAST(AVG(CASE WHEN sr.ratingCategory = 'CLEANLINESS' THEN CAST(sr.ratingValue AS DOUBLE) ELSE NULL END) AS DOUBLE), 0.0), " +
+            "COALESCE(CAST(AVG(CASE WHEN sr.ratingCategory = 'STAFF_FRIENDLINESS' THEN CAST(sr.ratingValue AS DOUBLE) ELSE NULL END) AS DOUBLE), 0.0), " +
+            "COALESCE(CAST(AVG(CASE WHEN sr.ratingCategory = 'FACILITIES' THEN CAST(sr.ratingValue AS DOUBLE) ELSE NULL END) AS DOUBLE), 0.0), " +
+            "COALESCE(CAST(AVG(CASE WHEN sr.ratingCategory = 'COMMUNICATION' THEN CAST(sr.ratingValue AS DOUBLE) ELSE NULL END) AS DOUBLE), 0.0), " +
             "COUNT(sr), " +
-            "'STABLE') " + // trend direction would be calculated separately
+            "'STABLE') " +
             "FROM SurveyRating sr " +
             "WHERE sr.school.id = :schoolId AND sr.isActive = true AND sr.isPublic = true " +
             "AND sr.createdAt BETWEEN :fromDate AND :toDate " +
-            "GROUP BY CAST(sr.createdAt AS date) " +
-            "ORDER BY CAST(sr.createdAt AS date) ASC")
+            "GROUP BY FUNCTION('DATE', sr.createdAt) " +
+            "ORDER BY FUNCTION('DATE', sr.createdAt) ASC")
     List<SatisfactionTrendDto> getSatisfactionTrends(
             @Param("schoolId") Long schoolId,
             @Param("fromDate") LocalDateTime fromDate,

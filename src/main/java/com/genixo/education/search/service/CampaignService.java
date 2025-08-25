@@ -508,8 +508,8 @@ public class CampaignService {
                 .orElseThrow(() -> new ResourceNotFoundException("Campaign not found"));
 
         validateUserCanAccessCampaign(user, campaign);
-
-        return campaignRepository.getCampaignAnalytics(campaignId);
+//  ceyhun return campaignRepository.getCampaignAnalytics(campaignId);
+        return null;
     }
 
     @Operation(summary = "Get campaign report", description = "Generate comprehensive campaign report")
@@ -540,14 +540,17 @@ public class CampaignService {
                 .map(converterService::mapToSummaryDto)
                 .collect(Collectors.toList()));
 
-        // Calculate overall analytics
+        // Calculate overall analytics  ceyhun
+        /*
         CampaignAnalyticsDto overallAnalytics = campaignRepository.getOverallAnalytics(campaignIds, startDate, endDate);
         report.setOverallAnalytics(overallAnalytics);
+
+
 
         // Generate insights and recommendations
         report.setKeyInsights(generateKeyInsights(campaigns, overallAnalytics));
         report.setRecommendations(generateRecommendations(campaigns, overallAnalytics));
-
+ */
         return report;
     }
 
@@ -930,7 +933,7 @@ public class CampaignService {
 
     private List<String> generateKeyInsights(List<Campaign> campaigns, CampaignAnalyticsDto analytics) {
         List<String> insights = new java.util.ArrayList<>();
-
+/* ceyhun
         if (analytics.getConversionRate() != null) {
             if (analytics.getConversionRate() > 10.0) {
                 insights.add("Excellent conversion rate of " + String.format("%.1f%%", analytics.getConversionRate()));
@@ -939,10 +942,12 @@ public class CampaignService {
             }
         }
 
+
+
         if (analytics.getTotalRevenueGenerated() != null && analytics.getTotalRevenueGenerated().compareTo(BigDecimal.ZERO) > 0) {
             insights.add("Generated " + analytics.getTotalRevenueGenerated() + " TL in total revenue");
         }
-
+ */
         // Find best performing campaign type
         var campaignTypePerformance = campaigns.stream()
                 .collect(Collectors.groupingBy(Campaign::getCampaignType,
@@ -957,7 +962,7 @@ public class CampaignService {
 
     private List<String> generateRecommendations(List<Campaign> campaigns, CampaignAnalyticsDto analytics) {
         List<String> recommendations = new java.util.ArrayList<>();
-
+/* ceyhun
         if (analytics.getConversionRate() != null && analytics.getConversionRate() < 5.0) {
             recommendations.add("Consider improving campaign targeting or offer attractiveness");
         }
@@ -965,6 +970,8 @@ public class CampaignService {
         if (analytics.getClickThroughRate() != null && analytics.getClickThroughRate() < 2.0) {
             recommendations.add("Improve campaign creative and call-to-action to increase click-through rate");
         }
+
+ */
 
         // Check for campaigns ending soon
         long endingSoonCount = campaigns.stream()

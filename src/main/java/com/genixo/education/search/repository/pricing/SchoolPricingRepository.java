@@ -119,12 +119,12 @@ public interface SchoolPricingRepository extends JpaRepository<SchoolPricing, Lo
 
 
     @Query("SELECT new com.genixo.education.search.dto.pricing.MarketAveragesDto(" +
-            "COALESCE(AVG(sp.monthlyTuition), 0), " +
-            "COALESCE(AVG(sp.annualTuition), 0), " +
-            "COALESCE(AVG(sp.registrationFee), 0), " +
-            "COALESCE(AVG(sp.totalAnnualCost), 0), " +
-            "COALESCE(MIN(sp.monthlyTuition), 0), " +
-            "COALESCE(MAX(sp.monthlyTuition), 0), " +
+            "COALESCE(CAST(AVG(sp.monthlyTuition) AS double), 0.0), " +
+            "COALESCE(CAST(AVG(sp.annualTuition) AS double), 0.0), " +
+            "COALESCE(CAST(AVG(sp.registrationFee) AS double), 0.0), " +
+            "COALESCE(CAST(AVG(sp.totalAnnualCost) AS double), 0.0), " +
+            "COALESCE(CAST(MIN(sp.monthlyTuition) AS double), 0.0), " +
+            "COALESCE(CAST(MAX(sp.monthlyTuition) AS double), 0.0), " +
             "COUNT(sp)) " +
             "FROM SchoolPricing sp " +
             "WHERE sp.gradeLevel = :gradeLevel AND sp.academicYear = :academicYear " +

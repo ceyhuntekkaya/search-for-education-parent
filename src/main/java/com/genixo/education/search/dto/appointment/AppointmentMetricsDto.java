@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -28,4 +29,28 @@ public class AppointmentMetricsDto {
     private String performanceLevel; // EXCELLENT, GOOD, AVERAGE, BELOW_AVERAGE, POOR
     private List<String> insights;
     private List<String> recommendations;
+
+
+    public AppointmentMetricsDto(String metricName, String metricDisplayName, String metricType,
+                                 Double currentValue, Double previousValue, Double changeAmount,
+                                 Double changePercentage, String changeDirection, String trendDirection,
+                                 String benchmark, Double benchmarkValue, String performanceLevel,
+                                 String performanceLevel2) { // Son parametre geçici
+        this.metricName = metricName;
+        this.metricDisplayName = metricDisplayName;
+        this.metricType = metricType;
+        this.currentValue = currentValue;
+        this.previousValue = previousValue;
+        this.changeAmount = changeAmount;
+        this.changePercentage = changePercentage;
+        this.changeDirection = changeDirection;
+        this.trendDirection = trendDirection;
+        this.benchmark = benchmark;
+        this.benchmarkValue = benchmarkValue;
+        this.performanceLevel = performanceLevel;
+        // List'ler service'te set edilecek
+        this.insights = new ArrayList<>();
+        this.recommendations = new ArrayList<>();
+    }
+
 }

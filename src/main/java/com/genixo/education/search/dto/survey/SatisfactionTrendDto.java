@@ -13,7 +13,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class SatisfactionTrendDto {
-    private LocalDate date;
     private Double overallSatisfaction;
     private Double cleanlinessRating;
     private Double staffRating;
@@ -21,4 +20,6 @@ public class SatisfactionTrendDto {
     private Double communicationRating;
     private Long responseCount;
     private String trendDirection; // UP, DOWN, STABLE
+
+
 }

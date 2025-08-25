@@ -63,7 +63,7 @@ public interface SurveyResponseRepository extends JpaRepository<SurveyResponse, 
             @Param("surveyId") Long surveyId,
             @Param("periodStart") LocalDateTime periodStart,
             @Param("periodEnd") LocalDateTime periodEnd);
-
+/* ceyhun
     @Query("SELECT new com.genixo.education.search.dto.survey.SchoolSurveyPerformanceDto(" +
             "s.id, s.name, s.campus.name, " +
             "COUNT(sr), " +
@@ -82,6 +82,8 @@ public interface SurveyResponseRepository extends JpaRepository<SurveyResponse, 
             "WHERE s.id IN :schoolIds AND sr.isActive = true " +
             "GROUP BY s.id, s.name, s.campus.name")
     List<SchoolSurveyPerformanceDto> getSchoolPerformanceComparison(@Param("schoolIds") List<Long> schoolIds);
+
+ */
 
     @Query("SELECT COUNT(sr) FROM SurveyResponse sr WHERE sr.isActive = true AND sr.createdAt >= :fromDate")
     Long countResponsesSince(@Param("fromDate") LocalDateTime fromDate);

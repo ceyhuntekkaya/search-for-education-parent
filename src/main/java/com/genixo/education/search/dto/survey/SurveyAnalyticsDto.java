@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -66,4 +67,44 @@ public class SurveyAnalyticsDto {
 
     // Satisfaction trends
     private List<SatisfactionTrendDto> satisfactionTrends;
+
+    public SurveyAnalyticsDto(Long surveyId, String surveyTitle, SurveyType surveyType,
+                              LocalDateTime periodStart, LocalDateTime periodEnd,
+                              Long totalInvitationsSent, Long totalStarted, Long totalCompleted,
+                              Long totalSubmitted, Long totalAbandoned,
+                              Double startRate, Double completionRate, Double submissionRate, Double abandonmentRate,
+                              Integer averageCompletionTimeSeconds, Integer medianCompletionTimeSeconds,
+                              Integer fastestCompletionTimeSeconds, Integer slowestCompletionTimeSeconds,
+                              Double overallAverageRating) {
+
+        this.surveyId = surveyId;
+        this.surveyTitle = surveyTitle;
+        this.surveyType = surveyType;
+        this.periodStart = periodStart;
+        this.periodEnd = periodEnd;
+        this.totalInvitationsSent = totalInvitationsSent;
+        this.totalStarted = totalStarted;
+        this.totalCompleted = totalCompleted;
+        this.totalSubmitted = totalSubmitted;
+        this.totalAbandoned = totalAbandoned;
+        this.startRate = startRate;
+        this.completionRate = completionRate;
+        this.submissionRate = submissionRate;
+        this.abandonmentRate = abandonmentRate;
+        this.averageCompletionTimeSeconds = averageCompletionTimeSeconds;
+        this.medianCompletionTimeSeconds = medianCompletionTimeSeconds;
+        this.fastestCompletionTimeSeconds = fastestCompletionTimeSeconds;
+        this.slowestCompletionTimeSeconds = slowestCompletionTimeSeconds;
+        this.overallAverageRating = overallAverageRating;
+
+        // Diğer complex alanlar serviste doldurulacak
+        this.categoryAverageRatings = new HashMap<>();
+        this.categoryResponseCounts = new HashMap<>();
+        this.ratingDistribution = new HashMap<>();
+        this.deviceTypeDistribution = new HashMap<>();
+        this.browserDistribution = new HashMap<>();
+        this.channelCompletionRates = new HashMap<>();
+    }
+
+
 }

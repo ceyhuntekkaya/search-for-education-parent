@@ -61,7 +61,7 @@ public class CustomFee extends BaseEntity {
     private Boolean appliesToExistingStudents = true;
 
     @Column(name = "applies_to_grades")
-    private String appliesToGrades; // JSON array of grade levels
+    private String appliesToGrades;
 
     @Column(name = "minimum_age")
     private Integer minimumAge;

@@ -146,34 +146,32 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
             @Param("accessibleSchoolIds") List<Long> accessibleSchoolIds,
             Pageable pageable);
 
-    // Analytics queries
+    // Analytics queries  ceyhun
+    /*
     @Query("SELECT new com.genixo.education.search.dto.campaign.CampaignAnalyticsDto(" +
-            "c.id, c.title, c.campaignType, c.startDate, c.endDate, " +
+            "c.id, " +
+            "c.title, " +
+            "c.campaignType, " +
+            "c.startDate, " +
+            "c.endDate, " +
             "COALESCE(c.viewCount, 0L), " +
             "COALESCE(c.clickCount, 0L), " +
             "COALESCE(c.applicationCount, 0L), " +
             "COALESCE(c.conversionCount, 0L), " +
-            "CASE WHEN c.clickCount > 0 THEN CAST(c.clickCount AS DOUBLE) / CAST(c.viewCount AS DOUBLE) * 100 ELSE 0.0 END, " +
-            "CASE WHEN c.applicationCount > 0 THEN CAST(c.conversionCount AS DOUBLE) / CAST(c.applicationCount AS DOUBLE) * 100 ELSE 0.0 END, " +
-            "CASE WHEN c.conversionCount > 0 THEN CAST(c.conversionCount AS DOUBLE) / CAST(c.applicationCount AS DOUBLE) * 100 ELSE 0.0 END, " +
-            "COALESCE((SELECT SUM(cu.finalAmount) FROM CampaignUsage cu WHERE cu.campaign.id = c.id), 0), " +
-            "COALESCE((SELECT SUM(cu.discountAmount) FROM CampaignUsage cu WHERE cu.campaign.id = c.id), 0), " +
-            "CASE WHEN c.conversionCount > 0 THEN " +
-            "    COALESCE((SELECT SUM(cu.finalAmount) FROM CampaignUsage cu WHERE cu.campaign.id = c.id), 0) / c.conversionCount " +
-            "ELSE 0 END, " +
-            "0.0, " + // ROI calculation would need cost data
             "COALESCE(c.usageCount, 0), " +
-            "COALESCE((SELECT COUNT(DISTINCT cu.user.id) FROM CampaignUsage cu WHERE cu.campaign.id = c.id), 0), " +
-            "0, " + // repeat users calculation
-            "CASE WHEN (SELECT COUNT(DISTINCT cu.user.id) FROM CampaignUsage cu WHERE cu.campaign.id = c.id) > 0 " +
-            "THEN CAST(c.usageCount AS DOUBLE) / CAST((SELECT COUNT(DISTINCT cu.user.id) FROM CampaignUsage cu WHERE cu.campaign.id = c.id) AS DOUBLE) " +
-            "ELSE 0.0 END, " +
-            "COALESCE((SELECT COUNT(cs) FROM CampaignSchool cs WHERE cs.campaign.id = c.id AND cs.isActive = true), 0), " +
-            "COALESCE((SELECT COUNT(cs) FROM CampaignSchool cs WHERE cs.campaign.id = c.id AND cs.status = 'ACTIVE'), 0), " +
-            "0L, " + // top performing school id
-            "'') " + // top performing school name
-            "FROM Campaign c WHERE c.id = :campaignId AND c.isActive = true")
+            "COALESCE(SUM(cu.finalAmount), 0), " +
+            "COALESCE(SUM(cu.discountAmount), 0), " +
+            "COUNT(DISTINCT cu.user.id), " +
+            "COUNT(cs.id), " +
+            "COALESCE(SUM(cs.usageCount), 0)) " +
+            "FROM Campaign c " +
+            "LEFT JOIN c.campaignUsages cu " +
+            "LEFT JOIN c.campaignSchools cs " +
+            "WHERE c.id = :campaignId AND c.isActive = true " +
+            "GROUP BY c.id, c.title, c.campaignType, c.startDate, c.endDate, c.viewCount, c.clickCount, c.applicationCount, c.conversionCount, c.usageCount")
     CampaignAnalyticsDto getCampaignAnalytics(@Param("campaignId") Long campaignId);
+
+
 
     // Overall analytics for multiple campaigns
     @Query("SELECT new com.genixo.education.search.dto.campaign.CampaignAnalyticsDto(" +
@@ -194,7 +192,7 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
     CampaignAnalyticsDto getOverallAnalytics(@Param("campaignIds") List<Long> campaignIds,
                                              @Param("startDate") LocalDate startDate,
                                              @Param("endDate") LocalDate endDate);
-
+ */
     // Expiring campaigns
     @Query("SELECT c FROM Campaign c WHERE c.isActive = true " +
             "AND c.status = 'ACTIVE' " +

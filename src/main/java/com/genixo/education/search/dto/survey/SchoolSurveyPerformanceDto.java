@@ -30,4 +30,6 @@ public class SchoolSurveyPerformanceDto {
     private List<String> topStrengths;
     private List<String> improvementAreas;
     private String overallTrend; // IMPROVING, DECLINING, STABLE
+
+
 }

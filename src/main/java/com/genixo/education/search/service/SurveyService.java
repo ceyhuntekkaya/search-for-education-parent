@@ -446,8 +446,8 @@ public class SurveyService {
         for (Long schoolId : schoolIds) {
             validateUserCanAccessSchool(user, schoolId);
         }
-
-        return surveyResponseRepository.getSchoolPerformanceComparison(schoolIds);
+// ceyhun  return surveyResponseRepository.getSchoolPerformanceComparison(schoolIds);
+        return null;
     }
 
     // ================================ BULK OPERATIONS ================================

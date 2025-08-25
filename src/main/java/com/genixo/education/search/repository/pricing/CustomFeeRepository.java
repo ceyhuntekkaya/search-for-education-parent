@@ -76,14 +76,7 @@ public interface CustomFeeRepository extends JpaRepository<CustomFee, Long> {
             @Param("pricingId") Long pricingId,
             @Param("currentDate") LocalDate currentDate);
 
-    @Query("SELECT cf FROM CustomFee cf " +
-            "WHERE cf.appliesToGrades IS NOT NULL " +
-            "AND JSON_CONTAINS(cf.appliesToGrades, JSON_QUOTE(:gradeLevel)) = 1 " +
-            "AND cf.schoolPricing.school.id = :schoolId " +
-            "AND cf.status = 'ACTIVE' AND cf.isActive = true")
-    List<CustomFee> findFeesApplicableToGrade(
-            @Param("schoolId") Long schoolId,
-            @Param("gradeLevel") String gradeLevel);
+
 
     @Query("SELECT cf FROM CustomFee cf " +
             "WHERE cf.requiresApproval = true AND cf.status = 'PENDING_APPROVAL' " +

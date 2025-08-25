@@ -5,19 +5,20 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class MarketAveragesDto {
-    private Integer monthlyTuition;
-    private Integer annualTuition;
-    private Integer registrationFee;
-    private Integer totalAnnualCost;
-    private Integer minMonthlyTuition;
-    private Integer maxMonthlyTuition;
+    private Double monthlyTuition;        // AVG BigDecimal döner
+    private Double annualTuition;         // AVG BigDecimal döner
+    private Double registrationFee;       // AVG BigDecimal döner
+    private Double totalAnnualCost;       // AVG BigDecimal döner
+    private Double minMonthlyTuition;        // MIN Integer döner
+    private Double maxMonthlyTuition;        // MAX Integer döner
     private Long numberOfSchools;
-
 
 
 }
