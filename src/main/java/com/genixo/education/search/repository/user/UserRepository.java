@@ -66,21 +66,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.isActive = true AND LOWER(u.email) = LOWER(:email)")
     Optional<User> findByEmailAndIsActiveTrue(@Param("email") String email);
 
-    @Query("SELECT new com.genixo.education.search.dto.appointment.AppointmentAvailabilityDto(" +
-            "s.id, s.name, :date, " +
-            "CAST(0 AS java.util.List), " + // Available slots - would be populated separately
-            "CAST(COUNT(DISTINCT slot.id) AS int), " +
-            "CAST(COUNT(a.id) AS int), " +
-            "CAST(COUNT(DISTINCT slot.id) - COUNT(a.id) AS int), " +
-            "'') " + // Availability status - calculated in service
-            "FROM School s " +
-            "LEFT JOIN AppointmentSlot slot ON slot.school.id = s.id AND slot.isActive = true " +
-            "LEFT JOIN Appointment a ON a.appointmentSlot.id = slot.id " +
-            "    AND a.appointmentDate = :date AND a.isActive = true " +
-            "    AND a.status IN ('CONFIRMED', 'PENDING', 'IN_PROGRESS') " +
-            "WHERE s.id = :schoolId AND s.isActive = true " +
-            "GROUP BY s.id, s.name")
-    List<AppointmentAvailabilityDto> getAvailabilityBetweenDates(@Param("schoolId") Long schoolId,
-                                                                 @Param("startDate") LocalDate startDate,
-                                                                 @Param("endDate") LocalDate endDate);
+
+
+
+
 }

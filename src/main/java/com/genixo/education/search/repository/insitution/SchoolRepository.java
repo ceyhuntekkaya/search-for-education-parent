@@ -1,5 +1,6 @@
 package com.genixo.education.search.repository.insitution;
 
+import com.genixo.education.search.dto.appointment.AppointmentAvailabilityDto;
 import com.genixo.education.search.dto.institution.SchoolStatisticsDto;
 import com.genixo.education.search.dto.institution.SchoolSummaryDto;
 import com.genixo.education.search.entity.institution.School;
@@ -11,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -186,4 +188,6 @@ public interface SchoolRepository extends JpaRepository<School, Long> {
     List<Long> findIdsByCampusId(Long entityId);
 
     Optional<Long> findIdsByBrandId(Long entityId);
+
+
 }

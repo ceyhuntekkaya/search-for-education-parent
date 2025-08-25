@@ -29,6 +29,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -50,7 +51,6 @@ public class SurveyService {
     private final SurveyConverterService converterService;
     private final JwtService jwtService;
 
-    // ================================ SURVEY OPERATIONS ================================
 
     @Transactional
     @CacheEvict(value = {"surveys", "survey_analytics"}, allEntries = true)
@@ -626,8 +626,8 @@ public class SurveyService {
         List<Long> answeredQuestionIds = surveyQuestionResponseRepository
                 .findAnsweredQuestionIdsByResponseId(response.getId());
 
-        return answeredQuestionIds.containsAll(
-                requiredQuestions.stream().map(SurveyQuestion::getId).collect(Collectors.toList())
+        return new HashSet<>(answeredQuestionIds).containsAll(
+                requiredQuestions.stream().map(SurveyQuestion::getId).toList()
         );
     }
 
