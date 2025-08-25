@@ -21,4 +21,5 @@ public class AppointmentAvailabilityDto {
     private Integer bookedSlots;
     private Integer availableCount;
     private String availability; // FULLY_BOOKED, LIMITED, AVAILABLE, ABUNDANT
+
 }

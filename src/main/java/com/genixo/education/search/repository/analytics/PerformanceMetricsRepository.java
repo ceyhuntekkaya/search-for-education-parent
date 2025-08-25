@@ -126,7 +126,10 @@ public interface PerformanceMetricsRepository extends JpaRepository<PerformanceM
             "ORDER BY COUNT(pm) DESC")
     List<Object[]> getMostErrorProneEndpoints(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate, Pageable pageable);
 
-    @Query("SELECT COALESCE(AVG(pm.cacheHit), 0.0) * 100 FROM PerformanceMetrics pm " +
+    @Query("SELECT CASE WHEN COUNT(pm) > 0 THEN " +
+            "CAST(COUNT(CASE WHEN pm.cacheHit = true THEN 1 END) AS DOUBLE) / COUNT(pm) * 100 " +
+            "ELSE 0.0 END " +
+            "FROM PerformanceMetrics pm " +
             "WHERE DATE(pm.timestamp) BETWEEN :startDate AND :endDate " +
             "AND pm.cacheHit IS NOT NULL")
     Double getCacheHitRate(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);

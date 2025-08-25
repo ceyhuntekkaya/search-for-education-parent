@@ -240,7 +240,7 @@ public class AnalyticsService {
                 pageable
         );
 
-        return searchLogs.map(converterService::mapToSearchLogDto);
+        return searchLogs.map(converterService::mapToDto);
     }
 
     @Cacheable(value = "search_summary", key = "#startDate + '_' + #endDate + '_' + #schoolId + '_' + #campusId + '_' + #brandId")

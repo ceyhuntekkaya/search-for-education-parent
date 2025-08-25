@@ -77,7 +77,7 @@ public interface VisitorLogRepository extends JpaRepository<VisitorLog, Long> {
         return getRecentVisitors(PageRequest.of(0, limit));
     }
 
-    @Query("SELECT vl.trafficSource.name FROM VisitorLog vl " +
+    @Query("SELECT vl.trafficSource FROM VisitorLog vl " +
             "WHERE DATE(vl.visitTime) BETWEEN :startDate AND :endDate " +
             "GROUP BY vl.trafficSource " +
             "ORDER BY COUNT(vl) DESC")

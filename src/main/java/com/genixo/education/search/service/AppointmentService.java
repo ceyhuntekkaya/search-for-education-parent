@@ -141,8 +141,28 @@ public class AppointmentService {
         User user = jwtService.getUser(request);
         validateUserCanAccessSchool(user, schoolId);
 
-        List<AppointmentAvailabilityDto> availability = appointmentRepository.getAvailabilityBetweenDates(
-                schoolId, startDate, endDate);
+        List<AppointmentAvailabilityDto> availability = appointmentRepository.getAvailabilityBetweenDatesRaw(schoolId, startDate, endDate)
+                .stream()
+                .map(result -> {
+                    DayOfWeek dayOfWeek = (DayOfWeek) result[0];
+                    LocalTime startTime = (LocalTime) result[1];
+                    LocalTime endTime = (LocalTime) result[2];
+                    Integer capacity = (Integer) result[3];
+                    Long bookedCount = ((Number) result[4]).longValue();
+                    Integer availableCount = capacity - bookedCount.intValue();
+                    boolean isFull = bookedCount >= capacity;
+
+                    return AppointmentAvailabilityDto.builder()
+                            .dayOfWeek(dayOfWeek)
+                            .startTime(startTime)
+                            .endTime(endTime)
+                            .totalCapacity(capacity)
+                            .bookedCount(bookedCount)
+                            .availableCount(availableCount)
+                            .isFull(isFull)
+                            .build();
+                })
+                .collect(Collectors.toList());
 
         return availability.stream()
                 .map(this::enrichAvailabilityData)

@@ -13,11 +13,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
@@ -174,8 +178,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     // Calendar queries
     @Query("SELECT new com.genixo.education.search.dto.appointment.AppointmentCalendarDto(" +
-            ":date, " +
-            "CAST(0 AS java.util.List), " + // Events - would be populated separately
+            "a.appointmentDate, " +
+            "null, " + // Events - would be populated separately
             "CAST(COUNT(a) AS int), " +
             "0, " + // Available slots - calculated separately
             "false) " + // Has conflicts - calculated separately
@@ -374,5 +378,146 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     @Query("SELECT s.id FROM School s WHERE s.campus.brand.id = :brandId AND s.isActive = true")
     List<Long> findIdsByBrandId(@Param("brandId") Long brandId);
 
-    List<AppointmentAvailabilityDto> getAvailabilityBetweenDates(Long schoolId, LocalDate startDate, LocalDate endDate);
+    @Query("SELECT slot.dayOfWeek, slot.startTime, slot.endTime, slot.capacity, " +
+            "(SELECT COUNT(app) FROM Appointment app " +
+            "WHERE app.appointmentSlot.id = slot.id " +
+            "AND app.appointmentDate BETWEEN :startDate AND :endDate " +
+            "AND app.status IN ('PENDING', 'CONFIRMED', 'APPROVED') " +
+            "AND app.isActive = true) " +
+            "FROM AppointmentSlot slot " +
+            "WHERE slot.school.id = :schoolId " +
+            "AND slot.isActive = true " +
+            "ORDER BY slot.dayOfWeek, slot.startTime")
+    List<Object[]> getAvailabilityBetweenDatesRaw(@Param("schoolId") Long schoolId,
+                                                  @Param("startDate") LocalDate startDate,
+                                                  @Param("endDate") LocalDate endDate);
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // Ana query - sadece sayısal veriler
+    @Query("SELECT COUNT(slot) " +
+            "FROM AppointmentSlot slot " +
+            "WHERE slot.school.id = :schoolId " +
+            "AND slot.isActive = true " +
+            "AND slot.dayOfWeek = :dayOfWeek")
+    Integer getTotalSlotsForDay(@Param("schoolId") Long schoolId, @Param("dayOfWeek") DayOfWeek dayOfWeek);
+
+    @Query("SELECT COUNT(DISTINCT app.appointmentSlot.id) " +
+            "FROM Appointment app " +
+            "WHERE app.school.id = :schoolId " +
+            "AND app.appointmentDate = :date " +
+            "AND app.status IN ('PENDING', 'CONFIRMED', 'APPROVED') " +
+            "AND app.isActive = true")
+    Integer getBookedSlotsForDate(@Param("schoolId") Long schoolId, @Param("date") LocalDate date);
+
+    // AvailableSlotDto için query (DTO property'lerine uygun)
+    @Query("SELECT slot.id, slot.startTime, slot.endTime, slot.durationMinutes, " +
+            "slot.appointmentType, slot.location, slot.onlineMeetingAvailable, " +
+            "CASE WHEN slot.staffUser IS NOT NULL THEN " +
+            "CONCAT(slot.staffUser.firstName, ' ', slot.staffUser.lastName) ELSE null END, " +
+            "slot.capacity, slot.requiresApproval " +
+            "FROM AppointmentSlot slot " +
+            "WHERE slot.school.id = :schoolId " +
+            "AND slot.isActive = true " +
+            "AND slot.dayOfWeek = :dayOfWeek " +
+            "ORDER BY slot.startTime")
+    List<Object[]> getAvailableSlotsForDateRaw(@Param("schoolId") Long schoolId, @Param("dayOfWeek") DayOfWeek dayOfWeek);
+
+    @Query("SELECT app.appointmentSlot.id, COUNT(app) " +
+            "FROM Appointment app " +
+            "WHERE app.school.id = :schoolId " +
+            "AND app.appointmentDate = :date " +
+            "AND app.status IN ('PENDING', 'CONFIRMED', 'APPROVED') " +
+            "AND app.isActive = true " +
+            "GROUP BY app.appointmentSlot.id")
+    List<Object[]> getBookedCountsBySlot(@Param("schoolId") Long schoolId, @Param("date") LocalDate date);
+
+    // Service method
+    default AppointmentAvailabilityDto getAvailabilityForDate(Long schoolId, String schoolName, LocalDate date) {
+        DayOfWeek dayOfWeek = date.getDayOfWeek();
+
+        // Temel sayılar
+        Integer totalSlots = getTotalSlotsForDay(schoolId, dayOfWeek);
+        Integer bookedSlots = getBookedSlotsForDate(schoolId, date);
+        int availableCount = totalSlots - bookedSlots;
+
+        // Slot bazında rezervasyon sayıları
+        Map<Long, Long> bookedCountsMap = getBookedCountsBySlot(schoolId, date)
+                .stream()
+                .collect(Collectors.toMap(
+                        arr -> (Long) arr[0],
+                        arr -> ((Number) arr[1]).longValue()
+                ));
+
+        // Available slots
+        List<AvailableSlotDto> availableSlots = getAvailableSlotsForDateRaw(schoolId, dayOfWeek)
+                .stream()
+                .map(arr -> {
+                    Long slotId = (Long) arr[0];
+                    LocalTime startTime = (LocalTime) arr[1];
+                    LocalTime endTime = (LocalTime) arr[2];
+                    Integer durationMinutes = (Integer) arr[3];
+                    AppointmentType appointmentType = (AppointmentType) arr[4];
+                    String location = (String) arr[5];
+                    Boolean isOnline = (Boolean) arr[6];
+                    String staffUserName = (String) arr[7];
+                    Integer capacity = (Integer) arr[8];
+                    Boolean requiresApproval = (Boolean) arr[9];
+
+                    Long bookedCount = bookedCountsMap.getOrDefault(slotId, 0L);
+                    int availableCapacity = capacity - bookedCount.intValue();
+                    String timeRange = startTime + " - " + endTime;
+                    Boolean isRecommended = availableCapacity > capacity * 0.5; // %50'den fazla boşsa recommended
+
+                    return AvailableSlotDto.builder()
+                            .slotId(slotId)
+                            .startTime(startTime)
+                            .endTime(endTime)
+                            .durationMinutes(durationMinutes)
+                            .appointmentType(appointmentType)
+                            .location(location)
+                            .isOnline(isOnline)
+                            .staffUserName(staffUserName)
+                            .availableCapacity(availableCapacity)
+                            .requiresApproval(requiresApproval)
+                            .timeRange(timeRange)
+                            .isRecommended(isRecommended)
+                            .build();
+                })
+                .filter(slot -> slot.getAvailableCapacity() > 0) // Sadece müsait olanları döndür
+                .collect(Collectors.toList());
+
+        // Availability durumu
+        String availability;
+        if (availableCount == 0) {
+            availability = "FULLY_BOOKED";
+        } else if (availableCount <= totalSlots * 0.25) {
+            availability = "LIMITED";
+        } else if (availableCount <= totalSlots * 0.75) {
+            availability = "AVAILABLE";
+        } else {
+            availability = "ABUNDANT";
+        }
+
+        return AppointmentAvailabilityDto.builder()
+                .schoolId(schoolId)
+                .schoolName(schoolName)
+                .date(date)
+                .availableSlots(availableSlots)
+                .totalSlots(totalSlots)
+                .bookedSlots(bookedSlots)
+                .availableCount(availableCount)
+                .availability(availability)
+                .build();
+    }
 }
