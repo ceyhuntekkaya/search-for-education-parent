@@ -508,8 +508,11 @@ public class CampaignService {
                 .orElseThrow(() -> new ResourceNotFoundException("Campaign not found"));
 
         validateUserCanAccessCampaign(user, campaign);
-//  ceyhun return campaignRepository.getCampaignAnalytics(campaignId);
+        //CampaignAnalyticsDto campaignAnalytics = campaignRepository.getCampaignAnalytics(campaignId);
+
+
         return null;
+
     }
 
     @Operation(summary = "Get campaign report", description = "Generate comprehensive campaign report")
@@ -541,16 +544,18 @@ public class CampaignService {
                 .collect(Collectors.toList()));
 
         // Calculate overall analytics  ceyhun
-        /*
+
+        /* ceyhun
         CampaignAnalyticsDto overallAnalytics = campaignRepository.getOverallAnalytics(campaignIds, startDate, endDate);
+
         report.setOverallAnalytics(overallAnalytics);
-
-
 
         // Generate insights and recommendations
         report.setKeyInsights(generateKeyInsights(campaigns, overallAnalytics));
         report.setRecommendations(generateRecommendations(campaigns, overallAnalytics));
- */
+
+
+         */
         return report;
     }
 

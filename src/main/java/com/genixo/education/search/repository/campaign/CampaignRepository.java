@@ -146,52 +146,42 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
             @Param("accessibleSchoolIds") List<Long> accessibleSchoolIds,
             Pageable pageable);
 
-    // Analytics queries  ceyhun
-    /*
+    // Analytics queries
+/* ceyhun
     @Query("SELECT new com.genixo.education.search.dto.campaign.CampaignAnalyticsDto(" +
-            "c.id, " +
-            "c.title, " +
-            "c.campaignType, " +
             "c.startDate, " +
             "c.endDate, " +
-            "COALESCE(c.viewCount, 0L), " +
-            "COALESCE(c.clickCount, 0L), " +
-            "COALESCE(c.applicationCount, 0L), " +
-            "COALESCE(c.conversionCount, 0L), " +
-            "COALESCE(c.usageCount, 0), " +
-            "COALESCE(SUM(cu.finalAmount), 0), " +
-            "COALESCE(SUM(cu.discountAmount), 0), " +
-            "COUNT(DISTINCT cu.user.id), " +
-            "COUNT(cs.id), " +
-            "COALESCE(SUM(cs.usageCount), 0)) " +
+            "c.viewCount, " +
+            "c.clickCount, " +
+            "c.applicationCount, " +
+            "c.conversionCount, " +
+            "c.usageCount, " +
+            "COALESCE(CAST((SELECT SUM(cu.finalAmount) FROM CampaignUsage cu WHERE cu.campaign.id = c.id) AS DOUBLE), 0.0), " +
+            "COALESCE(CAST((SELECT SUM(cu.discountAmount) FROM CampaignUsage cu WHERE cu.campaign.id = c.id) AS DOUBLE), 0.0)) " +
             "FROM Campaign c " +
-            "LEFT JOIN c.campaignUsages cu " +
-            "LEFT JOIN c.campaignSchools cs " +
-            "WHERE c.id = :campaignId AND c.isActive = true " +
-            "GROUP BY c.id, c.title, c.campaignType, c.startDate, c.endDate, c.viewCount, c.clickCount, c.applicationCount, c.conversionCount, c.usageCount")
+            "WHERE c.id = :campaignId AND c.isActive = true")
     CampaignAnalyticsDto getCampaignAnalytics(@Param("campaignId") Long campaignId);
+
+
 
 
 
     // Overall analytics for multiple campaigns
     @Query("SELECT new com.genixo.education.search.dto.campaign.CampaignAnalyticsDto(" +
-            "0L, 'Overall Analytics', null, :startDate, :endDate, " +
-            "COALESCE(SUM(c.viewCount), 0L), " +
-            "COALESCE(SUM(c.clickCount), 0L), " +
-            "COALESCE(SUM(c.applicationCount), 0L), " +
-            "COALESCE(SUM(c.conversionCount), 0L), " +
-            "CASE WHEN SUM(c.viewCount) > 0 THEN CAST(SUM(c.clickCount) AS DOUBLE) / CAST(SUM(c.viewCount) AS DOUBLE) * 100 ELSE 0.0 END, " +
-            "CASE WHEN SUM(c.applicationCount) > 0 THEN CAST(SUM(c.conversionCount) AS DOUBLE) / CAST(SUM(c.applicationCount) AS DOUBLE) * 100 ELSE 0.0 END, " +
-            "CASE WHEN SUM(c.conversionCount) > 0 THEN CAST(SUM(c.conversionCount) AS DOUBLE) / CAST(SUM(c.applicationCount) AS DOUBLE) * 100 ELSE 0.0 END, " +
-            "COALESCE((SELECT SUM(cu.finalAmount) FROM CampaignUsage cu WHERE cu.campaign.id IN :campaignIds AND cu.usageDate BETWEEN :startDate AND :endDate), 0), " +
-            "COALESCE((SELECT SUM(cu.discountAmount) FROM CampaignUsage cu WHERE cu.campaign.id IN :campaignIds AND cu.usageDate BETWEEN :startDate AND :endDate), 0), " +
-            "0.0, 0.0, " + // AOV and ROI
-            "COALESCE(SUM(c.usageCount), 0), " +
-            "0, 0, 0.0, 0, 0, 0L, '') " +
-            "FROM Campaign c WHERE c.id IN :campaignIds AND c.isActive = true")
+
+            "CAST(COALESCE(SUM(c.viewCount), 0L) AS DOUBLE), " +
+            "CAST(COALESCE(SUM(c.clickCount), 0L) AS DOUBLE), " +
+            "CAST(COALESCE(SUM(c.applicationCount), 0L) AS DOUBLE), " +
+            "CAST(COALESCE(SUM(c.conversionCount), 0L) AS DOUBLE), " +
+            "CAST(COALESCE(SUM(c.usageCount), 0) AS DOUBLE), " +
+            "CAST(COALESCE((SELECT SUM(cu.finalAmount) FROM CampaignUsage cu WHERE cu.campaign.id IN :campaignIds AND cu.usageDate BETWEEN :periodStart AND :periodEnd), 0) AS DOUBLE), " +
+            "CAST(COALESCE((SELECT SUM(cu.discountAmount) FROM CampaignUsage cu WHERE cu.campaign.id IN :campaignIds AND cu.usageDate BETWEEN :periodStart AND :periodEnd), 0) AS DOUBLE)) " +
+            "FROM Campaign c " +
+            "WHERE c.id IN :campaignIds AND c.isActive = true " +
+            "AND c.startDate <= :periodEnd AND c.endDate >= :periodStart")
     CampaignAnalyticsDto getOverallAnalytics(@Param("campaignIds") List<Long> campaignIds,
-                                             @Param("startDate") LocalDate startDate,
-                                             @Param("endDate") LocalDate endDate);
+                                             @Param("periodStart") LocalDate periodStart,
+                                             @Param("periodEnd") LocalDate periodEnd);
  */
     // Expiring campaigns
     @Query("SELECT c FROM Campaign c WHERE c.isActive = true " +

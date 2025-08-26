@@ -16,21 +16,14 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class CampaignAnalyticsDto {
-    private Long campaignId;
-    private String campaignTitle;
-    private CampaignType campaignType;
     private LocalDate startDate;
     private LocalDate endDate;
-    private Integer totalViews;
-    private Integer totalClicks;
-    private Integer totalApplications;
-    private Integer totalConversions;
-    private Integer totalUsages;
+    private Long totalViews;
+    private Long totalClicks;
+    private Long totalApplications;
+    private Long totalConversions;
+    private Long totalUsages;
     private Integer totalRevenueGenerated;
     private Integer totalDiscountGiven;
-    private Long uniqueUsers;
-    private Long totalSchools;
-    private Integer schoolUsageCount;
-
 
 }

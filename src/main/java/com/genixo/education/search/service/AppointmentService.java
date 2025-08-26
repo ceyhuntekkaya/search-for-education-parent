@@ -1300,7 +1300,7 @@ public class AppointmentService {
 
     // ================================ METRICS AND INSIGHTS ================================
 
-    /* ceyhun
+
 
     @Cacheable(value = "appointment_metrics", key = "#schoolId + '_' + #periodStart + '_' + #periodEnd + '_' + #metricType")
     public List<AppointmentMetricsDto> getAppointmentMetrics(Long schoolId, LocalDate periodStart,
@@ -1314,7 +1314,7 @@ public class AppointmentService {
         return appointmentRepository.getAppointmentMetrics(schoolId, periodStart, periodEnd, metricType);
     }
 
-     */
+
 
     public List<TimeSlotAnalysisDto> getTimeSlotAnalysis(Long schoolId, LocalDate periodStart,
                                                          LocalDate periodEnd, HttpServletRequest request) {

@@ -28,6 +28,7 @@ import org.springframework.util.StringUtils;
 import javax.security.sasl.AuthenticationException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -549,5 +550,9 @@ public class UserService {
 
     private String generatePasswordResetToken() {
         return UUID.randomUUID().toString().replace("-", "");
+    }
+
+    public Optional<User> findByEmail(String username) {
+        return userRepository.findByEmail(username);
     }
 }

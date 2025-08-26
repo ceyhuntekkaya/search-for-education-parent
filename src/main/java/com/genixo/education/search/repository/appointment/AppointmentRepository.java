@@ -331,11 +331,11 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
                                                            @Param("periodEnd") LocalDate periodEnd);
 
     // Metrics queries  ceyhun
-    /*
+
     @Query("SELECT new com.genixo.education.search.dto.appointment.AppointmentMetricsDto(" +
             ":metricType, 'Total Appointments', 'COUNT', " +
-            "CAST(COUNT(a) AS double), " +
-            "0.0, 0.0, 0.0, '', '', '', '', 0.0, '') " +
+            "CAST(COUNT(a) AS DOUBLE)) " +
+
             "FROM Appointment a " +
             "WHERE a.school.id = :schoolId " +
             "AND a.appointmentDate BETWEEN :periodStart AND :periodEnd " +
@@ -345,7 +345,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
                                                       @Param("periodEnd") LocalDate periodEnd,
                                                       @Param("metricType") String metricType);
 
-     */
+
 
     // Reminder queries
     @Query("SELECT a FROM Appointment a " +
