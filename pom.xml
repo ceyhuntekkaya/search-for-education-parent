@@ -210,13 +210,13 @@
                         </platforms>
                     </from>
                     <to>
-                        <image>registry.hub.docker.com/ctekkaya/search:3.0</image>
+                        <image>registry.hub.docker.com/ctekkaya/search:1.0</image>
                         <auth>
                             <username>ctekkaya</username>
-                            <password>Str11476500*</password>
+                            <password>Str421900*</password>
                         </auth>
                     </to>
-                    <skip>true</skip>
+                    <skip>false</skip>
                 </configuration>
             </plugin>
             <plugin>
