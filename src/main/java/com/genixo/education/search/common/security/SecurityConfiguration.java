@@ -16,7 +16,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -70,32 +69,39 @@ public class SecurityConfiguration {
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/auth/**")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/course/**")).permitAll()
+                        // Public endpoints - Modern approach without AntPathRequestMatcher
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/course/**").permitAll()
+                        .requestMatchers("/exam-part-question-part/**").permitAll()
+                        .requestMatchers("/course-part-material/**").permitAll()
+                        .requestMatchers("/exam-part-question/**").permitAll()
+                        .requestMatchers("/exam-part/**").permitAll()
+                        .requestMatchers("/question-content-section/**").permitAll()
+                        .requestMatchers("/course-part/**").permitAll()
+                        .requestMatchers("/curriculum-content/**").permitAll()
+                        .requestMatchers("/course-lesson/**").permitAll()
+                        .requestMatchers("/exam/**").permitAll()
+                        .requestMatchers("/user/**").permitAll()
+                        .requestMatchers("/storage/**").permitAll()
+                        .requestMatchers("/actuator/health").permitAll()
 
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/exam-part-question-part/**")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/course-part-material/**")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/exam-part-question/**")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/exam-part/**")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/question-content-section/**")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/course-part/**")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/curriculum-content/**")).permitAll()
+                        // Swagger/OpenAPI endpoints
+                        .requestMatchers("/swagger-ui/**").permitAll()
+                        .requestMatchers("/swagger-ui.html").permitAll()
+                        .requestMatchers("/v3/api-docs/**").permitAll()
+                        .requestMatchers("/api-docs/**").permitAll()
+                        .requestMatchers("/swagger-resources/**").permitAll()
+                        .requestMatchers("/swagger-resources").permitAll()
+                        .requestMatchers("/webjars/**").permitAll()
+                        .requestMatchers("/favicon.ico").permitAll()
 
-
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/course-lesson/**")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/exam/**")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/user/**")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/storage/**")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/actuator/health")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.OPTIONS)).permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS).permitAll()
 
                         // Protected endpoints with role-based authorization
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/security4/**")).hasRole("ADMIN")
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/security1/**")).hasAnyRole("ADMIN", "USER_MANAGER")
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/security3/**")).hasAuthority("DEVICE_CONTROL")
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/security2/**")).hasAnyAuthority("DEVICE_CONTROL", "DEVICE_ADD")
-
+                        .requestMatchers("/security4/**").hasRole("ADMIN")
+                        .requestMatchers("/security1/**").hasAnyRole("ADMIN", "USER_MANAGER")
+                        .requestMatchers("/security3/**").hasAuthority("DEVICE_CONTROL")
+                        .requestMatchers("/security2/**").hasAnyAuthority("DEVICE_CONTROL", "DEVICE_ADD")
 
                         // Catch-all: require authentication for any other endpoint
                         .anyRequest().authenticated()

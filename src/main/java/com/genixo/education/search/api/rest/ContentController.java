@@ -10,7 +10,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequestMapping("/content")
@@ -598,13 +601,197 @@ public class ContentController {
     }
 
     // ================================ HELPER REQUEST DTOs ================================
-    @Getter
+
     @Setter
+    @Getter
     public static class ContentModerationRequestDto {
         private String action; // APPROVE, REJECT, FLAG, DELETE
         private String reason;
         private String notes;
 
+    }
+
+    @Setter
+    @Getter
+    public static class ContentReportRequestDto {
+        private String reason; // SPAM, INAPPROPRIATE, OFFENSIVE, COPYRIGHT, OTHER
+        private String description;
+
+    }
+
+    @Setter
+    @Getter
+    public static class ContentExportRequestDto {
+        private String contentType; // POSTS, GALLERIES, MESSAGES
+        private String format; // JSON, CSV, XML
+        private List<Long> contentIds;
+        private java.time.LocalDate startDate;
+        private java.time.LocalDate endDate;
+        private List<Long> schoolIds;
+
+    }
+
+    // ================================ CONTENT ANALYTICS ================================
+
+    @GetMapping("/schools/{schoolId}/content-analytics")
+    @Operation(summary = "Get school content analytics", description = "Get comprehensive content analytics for a school")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Analytics retrieved successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "School not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Access denied")
+    })
+    public ResponseEntity<ApiResponse<ContentAnalyticsDto>> getSchoolContentAnalytics(
+            @Parameter(description = "School ID") @PathVariable Long schoolId,
+            @Parameter(description = "Start date (YYYY-MM-DD)") @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate startDate,
+            @Parameter(description = "End date (YYYY-MM-DD)") @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate endDate,
+            HttpServletRequest request) {
+
+        log.debug("Get school content analytics request: {}", schoolId);
+
+        // This would be implemented in the service
+        ContentAnalyticsDto analytics = ContentAnalyticsDto.builder()
+                .schoolId(schoolId)
+                .totalPosts(125L)
+                .totalGalleries(15L)
+                .totalMessages(456L)
+                .totalViews(25000L)
+                .totalLikes(1890L)
+                .totalComments(567L)
+                .totalShares(234L)
+                .engagementRate(12.5)
+                .averagePostViews(200.0)
+                .topPerformingPostId(123L)
+                .mostEngagedGalleryId(45L)
+                .messageResponseRate(95.2)
+                .averageResponseTimeHours(2.3)
+                .build();
+
+        ApiResponse<ContentAnalyticsDto> response = ApiResponse.success(analytics, "Analytics retrieved successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ================================ TRENDING CONTENT ================================
+
+    @GetMapping("/trending/posts")
+    @Operation(summary = "Get trending posts", description = "Get currently trending posts")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Trending posts retrieved successfully")
+    })
+    public ResponseEntity<ApiResponse<List<PostSummaryDto>>> getTrendingPosts(
+            @Parameter(description = "Time period (24h, 7d, 30d)") @RequestParam(defaultValue = "24h") String period,
+            @Parameter(description = "Limit") @RequestParam(defaultValue = "10") Integer limit,
+            HttpServletRequest request) {
+
+        log.debug("Get trending posts request - period: {}, limit: {}", period, limit);
+
+        // This would be implemented in the service
+        List<PostSummaryDto> trendingPosts = List.of(); // Placeholder
+
+        ApiResponse<List<PostSummaryDto>> response = ApiResponse.success(trendingPosts, "Trending posts retrieved successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/trending/hashtags")
+    @Operation(summary = "Get trending hashtags", description = "Get currently trending hashtags")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Trending hashtags retrieved successfully")
+    })
+    public ResponseEntity<ApiResponse<List<HashtagTrendDto>>> getTrendingHashtags(
+            @Parameter(description = "Time period (24h, 7d, 30d)") @RequestParam(defaultValue = "24h") String period,
+            @Parameter(description = "Limit") @RequestParam(defaultValue = "20") Integer limit,
+            HttpServletRequest request) {
+
+        log.debug("Get trending hashtags request - period: {}, limit: {}", period, limit);
+
+        // This would be implemented in the service
+        List<HashtagTrendDto> trendingHashtags = List.of(
+                HashtagTrendDto.builder()
+                        .hashtag("#education")
+                        .usageCount(156L)
+                        .trendScore(8.5)
+                        .growth(25.3)
+                        .build(),
+                HashtagTrendDto.builder()
+                        .hashtag("#admissions2024")
+                        .usageCount(89L)
+                        .trendScore(7.2)
+                        .growth(45.1)
+                        .build()
+        );
+
+        ApiResponse<List<HashtagTrendDto>> response = ApiResponse.success(trendingHashtags, "Trending hashtags retrieved successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ================================ CONTENT SCHEDULING ================================
+
+    @GetMapping("/posts/scheduled")
+    @Operation(summary = "Get scheduled posts", description = "Get all scheduled posts for a school")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Scheduled posts retrieved successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Access denied")
+    })
+    public ResponseEntity<ApiResponse<List<PostSummaryDto>>> getScheduledPosts(
+            @Parameter(description = "School ID") @RequestParam(required = false) Long schoolId,
+            HttpServletRequest request) {
+
+        log.debug("Get scheduled posts request for school: {}", schoolId);
+
+        // This would be implemented in the service
+        List<PostSummaryDto> scheduledPosts = List.of(); // Placeholder
+
+        ApiResponse<List<PostSummaryDto>> response = ApiResponse.success(scheduledPosts, "Scheduled posts retrieved successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/posts/{postId}/schedule")
+    @Operation(summary = "Schedule post publication", description = "Schedule a post for future publication")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Post scheduled successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Post not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Access denied"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid schedule time")
+    })
+    public ResponseEntity<ApiResponse<PostDto>> schedulePost(
+            @Parameter(description = "Post ID") @PathVariable Long postId,
+            @Valid @RequestBody PostScheduleRequestDto scheduleRequest,
+            HttpServletRequest request) {
+
+        log.info("Schedule post request: {} for {}", postId, scheduleRequest.getScheduledAt());
+
+        // This would be implemented in the service - update the post with scheduled time
+        PostUpdateDto updateDto = new PostUpdateDto();
+        updateDto.setScheduledAt(scheduleRequest.getScheduledAt());
+        updateDto.setStatus(com.genixo.education.search.enumaration.PostStatus.SCHEDULED);
+
+        PostDto postDto = contentService.updatePost(postId, updateDto, request);
+
+        ApiResponse<PostDto> response = ApiResponse.success(postDto, "Post scheduled successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ================================ ADDITIONAL HELPER DTOs ================================
+
+    public static class PostScheduleRequestDto {
+        private LocalDateTime scheduledAt;
+
+        public LocalDateTime getScheduledAt() { return scheduledAt; }
+        public void setScheduledAt(LocalDateTime scheduledAt) { this.scheduledAt = scheduledAt; }
     }
 
  */

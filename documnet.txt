@@ -1,0 +1,3 @@
+http://localhost:8080/api/test/health (Basit endpoint testi)
+http://localhost:8080/api/v3/api-docs (API docs JSON)
+http://localhost:8080/api/swagger-ui.html (Swagger UI)

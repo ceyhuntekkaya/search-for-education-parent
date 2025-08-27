@@ -34,8 +34,10 @@ spring:
 
   flyway:
     enabled: true
-    baseline-on-migrate: true
-    locations: classpath:db/migration
+    url: ${spring.datasource.dbUrl}${spring.datasource.dbName}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    schemas: public
 
   rabbitmq:
     username: GenUser2025
@@ -73,3 +75,18 @@ application:
       refresh-token:
         expiration: 31536000000
 
+# SpringDoc/Swagger konfigürasyonu
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+  # Önemli: packages-to-scan ile tarama alanını sınırlayın
+  packages-to-scan: com.genixo.education.search
+  # Default response'ları devre dışı bırak
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
+  # Hata durumlarında daha detaylı log için
+  show-actuator: false
