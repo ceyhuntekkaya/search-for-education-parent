@@ -1,11 +1,11 @@
 package com.genixo.education.search.service;
 
-
 import com.genixo.education.search.common.exception.BusinessException;
 import com.genixo.education.search.common.exception.ResourceNotFoundException;
 import com.genixo.education.search.dto.institution.*;
 import com.genixo.education.search.entity.institution.*;
 import com.genixo.education.search.entity.user.User;
+import com.genixo.education.search.entity.user.UserInstitutionAccess;
 import com.genixo.education.search.enumaration.*;
 import com.genixo.education.search.repository.insitution.*;
 import com.genixo.education.search.service.auth.JwtService;
@@ -43,7 +43,6 @@ public class InstitutionService {
     private final InstitutionConverterService converterService;
     private final JwtService jwtService;
 
-    // ================================ BRAND OPERATIONS ================================
 
     @Transactional
     @CacheEvict(value = {"brands", "brand_summaries"}, allEntries = true)
@@ -700,7 +699,7 @@ public class InstitutionService {
         return user.getInstitutionAccess().stream()
                 .filter(access -> access.getAccessType() == AccessType.BRAND)
                 .filter(access -> access.getExpiresAt() == null || access.getExpiresAt().isAfter(LocalDateTime.now()))
-                .map(access -> access.getEntityId())
+                .map(UserInstitutionAccess::getEntityId)
                 .collect(Collectors.toList());
     }
 
