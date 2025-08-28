@@ -473,5 +473,84 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     Integer getBookedSlotsForDate(@Param("schoolId") Long schoolId,
                                   @Param("date") LocalDate date);
 
+    @Query("SELECT a FROM Appointment a WHERE a.parentUser.id = :parentUserId AND a.appointmentDate > :appointmentDate")
+    List<Appointment> findByParentUserIdAndAppointmentDateAfter(
+            @Param("parentUserId") Long parentUserId,
+            @Param("appointmentDate") LocalDate appointmentDate);
 
+    @Query("SELECT a FROM Appointment a WHERE a.parentUser.id = :parentUserId AND a.school.id = :schoolId ORDER BY a.appointmentDate DESC, a.startTime DESC")
+    List<Appointment> findByParentUserIdAndSchoolIdOrderByAppointmentDateDesc(
+            @Param("parentUserId") Long parentUserId,
+            @Param("schoolId") Long schoolId);
+
+    /**
+     * Gelecek randevuları getirir (bugün dahil)
+     */
+    @Query("SELECT a FROM Appointment a WHERE a.parentUser.id = :parentUserId " +
+            "AND (a.appointmentDate > :today OR (a.appointmentDate = :today AND a.startTime >= CURRENT_TIME)) " +
+            "ORDER BY a.appointmentDate ASC, a.startTime ASC")
+    List<Appointment> findUpcomingAppointments(
+            @Param("parentUserId") Long parentUserId,
+            @Param("today") LocalDate today);
+
+    /**
+     * Geçmiş randevuları getirir
+     */
+    @Query("SELECT a FROM Appointment a WHERE a.parentUser.id = :parentUserId " +
+            "AND (a.appointmentDate < :today OR (a.appointmentDate = :today AND a.startTime < CURRENT_TIME)) " +
+            "ORDER BY a.appointmentDate DESC, a.startTime DESC")
+    List<Appointment> findPastAppointments(
+            @Param("parentUserId") Long parentUserId,
+            @Param("today") LocalDate today);
+
+
+    @Query("SELECT a FROM Appointment a WHERE a.parentUser.id = :parentUserId " +
+            "AND a.appointmentDate BETWEEN :startDate AND :endDate " +
+            "ORDER BY a.appointmentDate ASC, a.startTime ASC")
+    List<Appointment> findByParentUserIdAndAppointmentDateBetween(
+            @Param("parentUserId") Long parentUserId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
+
+    /**
+     * Aktif randevuları sayar (iptal olmamış)
+     */
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.parentUser.id = :parentUserId " +
+            "AND a.status NOT IN ('CANCELLED', 'REJECTED') " +
+            "AND a.appointmentDate >= :fromDate")
+    Long countActiveAppointments(
+            @Param("parentUserId") Long parentUserId,
+            @Param("fromDate") LocalDate fromDate);
+
+    /**
+     * Okul bazında randevu sayısı
+     */
+    @Query("SELECT COUNT(DISTINCT a.school.id) FROM Appointment a WHERE a.parentUser.id = :parentUserId " +
+            "AND a.status NOT IN ('CANCELLED', 'REJECTED') " +
+            "AND a.appointmentDate >= :fromDate")
+    Long countSchoolsWithAppointments(
+            @Param("parentUserId") Long parentUserId,
+            @Param("fromDate") LocalDate fromDate);
+
+
+    @Query("SELECT a FROM Appointment a WHERE a.parentUser.id = :parentUserId AND a.school.id = :schoolId " +
+            "AND a.appointmentDate <= :today " +
+            "ORDER BY a.appointmentDate DESC, a.startTime DESC " +
+            "LIMIT 1")
+    List<Appointment> findLastAppointmentBySchool(
+            @Param("parentUserId") Long parentUserId,
+            @Param("schoolId") Long schoolId,
+            @Param("today") LocalDate today);
+
+    /**
+     * Gelecek randevuyu getirir (okul bazında)
+     */
+    @Query("SELECT a FROM Appointment a WHERE a.parentUser.id = :parentUserId AND a.school.id = :schoolId " +
+            "AND (a.appointmentDate > :today OR (a.appointmentDate = :today AND a.startTime > CURRENT_TIME)) " +
+            "ORDER BY a.appointmentDate ASC, a.startTime ASC " +
+            "LIMIT 1")
+    List<Appointment> findNextAppointmentBySchool(
+            @Param("parentUserId") Long parentUserId,
+            @Param("schoolId") Long schoolId,
+            @Param("today") LocalDate today);
 }
