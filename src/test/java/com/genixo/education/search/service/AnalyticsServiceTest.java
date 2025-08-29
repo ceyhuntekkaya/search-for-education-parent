@@ -568,10 +568,7 @@ class AnalyticsServiceTest {
         user.setLastName("User");
         user.setEmail("test@example.com");
 
-        MockUserRole mockRole = new MockUserRole();
-        mockRole.setRoleLevel(roleLevel);
         user.setUserRoles(Set.of(createUserRole(roleLevel)));
-        //user.setUserRoles(List.of(mockRole));
         user.setInstitutionAccess(Collections.emptySet());
 
         return user;
@@ -924,10 +921,6 @@ class AnalyticsServiceTest {
         @DisplayName("Should allow access when user has school-level access")
         void shouldAllowAccessWhenUserHasSchoolLevelAccess() {
             // Given
-            MockInstitutionAccess schoolAccess = new MockInstitutionAccess();
-            schoolAccess.setAccessType(AccessType.SCHOOL);
-            schoolAccess.setEntityId(5L);
-            schoolAccess.setExpiresAt(null);
 
             User schoolUser = createUser(4L, RoleLevel.SCHOOL);
 
@@ -948,10 +941,7 @@ class AnalyticsServiceTest {
         @DisplayName("Should allow access when user has campus-level access")
         void shouldAllowAccessWhenUserHasCampusLevelAccess() {
             // Given
-            MockInstitutionAccess campusAccess = new MockInstitutionAccess();
-            campusAccess.setAccessType(AccessType.CAMPUS);
-            campusAccess.setEntityId(3L);
-            campusAccess.setExpiresAt(null);
+
 
             UserInstitutionAccess userInstitutionAccess = new UserInstitutionAccess();
             userInstitutionAccess.setAccessType(AccessType.CAMPUS);
@@ -971,10 +961,6 @@ class AnalyticsServiceTest {
         @DisplayName("Should deny access when access has expired")
         void shouldDenyAccessWhenAccessHasExpired() {
             // Given
-            MockInstitutionAccess expiredAccess = new MockInstitutionAccess();
-            expiredAccess.setAccessType(AccessType.BRAND);
-            expiredAccess.setEntityId(1L);
-            expiredAccess.setExpiresAt(LocalDateTime.now().minusDays(1)); // Expired yesterday
 
 
             UserInstitutionAccess userInstitutionAccess = new UserInstitutionAccess();

@@ -15,8 +15,6 @@ import com.genixo.education.search.service.auth.JwtService;
 import com.genixo.education.search.service.converter.CampaignConverterService;
 
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.Getter;
-import lombok.Setter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -44,7 +42,6 @@ class CampaignServiceTest {
     @Mock private CampaignRepository campaignRepository;
     @Mock private CampaignSchoolRepository campaignSchoolRepository;
     @Mock private CampaignUsageRepository campaignUsageRepository;
-    @Mock private CampaignContentRepository campaignContentRepository;
     @Mock private SchoolRepository schoolRepository;
     @Mock private CampaignConverterService converterService;
     @Mock private JwtService jwtService;
@@ -493,7 +490,6 @@ class CampaignServiceTest {
 
         private CampaignUsageCreateDto validUsageCreateDto;
         private Campaign activeCampaign;
-        private CampaignSchool activeCampaignSchool;
         private CampaignUsage savedUsage;
         private CampaignUsageDto expectedUsageDto;
 
@@ -538,11 +534,6 @@ class CampaignServiceTest {
             activeCampaign.setPerSchoolLimit(20);
             activeCampaign.setPromoCode("EARLY2024");
 
-            activeCampaignSchool = new CampaignSchool();
-            activeCampaignSchool.setCampaign(activeCampaign);
-            activeCampaignSchool.setSchool(validSchool);
-            activeCampaignSchool.setStatus(CampaignSchoolStatus.ACTIVE);
-            activeCampaignSchool.setIsActive(true);
 
             savedUsage = new CampaignUsage();
             savedUsage.setId(1L);
@@ -1736,7 +1727,6 @@ class CampaignServiceTest {
         User user = new User();
         user.setId(id);
         user.setUserRoles(Set.of(createUserRole(roleLevel)));
-        //user.setUserRoles(createMockUserRoles(roleLevel));
         user.setInstitutionAccess(Collections.emptySet());
         return user;
     }
@@ -1747,16 +1737,4 @@ class CampaignServiceTest {
         return mockRole;
     }
 
-    private List<MockUserRole> createMockUserRoles(RoleLevel roleLevel) {
-        MockUserRole mockRole = new MockUserRole();
-        mockRole.setRoleLevel(roleLevel);
-        return List.of(mockRole);
-    }
-
-    // Mock inner class for UserRole
-    @Setter
-    @Getter
-    private static class MockUserRole {
-        private RoleLevel roleLevel;
-    }
 }

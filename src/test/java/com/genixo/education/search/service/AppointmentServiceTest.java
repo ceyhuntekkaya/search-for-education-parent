@@ -31,7 +31,6 @@ import org.springframework.data.domain.Pageable;
 import java.time.*;
 import java.time.DayOfWeek;
 import java.util.*;
-import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -44,7 +43,6 @@ class AppointmentServiceTest {
     @Mock private AppointmentRepository appointmentRepository;
     @Mock private AppointmentSlotRepository appointmentSlotRepository;
     @Mock private AppointmentNoteRepository appointmentNoteRepository;
-    @Mock private AppointmentParticipantRepository appointmentParticipantRepository;
     @Mock private SchoolRepository schoolRepository;
     @Mock private UserRepository userRepository;
     @Mock private AppointmentConverterService converterService;
@@ -1530,7 +1528,7 @@ class AppointmentServiceTest {
 
             // Mock excluded dates
             List<Object[]> excludedDates = new ArrayList<>();
-            excludedDates.add(new Object[]{1L, "[\"" + excludedDate.toString() + "\"]"});
+            excludedDates.add(new Object[]{1L, "[\"" + excludedDate + "\"]"});
 
             when(appointmentRepository.getAllActiveSlotsForSchool(eq(schoolId), any(LocalDate.class)))
                     .thenReturn(slotsData);
@@ -1852,19 +1850,6 @@ class AppointmentServiceTest {
         return user;
     }
 
-    private List<MockUserRole> createMockUserRoles(RoleLevel roleLevel) {
-        MockUserRole mockRole = new MockUserRole();
-        mockRole.setRoleLevel(roleLevel);
-        return List.of(mockRole);
-    }
-
-    // Mock inner class for UserRole
-    private static class MockUserRole {
-        private RoleLevel roleLevel;
-
-        public RoleLevel getRoleLevel() { return roleLevel; }
-        public void setRoleLevel(RoleLevel roleLevel) { this.roleLevel = roleLevel; }
-    }
 }
 
 

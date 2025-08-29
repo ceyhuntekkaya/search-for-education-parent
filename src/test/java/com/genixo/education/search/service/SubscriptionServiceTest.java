@@ -22,17 +22,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.Objects;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -1248,25 +1243,6 @@ class SubscriptionServiceTest {
         user.setUserRoles(Set.of(createUserRole(roleLevel)));
         user.setInstitutionAccess(Collections.emptySet());
         return user;
-    }
-
-    private MockUserRole createMockUserRole(RoleLevel roleLevel) {
-        MockUserRole mockRole = new MockUserRole();
-        mockRole.setRoleLevel(roleLevel);
-        return mockRole;
-    }
-
-    // Mock inner classes
-    private static class MockUserRole {
-        private RoleLevel roleLevel;
-
-        public RoleLevel getRoleLevel() {
-            return roleLevel;
-        }
-
-        public void setRoleLevel(RoleLevel roleLevel) {
-            this.roleLevel = roleLevel;
-        }
     }
 
 }

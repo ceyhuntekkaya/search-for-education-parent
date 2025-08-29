@@ -17,6 +17,8 @@ import com.genixo.education.search.service.auth.JwtService;
 import com.genixo.education.search.service.converter.PricingConverterService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Getter;
+import lombok.Setter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -983,11 +985,11 @@ class PricingServiceTest {
     }
 
     // Mock inner class for UserRole
+    @Setter
+    @Getter
     private static class MockUserRole {
         private RoleLevel roleLevel;
 
-        public RoleLevel getRoleLevel() { return roleLevel; }
-        public void setRoleLevel(RoleLevel roleLevel) { this.roleLevel = roleLevel; }
     }
 
 
