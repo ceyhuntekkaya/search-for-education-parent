@@ -1,6 +1,7 @@
 package com.genixo.education.search.entity.appointment;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.genixo.education.search.entity.BaseEntity;
 import com.genixo.education.search.entity.institution.School;
 import com.genixo.education.search.enumaration.SchoolItemStatus;
@@ -70,6 +71,9 @@ public class ParentSchoolListItem extends BaseEntity {
     private String addedFromSearch; // Hangi aramadan eklendiği
 
     // Relationships
-    @OneToMany(mappedBy = "parentSchoolListItem", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "parentSchoolListItem", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private Set<ParentSchoolNote> schoolNotes = new HashSet<>();
 }

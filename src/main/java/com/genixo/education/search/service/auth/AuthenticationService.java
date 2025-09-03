@@ -1,11 +1,13 @@
 package com.genixo.education.search.service.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.genixo.education.search.dto.user.UserDto;
 import com.genixo.education.search.entity.user.Token;
 import com.genixo.education.search.entity.user.User;
 import com.genixo.education.search.enumaration.TokenType;
 import com.genixo.education.search.repository.user.TokenRepository;
 import com.genixo.education.search.repository.user.UserRepository;
+import com.genixo.education.search.service.converter.UserConverterService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -24,13 +26,15 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final UserConverterService converterService;
 
     public AuthenticationResponse register(User user) {
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setIsActive(true);
         var savedUser = repository.save(user);
-        var jwtToken = jwtService.generateToken(user, user);
+        UserDto userDto = converterService.mapToDto(savedUser);
+        var jwtToken = jwtService.generateToken(user, userDto);
         var refreshToken = jwtService.generateRefreshToken(user);
         saveUserToken(savedUser, jwtToken);
         return AuthenticationResponse.builder()
@@ -45,7 +49,8 @@ public class AuthenticationService {
             user.setIsActive(true);
 
             var savedUser = repository.saveAndFlush(user);
-            var jwtToken = jwtService.generateToken(user, user);
+            UserDto userDto = converterService.mapToDto(user);
+            var jwtToken = jwtService.generateToken(user, userDto);
             var refreshToken = jwtService.generateRefreshToken(user);
             saveUserToken(savedUser, jwtToken);
             return savedUser;
@@ -58,14 +63,15 @@ public class AuthenticationService {
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         User user = repository.findByEmail(request.getUsername().trim()).orElse(null);
         if (user != null) {
-            if (passwordEncoder.matches(request.getPassword(), user.getEmail())) {
-                var jwtToken = jwtService.generateToken(user, user);
+            if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+                UserDto userDto = converterService.mapToDto(user);
+                var jwtToken = jwtService.generateToken(user, userDto);
                 var refreshToken = jwtService.generateRefreshToken(user);
 
                 revokeAllUserTokens(user);
                 saveUserToken(user, jwtToken);
                 return AuthenticationResponse.builder()
-                        .user(user)
+                        .user(userDto)
                         .accessToken(jwtToken)
                         .refreshToken(refreshToken)
                         .build();
@@ -130,7 +136,8 @@ public class AuthenticationService {
             var user = this.repository.findByEmail(userEmail)
                     .orElseThrow();
             if (jwtService.isTokenValid(refreshToken, user)) {
-                var accessToken = jwtService.generateToken(user, user);
+                UserDto userDto = converterService.mapToDto(user);
+                var accessToken = jwtService.generateToken(user, userDto);
                 revokeAllUserTokens(user);
                 saveUserToken(user, accessToken);
                 var authResponse = AuthenticationResponse.builder()

@@ -15,8 +15,8 @@ spring:
             platform: org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform
   datasource:
     dbName: search_edu_app
-    #dbUrl: jdbc:postgresql://localhost:5432/ #3
-    dbUrl: jdbc:postgresql://postgres:5432/
+    dbUrl: jdbc:postgresql://localhost:5432/ #3
+    #dbUrl: jdbc:postgresql://postgres:5432/
 
     url: ${spring.datasource.dbUrl}${spring.datasource.dbName}
     username: genixo

@@ -1,5 +1,6 @@
 package com.genixo.education.search.entity.content;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.genixo.education.search.entity.BaseEntity;
 import com.genixo.education.search.enumaration.GalleryType;
 import com.genixo.education.search.enumaration.GalleryVisibility;
@@ -8,10 +9,7 @@ import com.genixo.education.search.entity.institution.Campus;
 import com.genixo.education.search.entity.institution.School;
 import com.genixo.education.search.entity.user.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -97,7 +95,10 @@ public class Gallery extends BaseEntity {
     private Long totalSizeBytes = 0L;
 
     // Relationships
-    @OneToMany(mappedBy = "gallery", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "gallery", fetch = FetchType.LAZY)
     @OrderBy("sortOrder ASC, createdAt DESC")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private Set<GalleryItem> items = new HashSet<>();
 }

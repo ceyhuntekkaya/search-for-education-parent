@@ -14,8 +14,8 @@ http://46.62.141.0:8080/api/swagger-ui.html
 
 
 Kullanıcı       Email                   Şifre               Rol         Açıklama
-Ahmet Yılmaz    admin@egitimara.comd    emo123ADMIN         (SYSTEM)    Sistem yöneticisi - tüm yetkiler
-Zeynep Kaya     sirket@egitimara.com    demo123COMPANY      (BRAND)     Şirket kullanıcısı - Eğitim Dünyası markası
-Mehmet Demir    aday@egitimara.com      demo123CANDIDATE    (SCHOOL)    Aday kullanıcı - Bilim Sanat lisesi
-Ayşe Özkan      user@egitimara.com      demo123USER         (CAMPUS)    Normal kullanıcı - Gelişim anaokulu
+Ahmet Yılmaz    admin@egitimara.com     genixo123        (SYSTEM)    Sistem yöneticisi - tüm yetkiler
+Zeynep Kaya     sirket@egitimara.com    genixo123        (BRAND)     Şirket kullanıcısı - Eğitim Dünyası markası
+Mehmet Demir    aday@egitimara.com      genixo123        (SCHOOL)    Aday kullanıcı - Bilim Sanat lisesi
+Ayşe Özkan      user@egitimara.com      genixo123        (CAMPUS)    Normal kullanıcı - Gelişim anaokulu
 

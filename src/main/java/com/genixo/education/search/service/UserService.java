@@ -13,6 +13,7 @@ import com.genixo.education.search.repository.location.DistrictRepository;
 import com.genixo.education.search.repository.location.NeighborhoodRepository;
 import com.genixo.education.search.repository.location.ProvinceRepository;
 import com.genixo.education.search.repository.user.*;
+import com.genixo.education.search.service.converter.UserConverterService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +49,7 @@ public class UserService {
     private final DistrictRepository districtRepository;
     private final NeighborhoodRepository neighborhoodRepository;
 
-    private final ConverterService converterService;
+    private final UserConverterService converterService;
     private final PasswordEncoder passwordEncoder;
 
 
@@ -102,7 +103,7 @@ public class UserService {
         // }
 
         log.info("User registered successfully with ID: {}", savedUser.getId());
-        return converterService.toUserDto(savedUser);
+        return converterService.mapToDto(savedUser);
     }
 
     /**
@@ -161,7 +162,7 @@ public class UserService {
         userRepository.save(user);
 
         log.info("User authenticated successfully: {}", user.getId());
-        return converterService.toUserDto(user);
+        return converterService.mapToDto(user);
     }
 
     // ========================= USER MANAGEMENT =========================
@@ -173,7 +174,12 @@ public class UserService {
     public UserDto getUserById(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
-        return converterService.toUserDto(user);
+        return converterService.mapToDto(user);
+    }
+
+    public User findUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
     }
 
     /**
@@ -183,7 +189,7 @@ public class UserService {
     public UserProfileDto getUserProfile(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
-        return converterService.toUserProfileDto(user);
+        return converterService.mapToProfileDto(user);
     }
 
     /**
@@ -226,7 +232,7 @@ public class UserService {
         User updatedUser = userRepository.save(user);
 
         log.info("User profile updated successfully for ID: {}", userId);
-        return converterService.toUserProfileDto(updatedUser);
+        return converterService.mapToProfileDto(updatedUser);
     }
 
     /**
@@ -431,7 +437,7 @@ public class UserService {
         UserInstitutionAccess savedAccess = userInstitutionAccessRepository.save(access);
 
         log.info("Institution access granted successfully");
-        return converterService.toUserInstitutionAccessDto(savedAccess);
+        return converterService.mapToDto(savedAccess);
     }
 
     /**
@@ -458,7 +464,7 @@ public class UserService {
         List<UserInstitutionAccess> accessList = userInstitutionAccessRepository
                 .findByUserIdAndIsActiveTrueOrderByGrantedAtDesc(userId);
         return accessList.stream()
-                .map(converterService::toUserInstitutionAccessDto)
+                .map(converterService::mapToDto)
                 .collect(Collectors.toList());
     }
 

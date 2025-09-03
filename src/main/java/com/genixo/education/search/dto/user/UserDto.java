@@ -1,5 +1,7 @@
 package com.genixo.education.search.dto.user;
 
+import com.genixo.education.search.dto.location.*;
+import com.genixo.education.search.entity.location.Province;
 import com.genixo.education.search.entity.user.Department;
 import com.genixo.education.search.entity.user.Permission;
 import com.genixo.education.search.entity.user.Role;
@@ -33,10 +35,10 @@ public class UserDto {
     private LocalDateTime createdAt;
 
     // Location information
-    private String country;
-    private String province;
-    private String district;
-    private String neighborhood;
+    private CountrySummaryDto country;
+    private ProvinceSummaryDto province;
+    private DistrictSummaryDto district;
+    private NeighborhoodSummaryDto neighborhood;
     private String addressLine1;
     private String addressLine2;
     private String postalCode;
@@ -44,6 +46,10 @@ public class UserDto {
     private Double longitude;
 
     // Relationships
-    private List<UserRole> userRoles;
+    private List<UserRoleDto> userRoles;
     private List<UserInstitutionAccessDto> institutionAccess;
+
+
+    private List<String> roles;
+    private List<String> authorities;
 }

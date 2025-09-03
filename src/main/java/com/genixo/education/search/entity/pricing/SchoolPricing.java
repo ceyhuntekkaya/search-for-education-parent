@@ -1,5 +1,6 @@
 package com.genixo.education.search.entity.pricing;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.genixo.education.search.entity.BaseEntity;
 import com.genixo.education.search.enumaration.Currency;
 import com.genixo.education.search.enumaration.PaymentFrequency;
@@ -7,10 +8,7 @@ import com.genixo.education.search.enumaration.PricingStatus;
 import com.genixo.education.search.entity.institution.School;
 import com.genixo.education.search.entity.user.User;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -264,9 +262,15 @@ public class SchoolPricing extends BaseEntity {
     private Boolean showFinancialAidInfo = false;
 
     // Relationships
-    @OneToMany(mappedBy = "schoolPricing", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "schoolPricing", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private Set<PriceHistory> priceHistories = new HashSet<>();
 
-    @OneToMany(mappedBy = "schoolPricing", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "schoolPricing", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private Set<CustomFee> customFees = new HashSet<>();
 }

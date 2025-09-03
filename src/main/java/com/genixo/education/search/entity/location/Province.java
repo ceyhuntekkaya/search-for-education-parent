@@ -1,11 +1,9 @@
 package com.genixo.education.search.entity.location;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.genixo.education.search.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -117,6 +115,9 @@ public class Province extends BaseEntity {
     private Double literacyRate;
 
     // Relationships
-    @OneToMany(mappedBy = "province", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "province", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private Set<District> districts = new HashSet<>();
 }

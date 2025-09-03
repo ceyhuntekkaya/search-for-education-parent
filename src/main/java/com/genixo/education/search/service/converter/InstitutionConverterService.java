@@ -11,6 +11,7 @@ import com.genixo.education.search.entity.location.District;
 import com.genixo.education.search.entity.location.Neighborhood;
 import com.genixo.education.search.entity.location.Province;
 import com.genixo.education.search.util.ConversionUtils;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -313,7 +314,7 @@ public class InstitutionConverterService {
     }
 
     // ================== BRAND CONVERSIONS ==================
-
+//@Transactional(readOnly = true)
     public BrandDto mapToDto(Brand entity) {
         if (entity == null) {
             return null;
@@ -533,8 +534,11 @@ public class InstitutionConverterService {
         if (entity == null) {
             return null;
         }
+        long schoolCount = 0;
+        try{
+            schoolCount = entity.getSchools() != null ? entity.getSchools().size() : 0;
+        }catch(Exception e){}
 
-        long schoolCount = ConversionUtils.safeSize(entity.getSchools().stream().toList());
 
         return CampusSummaryDto.builder()
                 .id(entity.getId())

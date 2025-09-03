@@ -1,6 +1,7 @@
 package com.genixo.education.search.service.converter;
 
 import com.genixo.education.search.dto.user.*;
+import com.genixo.education.search.entity.user.Permission;
 import com.genixo.education.search.entity.user.User;
 import com.genixo.education.search.entity.user.UserInstitutionAccess;
 import com.genixo.education.search.entity.user.UserRole;
@@ -24,10 +25,44 @@ public class UserConverterService {
     private PasswordEncoder passwordEncoder;
 
 
+
+    public UserRoleDto mapToDto(UserRole entity) {
+        if (entity == null) {
+            return null;
+        }
+        return UserRoleDto.builder()
+                .id(entity.getId())
+                .userId(entity.getUser().getId())
+                .role(entity.getRole())
+                .departments(entity.getDepartments())
+                .permissions(entity.getPermissions())
+                .roleLevel(entity.getRoleLevel())
+                .expiresAt(entity.getExpiresAt())
+                .build();
+    }
+
+
+
+
     public UserDto mapToDto(User entity) {
         if (entity == null) {
             return null;
         }
+
+        List<String> roles = entity.getUserRoles() == null ? new ArrayList<>() :
+                entity.getUserRoles().stream()
+                        .map(userRole -> userRole.getRole().name())
+                        .distinct()
+                        .collect(Collectors.toList());
+
+        List<String> authorities = entity.getUserRoles() == null ? new ArrayList<>() :
+                entity.getUserRoles().stream()
+                        .filter(userRole -> userRole.getRole() != null && userRole.getRole().getPermissions() != null)
+                        .flatMap(userRole -> userRole.getRole().getPermissions().stream())
+                        .map(Permission::name)
+                        .distinct()
+                        .collect(Collectors.toList());
+
 
         return UserDto.builder()
                 .id(entity.getId())
@@ -43,17 +78,23 @@ public class UserConverterService {
                 .profileImageUrl(entity.getProfileImageUrl())
                 .isActive(ConversionUtils.defaultIfNull(entity.getIsActive(), true))
                 .createdAt(entity.getCreatedAt())
-                .country(entity.getCountry() != null ? entity.getCountry().getName() : null)
-                .province(entity.getProvince() != null ? entity.getProvince().getName() : null)
-                .district(entity.getDistrict() != null ? entity.getDistrict().getName() : null)
-                .neighborhood(entity.getNeighborhood() != null ? entity.getNeighborhood().getName() : null)
+                .country(entity.getCountry() != null ? locationConverterService.mapToSummaryDto(entity.getCountry()) : null)
+                .province(entity.getProvince() != null ? locationConverterService.mapToSummaryDto(entity.getProvince()) : null)
+                .district(entity.getDistrict() != null ? locationConverterService.mapToSummaryDto(entity.getDistrict()) : null)
+                .neighborhood(entity.getNeighborhood() != null ? locationConverterService.mapToSummaryDto(entity.getNeighborhood()) : null)
                 .addressLine1(entity.getAddressLine1())
                 .addressLine2(entity.getAddressLine2())
                 .postalCode(entity.getPostalCode())
                 .latitude(entity.getLatitude())
                 .longitude(entity.getLongitude())
-                .userRoles(entity.getUserRoles().stream().toList())
+                .userRoles(entity.getUserRoles() == null ? new ArrayList<>() :
+                        entity.getUserRoles().stream()
+                                .map(this::mapToDto)
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.toList()))
                 .institutionAccess(mapInstitutionAccessToDto(entity.getInstitutionAccess()))
+                .roles(roles)
+                .authorities(authorities)
                 .build();
     }
 
@@ -154,6 +195,39 @@ public class UserConverterService {
                 .timezone("Europe/Istanbul")
                 .build();
     }
+
+
+    public User mapToEntity(UserDto dto) {
+        if (dto == null) {
+            return null;
+        }
+
+        User entity = new User();
+        entity.setId(dto.getId());
+        entity.setEmail(dto.getEmail().toLowerCase().trim());
+        entity.setPhone(cleanPhoneNumber(dto.getPhone()));
+        entity.setFirstName(ConversionUtils.capitalizeWords(dto.getFirstName().trim()));
+        entity.setLastName(ConversionUtils.capitalizeWords(dto.getLastName().trim()));
+        entity.setUserType(dto.getUserType());
+        entity.setIsEmailVerified(false);
+        entity.setIsPhoneVerified(false);
+        entity.setIsActive(true);
+        entity.setAddressLine1(dto.getAddressLine1());
+        entity.setAddressLine2(dto.getAddressLine2());
+        entity.setPostalCode(dto.getPostalCode());
+
+        // Generate email verification token
+        entity.setEmailVerificationToken(generateVerificationToken());
+
+        // Generate phone verification code if phone provided
+        if (StringUtils.hasText(dto.getPhone())) {
+            entity.setPhoneVerificationCode(generatePhoneVerificationCode());
+        }
+
+        return entity;
+    }
+
+
 
     public User mapToEntity(UserRegistrationDto dto) {
         if (dto == null) {

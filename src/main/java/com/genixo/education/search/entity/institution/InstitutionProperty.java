@@ -1,12 +1,10 @@
 package com.genixo.education.search.entity.institution;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.genixo.education.search.entity.BaseEntity;
 import com.genixo.education.search.enumaration.PropertyDataType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -79,6 +77,9 @@ public class InstitutionProperty extends BaseEntity {
     @JoinColumn(name = "institution_type_id", nullable = false)
     private InstitutionType institutionType;
 
-    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "property", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private Set<InstitutionPropertyValue> propertyValues = new HashSet<>();
 }

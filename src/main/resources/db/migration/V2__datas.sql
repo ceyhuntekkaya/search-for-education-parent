@@ -225,7 +225,7 @@ INSERT INTO users (
     1, null, 1, CURRENT_TIMESTAMP, 1,
     'Maslak Mahallesi, Büyükdere Caddesi No:171', 'A Blok Kat:15',
     'admin@egitimara.com', null,
-    'Ahmet', 'Yılmaz', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhka',
+    'Ahmet', 'Yılmaz', '$2a$10$KjxJ2ePWkvl2h6LWXLtr3eNtPAGdNskdQtJS.exeYzFRmQAVm/WHe',
     null, '+905551234567', null, '34485',
     'https://egitimara.com/images/profiles/admin.jpg', 'INSTITUTION_USER'
 ),
@@ -236,7 +236,7 @@ INSERT INTO users (
     2, null, 1, CURRENT_TIMESTAMP, 1,
     'Moda Mahallesi, Bahariye Caddesi No:25', 'B Blok Kat:8',
     'sirket@egitimara.com', null,
-    'Zeynep', 'Kaya', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhka',
+    'Zeynep', 'Kaya', '$2a$10$KjxJ2ePWkvl2h6LWXLtr3eNtPAGdNskdQtJS.exeYzFRmQAVm/WHe',
     null, '+905551234568', null, '34742',
     'https://egitimara.com/images/profiles/company.jpg', 'INSTITUTION_USER'
 ),
@@ -247,7 +247,7 @@ INSERT INTO users (
     3, null, 2, CURRENT_TIMESTAMP, 1,
     'Kızılay Mahallesi, Atatürk Bulvarı No:45', 'Daire:12',
     'aday@egitimara.com', null,
-    'Mehmet', 'Demir', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhka',
+    'Mehmet', 'Demir', '$2a$10$KjxJ2ePWkvl2h6LWXLtr3eNtPAGdNskdQtJS.exeYzFRmQAVm/WHe',
     null, '+905551234569', null, '06420',
     'https://egitimara.com/images/profiles/candidate.jpg', 'PARENT'
 ),
@@ -258,7 +258,7 @@ INSERT INTO users (
     4, null, 3, CURRENT_TIMESTAMP, 1,
     'Alsancak Mahallesi, Kıbrıs Şehitleri Caddesi No:80', null,
     'user@egitimara.com', null,
-    'Ayşe', 'Özkan', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhka',
+    'Ayşe', 'Özkan', '$2a$10$KjxJ2ePWkvl2h6LWXLtr3eNtPAGdNskdQtJS.exeYzFRmQAVm/WHe',
     null, '+905551234570', null, '35220',
     'https://egitimara.com/images/profiles/user.jpg', 'PARENT'
 );

@@ -12,6 +12,7 @@ import com.genixo.education.search.service.auth.JwtService;
 import com.genixo.education.search.service.converter.InstitutionConverterService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -96,10 +97,14 @@ public class InstitutionService {
         User user = jwtService.getUser(request);
         Brand brand = brandRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Brand not found with ID: " + id));
+        if (!Hibernate.isInitialized(brand.getCampuses())) {
 
+            Hibernate.initialize(brand.getCampuses());
+        }
         validateUserCanAccessBrand(user, brand.getId());
+        BrandDto reult = converterService.mapToDto(brand);
 
-        return converterService.mapToDto(brand);
+        return reult;
     }
 
     @Cacheable(value = "brands", key = "#slug")

@@ -1,14 +1,12 @@
 package com.genixo.education.search.entity.survey;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.genixo.education.search.entity.BaseEntity;
 import com.genixo.education.search.enumaration.ConditionType;
 import com.genixo.education.search.enumaration.QuestionType;
 import com.genixo.education.search.enumaration.RatingCategory;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -113,6 +111,9 @@ public class SurveyQuestion extends BaseEntity {
     private Long skipCount = 0L;
 
     // Relationships
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "question", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private Set<SurveyQuestionResponse> questionResponses = new HashSet<>();
 }

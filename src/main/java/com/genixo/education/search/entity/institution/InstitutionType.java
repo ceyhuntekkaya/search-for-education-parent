@@ -1,11 +1,9 @@
 package com.genixo.education.search.entity.institution;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.genixo.education.search.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -41,9 +39,15 @@ public class InstitutionType extends BaseEntity {
     private String defaultProperties;
 
     // Relationships
-    @OneToMany(mappedBy = "institutionType", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "institutionType", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private Set<School> schools = new HashSet<>();
 
-    @OneToMany(mappedBy = "institutionType", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "institutionType", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private Set<InstitutionProperty> properties = new HashSet<>();
 }

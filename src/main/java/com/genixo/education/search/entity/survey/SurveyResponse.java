@@ -1,16 +1,14 @@
 package com.genixo.education.search.entity.survey;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.genixo.education.search.entity.BaseEntity;
 import com.genixo.education.search.entity.appointment.Appointment;
 import com.genixo.education.search.enumaration.ResponseStatus;
 import com.genixo.education.search.entity.institution.School;
 import com.genixo.education.search.entity.user.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -128,6 +126,9 @@ public class SurveyResponse extends BaseEntity {
     private Integer likelihoodToEnroll; // 1-10 scale
 
     // Relationships
-    @OneToMany(mappedBy = "surveyResponse", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "surveyResponse", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private Set<SurveyQuestionResponse> questionResponses = new HashSet<>();
 }

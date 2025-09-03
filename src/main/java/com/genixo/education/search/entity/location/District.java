@@ -1,13 +1,11 @@
 package com.genixo.education.search.entity.location;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.genixo.education.search.entity.BaseEntity;
 import com.genixo.education.search.enumaration.DistrictType;
 import com.genixo.education.search.enumaration.SocioeconomicLevel;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -187,6 +185,9 @@ public class District extends BaseEntity {
     private Double humidityPercentage;
 
     // Relationships
-    @OneToMany(mappedBy = "district", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "district", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private Set<Neighborhood> neighborhoods = new HashSet<>();
 }

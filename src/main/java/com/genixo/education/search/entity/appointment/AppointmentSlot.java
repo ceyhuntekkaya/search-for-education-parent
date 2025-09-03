@@ -1,14 +1,12 @@
 package com.genixo.education.search.entity.appointment;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.genixo.education.search.entity.BaseEntity;
 import com.genixo.education.search.enumaration.AppointmentType;
 import com.genixo.education.search.entity.institution.School;
 import com.genixo.education.search.entity.user.User;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.*;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -99,6 +97,9 @@ public class AppointmentSlot extends BaseEntity {
     private Boolean requiresApproval = false;
 
     // Relationships
-    @OneToMany(mappedBy = "appointmentSlot", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "appointmentSlot", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private Set<Appointment> appointments = new HashSet<>();
 }

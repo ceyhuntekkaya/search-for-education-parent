@@ -28,6 +28,27 @@ public class UserController {
 
     private final UserService userService;
 
+
+
+    /*
+        @RestController
+        @RequestMapping("/api/admin")
+        @PreAuthorize("hasRole('ADMIN')") // Rol kontrolü
+        public class AdminController {
+
+        @GetMapping("/users")
+        @PreAuthorize("hasAuthority('USER_READ')") // Spesifik yetki kontrolü
+        public ResponseEntity<?> getUsers() {
+            // ...
+        }
+
+        @PostMapping("/users")
+        @PreAuthorize("hasRole('ADMIN') and hasAuthority('USER_CREATE')") // Rol ve yetki kontrolü
+        public ResponseEntity<?> createUser() {
+            // ...
+    }
+}
+     */
     // ================================ USER REGISTRATION & AUTHENTICATION ================================
 
     @PostMapping("/register")
@@ -60,7 +81,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
-
+/*
     @PostMapping("/login")
     @Operation(summary = "User login", description = "Authenticate user with email/phone and password")
     @ApiResponses(value = {
@@ -91,6 +112,8 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
+
+ */
 
     // ================================ EMAIL & PHONE VERIFICATION ================================
 
@@ -516,14 +539,29 @@ public class UserController {
         private Long entityId;
         private LocalDateTime expiresAt;
 
-        public AccessType getAccessType() { return accessType; }
-        public void setAccessType(AccessType accessType) { this.accessType = accessType; }
+        public AccessType getAccessType() {
+            return accessType;
+        }
 
-        public Long getEntityId() { return entityId; }
-        public void setEntityId(Long entityId) { this.entityId = entityId; }
+        public void setAccessType(AccessType accessType) {
+            this.accessType = accessType;
+        }
 
-        public LocalDateTime getExpiresAt() { return expiresAt; }
-        public void setExpiresAt(LocalDateTime expiresAt) { this.expiresAt = expiresAt; }
+        public Long getEntityId() {
+            return entityId;
+        }
+
+        public void setEntityId(Long entityId) {
+            this.entityId = entityId;
+        }
+
+        public LocalDateTime getExpiresAt() {
+            return expiresAt;
+        }
+
+        public void setExpiresAt(LocalDateTime expiresAt) {
+            this.expiresAt = expiresAt;
+        }
     }
 
     // ================================ EXCEPTION CLASSES (Placeholder) ================================

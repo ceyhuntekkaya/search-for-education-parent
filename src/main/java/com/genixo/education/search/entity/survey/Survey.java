@@ -1,13 +1,11 @@
 package com.genixo.education.search.entity.survey;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.genixo.education.search.entity.BaseEntity;
 import com.genixo.education.search.enumaration.SurveyTriggerEvent;
 import com.genixo.education.search.enumaration.SurveyType;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -110,10 +108,16 @@ public class Survey extends BaseEntity {
     private Double averageRating = 0.0;
 
     // Relationships
-    @OneToMany(mappedBy = "survey", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "survey", fetch = FetchType.LAZY, orphanRemoval = true)
     @OrderBy("sortOrder ASC")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private Set<SurveyQuestion> questions = new HashSet<>();
 
-    @OneToMany(mappedBy = "survey", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "survey", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private Set<SurveyResponse> responses = new HashSet<>();
 }

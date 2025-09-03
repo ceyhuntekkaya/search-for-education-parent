@@ -1,5 +1,6 @@
 package com.genixo.education.search.entity.campaign;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.genixo.education.search.entity.BaseEntity;
 import com.genixo.education.search.enumaration.CampaignStatus;
 import com.genixo.education.search.enumaration.CampaignType;
@@ -7,10 +8,7 @@ import com.genixo.education.search.enumaration.DiscountType;
 import com.genixo.education.search.enumaration.TargetAudience;
 import com.genixo.education.search.entity.user.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -246,12 +244,21 @@ public class Campaign extends BaseEntity {
     private String smsTemplateId;
 
     // Relationships
-    @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "campaign", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private Set<CampaignSchool> campaignSchools = new HashSet<>();
 
-    @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "campaign", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private Set<CampaignContent> campaignContents = new HashSet<>();
 
-    @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "campaign", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private Set<CampaignUsage> campaignUsages = new HashSet<>();
 }

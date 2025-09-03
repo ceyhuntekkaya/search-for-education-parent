@@ -1,5 +1,6 @@
 package com.genixo.education.search.entity.appointment;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.genixo.education.search.entity.BaseEntity;
 import com.genixo.education.search.enumaration.AppointmentOutcome;
 import com.genixo.education.search.enumaration.AppointmentStatus;
@@ -8,10 +9,7 @@ import com.genixo.education.search.enumaration.CancelledByType;
 import com.genixo.education.search.entity.institution.School;
 import com.genixo.education.search.entity.user.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -191,9 +189,15 @@ public class Appointment extends BaseEntity {
     private LocalDateTime surveyCompletedAt;
 
     // Relationships
-    @OneToMany(mappedBy = "appointment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "appointment", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private Set<AppointmentParticipant> participants = new HashSet<>();
 
-    @OneToMany(mappedBy = "appointment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "appointment", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private Set<AppointmentNote> appointmentNotes = new HashSet<>();
 }

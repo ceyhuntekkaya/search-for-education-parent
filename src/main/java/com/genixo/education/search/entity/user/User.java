@@ -13,6 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
@@ -128,7 +129,23 @@ public class User extends BaseEntity implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return new ArrayList<>();
+        List<GrantedAuthority> authorities = new ArrayList<>();
+
+        // Rolleri ekle
+        if (userRoles != null) {
+            for (UserRole userRole : userRoles) {
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + userRole.getRole().name()));
+
+                // Permission'ları da ekle
+                if (userRole.getRole().getPermissions() != null) {
+                    for (Permission permission : userRole.getRole().getPermissions()) {
+                        authorities.add(new SimpleGrantedAuthority(permission.name()));
+                    }
+                }
+            }
+        }
+
+        return authorities;
     }
 
     @Override

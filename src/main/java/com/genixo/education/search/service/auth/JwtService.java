@@ -4,8 +4,12 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.genixo.education.search.dto.user.UserDto;
+import com.genixo.education.search.dto.user.UserInstitutionAccessDto;
 import com.genixo.education.search.entity.user.Role;
 import com.genixo.education.search.entity.user.User;
+import com.genixo.education.search.service.UserService;
+import com.genixo.education.search.service.converter.UserConverterService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.jackson.io.JacksonSerializer;
 import io.jsonwebtoken.security.Keys;
@@ -15,12 +19,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -33,13 +36,15 @@ public class JwtService {
     private final long jwtExpiration;
     private final long refreshExpiration;
     private final String secret;
+    private final UserConverterService userConverterService;
+    private final UserService userService;
 
 
     public JwtService(
             @Value("${application.security.jwt.expiration}") long jwtExpiration,
             @Value("${application.security.jwt.refresh-token.expiration}") long refreshExpiration,
             @Value("${application.security.jwt.secret-key}") String secret,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper, UserConverterService userConverterService, UserService userService
     ) {
         this.jwtExpiration = jwtExpiration;
         this.refreshExpiration = refreshExpiration;
@@ -47,6 +52,8 @@ public class JwtService {
         this.objectMapper = objectMapper
                 .registerModule(new JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        this.userConverterService = userConverterService;
+        this.userService = userService;
     }
 
     public String extractUsername(String token) {
@@ -58,35 +65,39 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails, User user) {
+    public String generateToken(UserDetails userDetails, UserDto user) {
         if (userDetails == null || user == null) {
             throw new IllegalArgumentException("UserDetails or User cannot be null.");
         }
         logger.debug("Creating token: {}", userDetails.getUsername());
 
         Map<String, Object> userData = new HashMap<>();
-
         userData.put(USER_KEY, user);
-/*
-        userData.put("brands", user.getBrandSet());
 
-        userData.put("departments", user.getDepartmentSet().stream()
-                .map(Department::name)
-                .collect(Collectors.toList()));
+        // ROL VE YETKİLERİ EKLE
+        if (user.getUserRoles() != null && !user.getUserRoles().isEmpty()) {
+            List<String> roles = user.getUserRoles().stream()
+                    .map(userRole -> userRole.getRole().name()) // Role adını al
+                    .collect(Collectors.toList());
+            userData.put("roles", roles);
 
+            // Yetkiler için (eğer Role entity'nizde permissions var ise)
+            List<String> authorities = user.getUserRoles().stream()
+                    .flatMap(userRole -> userRole.getRole().getPermissions().stream())
+                    .map(Enum::name) // Permission adını al
+                    .distinct()
+                    .collect(Collectors.toList());
+            userData.put("authorities", authorities);
+        }
 
+        // Kurum erişimleri (eğer gerekli ise)
+        if (user.getInstitutionAccess() != null && !user.getInstitutionAccess().isEmpty()) {
+            List<Long> institutionIds = user.getInstitutionAccess().stream()
+                    .map(UserInstitutionAccessDto::getEntityId) // Institution ID'sini al
+                    .collect(Collectors.toList());
+            userData.put("institutions", institutionIds);
+        }
 
-        userData.put("authorities", user.getAuthoritySet().stream()
-                .map(Permission::name)
-                .collect(Collectors.toList()));
-
-
-
-
-        userData.put("roles", user.getUserRoles().stream()
-                .map(Role::getName)
-                .collect(Collectors.toList()));
-  */
         String token = generateToken(userData, userDetails);
         logger.info("Token created successfully: {}", userDetails.getUsername());
         return token;
@@ -105,15 +116,31 @@ public class JwtService {
             ObjectMapper mapper = new ObjectMapper();
             mapper.registerModule(new JavaTimeModule());
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            Map<String, Object> userData = new HashMap<>();
+
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(getSignInKey())
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-            User user = mapper.convertValue(claims.get(USER_KEY), User.class);
+
+            Map<String, Object> userData = new HashMap<>();
+
+            // User bilgisini al
+            UserDto user = mapper.convertValue(claims.get(USER_KEY), UserDto.class);
             userData.put(USER_KEY, user);
-            //userData.put(USER_KEY, claims.get(USER_KEY, User.class));
+
+            // Rolleri al
+            List<String> roles = (List<String>) claims.get("roles");
+            userData.put("roles", roles != null ? roles : new ArrayList<>());
+
+            // Yetkileri al
+            List<String> authorities = (List<String>) claims.get("authorities");
+            userData.put("authorities", authorities != null ? authorities : new ArrayList<>());
+
+            // Kurumları al
+            List<Long> institutions = (List<Long>) claims.get("institutions");
+            userData.put("institutions", institutions != null ? institutions : new ArrayList<>());
+
             return userData;
         } catch (Exception e) {
             logger.error("Token parsing error: {}", e.getMessage());
@@ -121,11 +148,14 @@ public class JwtService {
         }
     }
 
-    public User getUser(HttpServletRequest request) {
+    public User getUser(HttpServletRequest request) { // Dönüş tipini UserDto yapın
         try {
             String token = request.getHeader("Authorization").substring(7);
             Map<String, Object> userData = getUserData(token);
-            return (User) userData.get("user");
+            UserDto userDto = (UserDto) userData.get("user"); // UserDto'ya cast edin
+            return userService.findUserById(userDto.getId());
+
+            //return userConverterService.mapToEntity(userDto);
         } catch (Exception e) {
             logger.error("User parsing error: {}", e.getMessage());
             throw new JwtException(TOKEN_INVALID);

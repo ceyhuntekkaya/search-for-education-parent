@@ -1,6 +1,6 @@
 package com.genixo.education.search.service.auth;
 
-import com.genixo.education.search.entity.user.User;
+import com.genixo.education.search.dto.user.UserDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,5 +14,5 @@ public class AuthenticationResponse {
 
     private String accessToken;
     private String refreshToken;
-    private User user;
+    private UserDto user;
 }

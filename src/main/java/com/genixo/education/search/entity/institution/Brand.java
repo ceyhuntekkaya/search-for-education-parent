@@ -1,11 +1,9 @@
 package com.genixo.education.search.entity.institution;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.genixo.education.search.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -17,6 +15,10 @@ import java.util.Set;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@NamedEntityGraph(
+        name = "Brand.withCampuses",
+        attributeNodes = @NamedAttributeNode("campuses")
+)
 public class Brand extends BaseEntity {
 
     @Column(name = "name", nullable = false)
@@ -83,6 +85,10 @@ public class Brand extends BaseEntity {
     private Long ratingCount = 0L;
 
     // Relationships
-    @OneToMany(mappedBy = "brand", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+
+    @OneToMany(mappedBy = "brand", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonIgnore // JSON serialization'da sonsuz döngüyü engelle
     private Set<Campus> campuses = new HashSet<>();
 }
