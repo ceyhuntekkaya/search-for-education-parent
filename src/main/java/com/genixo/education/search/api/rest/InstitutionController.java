@@ -423,7 +423,9 @@ public class InstitutionController {
 
         log.debug("Search schools request");
 
-        Page<SchoolSearchResultDto> results = institutionService.searchSchools(searchDto);
+        SchoolSearchDto schoolSearchDto =  institutionService.validateSearchSchools(searchDto);
+
+        Page<SchoolSearchResultDto> results = institutionService.searchSchools(schoolSearchDto);
 
         ApiResponse<Page<SchoolSearchResultDto>> response = ApiResponse.success(results, "Search completed successfully");
         response.setPath(request.getRequestURI());
@@ -431,6 +433,7 @@ public class InstitutionController {
 
         return ResponseEntity.ok(response);
     }
+
 
     @PostMapping("/schools/public-search")
     @Operation(summary = "Public search schools", description = "Public search for schools (no authentication required)")

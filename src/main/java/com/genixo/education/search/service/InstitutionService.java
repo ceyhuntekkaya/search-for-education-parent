@@ -10,6 +10,7 @@ import com.genixo.education.search.enumaration.*;
 import com.genixo.education.search.repository.insitution.*;
 import com.genixo.education.search.service.auth.JwtService;
 import com.genixo.education.search.service.converter.InstitutionConverterService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
@@ -27,6 +28,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -976,5 +978,48 @@ public class InstitutionService {
         log.info("Institution type created with ID: {}", institutionType.getId());
 
         return converterService.mapToDto(institutionType);
+    }
+
+    public SchoolSearchDto validateSearchSchools(@Valid SchoolSearchDto searchDto) {
+
+        if(Objects.equals(searchDto.getSearchTerm(), ""))  searchDto.setSearchTerm(null);
+        if(searchDto.getIsSubscribed()) searchDto.setIsSubscribed(false);
+        if(searchDto.getInstitutionTypeIds().isEmpty()) searchDto.setInstitutionTypeIds(null);
+        if(searchDto.getMinAge()==0) searchDto.setMinAge(null);
+        if(searchDto.getMaxAge()==0) searchDto.setMaxAge(null);
+        if (searchDto.getMinFee()==0) searchDto.setMinFee(null);
+        if (searchDto.getMaxFee()==0) searchDto.setMaxFee(null);
+        if(Objects.equals(searchDto.getCurriculumType(), ""))  searchDto.setCurriculumType(null);
+        if(Objects.equals(searchDto.getLanguageOfInstruction(), ""))  searchDto.setLanguageOfInstruction(null);
+        if(searchDto.getCountryId()==0) searchDto.setCountryId(null);
+        if(searchDto.getProvinceId()==0) searchDto.setProvinceId(null);
+        if(searchDto.getDistrictId()==0) searchDto.setDistrictId(null);
+        if(searchDto.getNeighborhoodId()==0) searchDto.setNeighborhoodId(null);
+
+
+        if(searchDto.getLatitude()<1) searchDto.setLatitude(null);
+        if(searchDto.getLongitude()<1) searchDto.setLongitude(null);
+        if(searchDto.getRadiusKm()<1) searchDto.setRadiusKm(null);
+
+        if(searchDto.getMinRating()<0) searchDto.setMinRating(null);
+
+        if(searchDto.getSortBy() == null ||  Objects.equals(searchDto.getSortBy(), ""))  searchDto.setSortBy("NAME");
+
+
+        // Quality filters
+
+        private Boolean hasActiveCampaigns;
+        private Boolean isSubscribed;
+
+        // Property filters
+        private Map<String, Object> propertyFilters;
+
+        // Sorting
+        private String sortBy; // RATING, PRICE, DISTANCE, NAME, CREATED_DATE
+        private String sortDirection;
+
+        // Pagination
+        private Integer page;
+        private Integer size;
     }
 }
