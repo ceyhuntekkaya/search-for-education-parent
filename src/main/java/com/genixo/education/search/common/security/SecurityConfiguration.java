@@ -33,7 +33,7 @@ public class SecurityConfiguration {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
-
+/*
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -45,6 +45,8 @@ public class SecurityConfiguration {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
+ */
 
     @Bean
     public AccessDeniedHandler customAccessDeniedHandler() {
@@ -78,6 +80,9 @@ public class SecurityConfiguration {
                         .requestMatchers("/institutions/**").permitAll()
                         .requestMatchers("/locations/**").permitAll()
                         .requestMatchers("/parent/**").permitAll()
+                        .requestMatchers("/email/**").permitAll()
+                        .requestMatchers("/sms/**").permitAll()
+                        .requestMatchers("/ai/**").permitAll()
                         .requestMatchers("/pricing/**").permitAll()
                         .requestMatchers("/subscriptions/**").permitAll()
                         .requestMatchers("/surveys/**").permitAll()

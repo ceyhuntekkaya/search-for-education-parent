@@ -15,6 +15,7 @@ import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -53,8 +54,8 @@ public class InstitutionConverterService {
                 .displayName(entity.getDisplayName())
                 .iconUrl(entity.getIconUrl())
                 .colorCode(entity.getColorCode())
-                .schoolCount(ConversionUtils.safeSize(entity.getSchools().stream().toList()) != 0 ?
-                        (long) ConversionUtils.safeSize(entity.getSchools().stream().toList()) : 0L)
+            //    .schoolCount(ConversionUtils.safeSize(entity.getSchools().stream().toList()) != 0 ?  ceyhun
+            //            (long) ConversionUtils.safeSize(entity.getSchools().stream().toList()) : 0L)
                 .build();
     }
 
@@ -1265,4 +1266,182 @@ public class InstitutionConverterService {
 
         return entity;
     }
+
+
+// ================== PROPERTY GROUP TYPE CONVERSIONS ==================
+
+    public PropertyGroupTypeDto mapPropertyGroupTypeToDto(PropertyGroupType entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        return PropertyGroupTypeDto.builder()
+                .id(entity.getId())
+                .name(entity.getName())
+                .displayName(entity.getDisplayName())
+                .institutionTypeId(entity.getInstitutionType() != null ? entity.getInstitutionType().getId() : null)
+                .isActive(entity.getIsActive())
+                .createdAt(entity.getCreatedAt())
+                .propertyTypes(new ArrayList<>()) // PropertyType'lar service katmanında set edilecek
+                .build();
+    }
+
+    public List<PropertyGroupTypeDto> mapPropertyGroupTypesToDto(List<PropertyGroupType> entities) {
+        if (entities == null || entities.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        return entities.stream()
+                .filter(Objects::nonNull)
+                .filter(pgt -> pgt.getIsActive() != null && pgt.getIsActive())
+                .map(this::mapPropertyGroupTypeToDto)
+                .filter(Objects::nonNull)
+                .sorted(Comparator.comparing(PropertyGroupTypeDto::getName,
+                        Comparator.nullsLast(Comparator.naturalOrder())))
+                .collect(Collectors.toList());
+    }
+
+    // ================== PROPERTY TYPE CONVERSIONS ==================
+
+    public PropertyTypeDto mapPropertyTypeToDto(PropertyType entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        return PropertyTypeDto.builder()
+                .id(entity.getId())
+                .name(entity.getName())
+                .displayName(entity.getDisplayName())
+                .propertyGroupTypeId(entity.getPropertyGroupType() != null ? entity.getPropertyGroupType().getId() : null)
+                .isActive(entity.getIsActive())
+                .createdAt(entity.getCreatedAt())
+                .build();
+    }
+
+    public List<PropertyTypeDto> mapPropertyTypesToDto(List<PropertyType> entities) {
+        if (entities == null || entities.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        return entities.stream()
+                .filter(Objects::nonNull)
+                .filter(pt -> pt.getIsActive() != null && pt.getIsActive())
+                .map(this::mapPropertyTypeToDto)
+                .filter(Objects::nonNull)
+                .sorted(Comparator.comparing(PropertyTypeDto::getName,
+                        Comparator.nullsLast(Comparator.naturalOrder())))
+                .collect(Collectors.toList());
+    }
+
+    // ================== INSTITUTION TYPE GROUP CONVERSIONS ==================
+
+    public InstitutionTypeGroupDto mapInstitutionTypeGroupToDto(InstitutionTypeGroup entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        return InstitutionTypeGroupDto.builder()
+                .id(entity.getId())
+                .name(entity.getName())
+                .displayName(entity.getDisplayName())
+                .description(entity.getDescription())
+                .iconUrl(entity.getIconUrl())
+                .colorCode(entity.getColorCode())
+                .sortOrder(entity.getSortOrder())
+                .defaultProperties(entity.getDefaultProperties())
+                .isActive(entity.getIsActive())
+                .createdAt(entity.getCreatedAt())
+                .build();
+    }
+
+    public List<InstitutionTypeGroupDto> mapInstitutionTypeGroupsToDto(List<InstitutionTypeGroup> entities) {
+        if (entities == null || entities.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        return entities.stream()
+                .filter(Objects::nonNull)
+                .filter(itg -> itg.getIsActive() != null && itg.getIsActive())
+                .map(this::mapInstitutionTypeGroupToDto)
+                .filter(Objects::nonNull)
+                .sorted(Comparator.comparing(InstitutionTypeGroupDto::getSortOrder,
+                        Comparator.nullsLast(Comparator.naturalOrder())))
+                .collect(Collectors.toList());
+    }
+
+    // ================== INSTITUTION TYPE LIST CONVERSIONS ==================
+
+    public InstitutionTypeListDto mapToInstitutionTypeListDto(InstitutionType institutionType,
+                                                              List<PropertyGroupTypeDto> propertyGroupTypeDtos) {
+        if (institutionType == null) {
+            return null;
+        }
+
+        return InstitutionTypeListDto.builder()
+                .institutionTypeDto(mapToDto(institutionType))
+                .propertyGroupTypeDtos(propertyGroupTypeDtos != null ? propertyGroupTypeDtos : new ArrayList<>())
+                .build();
+    }
+
+    public List<InstitutionTypeListDto> mapToInstitutionTypeListDtos(List<InstitutionType> institutionTypes,
+                                                                     Map<Long, List<PropertyGroupTypeDto>> propertyGroupsByInstitutionType) {
+        if (institutionTypes == null || institutionTypes.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        return institutionTypes.stream()
+                .filter(Objects::nonNull)
+                .map(institutionType -> {
+                    List<PropertyGroupTypeDto> propertyGroups = propertyGroupsByInstitutionType != null ?
+                            propertyGroupsByInstitutionType.getOrDefault(institutionType.getId(), new ArrayList<>()) :
+                            new ArrayList<>();
+
+                    return mapToInstitutionTypeListDto(institutionType, propertyGroups);
+                })
+                .filter(Objects::nonNull)
+                .sorted(Comparator.comparing(dto -> dto.getInstitutionTypeDto().getSortOrder(),
+                        Comparator.nullsLast(Comparator.naturalOrder())))
+                .collect(Collectors.toList());
+    }
+
+    // ================== HELPER METHODS FOR PROPERTY STRUCTURE ==================
+
+    /**
+     * PropertyGroupType'a PropertyType'ları set eder
+     */
+    public void setPropertyTypesToGroup(PropertyGroupTypeDto propertyGroupDto, List<PropertyTypeDto> propertyTypes) {
+        if (propertyGroupDto != null && propertyTypes != null) {
+            propertyGroupDto.setPropertyTypes(propertyTypes);
+        }
+    }
+
+    /**
+     * PropertyType'ları PropertyGroupType ID'ye göre gruplar
+     */
+    public Map<Long, List<PropertyTypeDto>> groupPropertyTypesByGroupId(List<PropertyTypeDto> propertyTypes) {
+        if (propertyTypes == null || propertyTypes.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        return propertyTypes.stream()
+                .filter(Objects::nonNull)
+                .filter(pt -> pt.getPropertyGroupTypeId() != null)
+                .collect(Collectors.groupingBy(PropertyTypeDto::getPropertyGroupTypeId));
+    }
+
+    /**
+     * PropertyGroupType'ları InstitutionType ID'ye göre gruplar
+     */
+    public Map<Long, List<PropertyGroupTypeDto>> groupPropertyGroupsByInstitutionTypeId(List<PropertyGroupTypeDto> propertyGroups) {
+        if (propertyGroups == null || propertyGroups.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        return propertyGroups.stream()
+                .filter(Objects::nonNull)
+                .filter(pgt -> pgt.getInstitutionTypeId() != null)
+                .collect(Collectors.groupingBy(PropertyGroupTypeDto::getInstitutionTypeId));
+    }
+
+
 }

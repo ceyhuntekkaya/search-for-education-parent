@@ -6,8 +6,10 @@ import com.genixo.education.search.entity.campaign.CampaignSchool;
 import com.genixo.education.search.entity.pricing.SchoolPricing;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.proxy.HibernateProxy;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 
@@ -110,10 +112,12 @@ public class School extends BaseEntity {
     // Relationships
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "campus_id", nullable = false)
+    @ToString.Exclude
     private Campus campus;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "institution_type_id", nullable = false)
+    @ToString.Exclude
     private InstitutionType institutionType;
 
     @OneToMany(mappedBy = "school", fetch = FetchType.LAZY)
@@ -135,4 +139,5 @@ public class School extends BaseEntity {
     @EqualsAndHashCode.Exclude
     @JsonIgnore
     private Set<CampaignSchool> campaignSchools = new HashSet<>();
+
 }

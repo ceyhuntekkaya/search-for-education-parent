@@ -82,4 +82,9 @@ public class InstitutionProperty extends BaseEntity {
     @EqualsAndHashCode.Exclude
     @JsonIgnore
     private Set<InstitutionPropertyValue> propertyValues = new HashSet<>();
+
+// ceyhun
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "property_type_id", nullable = false)
+    private PropertyType propertyType;
 }

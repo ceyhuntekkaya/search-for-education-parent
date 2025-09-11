@@ -62,10 +62,22 @@ server:
   tomcat:
     max-swallow-size: 1GB
     max-http-form-post-size: 1GB
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 storage:
   base: /app/uploads/
   #base: /Users/developer/Desktop/file/
+
+sendgrid:
+  api:
+    key: ${SENDGRID_API_KEY:SG.your-api-key-here}
+  from:
+    email: ${SENDGRID_FROM_EMAIL:your-verified-email@domain.com}
+    name: ${SENDGRID_FROM_NAME:Your App Name}
+
 
 application:
   security:

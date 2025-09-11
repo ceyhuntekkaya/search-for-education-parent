@@ -423,9 +423,18 @@ public class InstitutionController {
 
         log.debug("Search schools request");
 
-        SchoolSearchDto schoolSearchDto =  institutionService.validateSearchSchools(searchDto);
+        searchDto = institutionService.validateSearchSchools(searchDto);
 
-        Page<SchoolSearchResultDto> results = institutionService.searchSchools(schoolSearchDto);
+        log.info("Search parameters:");
+        log.info("searchTerm: '{}'", searchDto.getSearchTerm());
+        log.info("curriculumType: '{}'", searchDto.getCurriculumType());
+        log.info("languageOfInstruction: '{}'", searchDto.getLanguageOfInstruction());
+        log.info("institutionTypeIds: {}", searchDto.getInstitutionTypeIds());
+        log.info("hasActiveCampaigns: {}", searchDto.getHasActiveCampaigns());
+        log.info("isSubscribed: {}", searchDto.getIsSubscribed());
+
+
+        Page<SchoolSearchResultDto> results = institutionService.searchSchools(searchDto);
 
         ApiResponse<Page<SchoolSearchResultDto>> response = ApiResponse.success(results, "Search completed successfully");
         response.setPath(request.getRequestURI());
@@ -462,19 +471,40 @@ public class InstitutionController {
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Institution types retrieved successfully")
     })
-    public ResponseEntity<ApiResponse<List<InstitutionTypeDto>>> getAllInstitutionTypes(
+    public ResponseEntity<ApiResponse<List<InstitutionTypeListDto>>> getAllInstitutionTypes(
             HttpServletRequest request) {
 
         log.debug("Get institution types request");
 
-        List<InstitutionTypeDto> types = institutionService.getAllInstitutionTypes();
+        List<InstitutionTypeListDto> types = institutionService.getAllInstitutionTypes();
 
-        ApiResponse<List<InstitutionTypeDto>> response = ApiResponse.success(types, "Institution types retrieved successfully");
+        ApiResponse<List<InstitutionTypeListDto>> response = ApiResponse.success(types, "Institution types retrieved successfully");
         response.setPath(request.getRequestURI());
         response.setTimestamp(LocalDateTime.now());
 
         return ResponseEntity.ok(response);
     }
+
+
+    @GetMapping("/institution-types/properties")
+    @Operation(summary = "Get all institution types", description = "Get all available institution types")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Institution types retrieved successfully")
+    })
+    public ResponseEntity<ApiResponse<List<InstitutionTypeListDto>>> getAllInstitutionTypesWithProperties(
+            HttpServletRequest request) {
+
+        log.debug("Get institution types request");
+
+        List<InstitutionTypeListDto> types = institutionService.getAllInstitutionTypesWithProperties();
+
+        ApiResponse<List<InstitutionTypeListDto>> response = ApiResponse.success(types, "Institution types retrieved successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+
+        return ResponseEntity.ok(response);
+    }
+
 
     @GetMapping("/institution-types/summaries")
     @Operation(summary = "Get institution type summaries", description = "Get institution type summaries with count info")
@@ -775,30 +805,55 @@ public class InstitutionController {
     public static class NameValidationDto {
         private String name;
 
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
     }
 
     public static class CampusNameValidationDto {
         private String name;
         private Long brandId;
 
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
+        public String getName() {
+            return name;
+        }
 
-        public Long getBrandId() { return brandId; }
-        public void setBrandId(Long brandId) { this.brandId = brandId; }
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Long getBrandId() {
+            return brandId;
+        }
+
+        public void setBrandId(Long brandId) {
+            this.brandId = brandId;
+        }
     }
 
     public static class SchoolNameValidationDto {
         private String name;
         private Long campusId;
 
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
+        public String getName() {
+            return name;
+        }
 
-        public Long getCampusId() { return campusId; }
-        public void setCampusId(Long campusId) { this.campusId = campusId; }
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Long getCampusId() {
+            return campusId;
+        }
+
+        public void setCampusId(Long campusId) {
+            this.campusId = campusId;
+        }
     }
 
     public static class ValidationResultDto {
@@ -810,14 +865,29 @@ public class InstitutionController {
             return new ValidationResultDtoBuilder();
         }
 
-        public Boolean getIsValid() { return isValid; }
-        public void setIsValid(Boolean isValid) { this.isValid = isValid; }
+        public Boolean getIsValid() {
+            return isValid;
+        }
 
-        public String getMessage() { return message; }
-        public void setMessage(String message) { this.message = message; }
+        public void setIsValid(Boolean isValid) {
+            this.isValid = isValid;
+        }
 
-        public String getFieldName() { return fieldName; }
-        public void setFieldName(String fieldName) { this.fieldName = fieldName; }
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
+
+        public String getFieldName() {
+            return fieldName;
+        }
+
+        public void setFieldName(String fieldName) {
+            this.fieldName = fieldName;
+        }
 
         public static class ValidationResultDtoBuilder {
             private Boolean isValid;

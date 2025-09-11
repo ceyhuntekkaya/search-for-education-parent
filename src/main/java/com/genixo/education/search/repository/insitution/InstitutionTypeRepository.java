@@ -31,4 +31,16 @@ public interface InstitutionTypeRepository extends JpaRepository<InstitutionType
     @Query("SELECT it FROM InstitutionType it WHERE it.isActive = true AND " +
             "LOWER(it.displayName) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
     List<InstitutionType> searchByDisplayName(@Param("searchTerm") String searchTerm);
+
+
+
+    List<InstitutionType> findByIsActiveTrue();
+
+
+    Optional<InstitutionType> findByNameAndIsActiveTrue(String name);
+
+    @Query("SELECT it FROM InstitutionType it WHERE it.isActive = true ORDER BY it.sortOrder ASC, it.name ASC")
+    List<InstitutionType> findAllActiveOrderBySortOrder();
+
+    List<InstitutionType> findByIdInAndIsActiveTrue(List<Long> ids);
 }

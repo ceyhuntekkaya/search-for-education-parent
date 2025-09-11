@@ -4,11 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.genixo.education.search.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.proxy.HibernateProxy;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
-// ========================= BRAND =========================
+
 @Entity
 @Table(name = "brands")
 @Data
@@ -91,4 +93,6 @@ public class Brand extends BaseEntity {
     @EqualsAndHashCode.Exclude
     @JsonIgnore // JSON serialization'da sonsuz döngüyü engelle
     private Set<Campus> campuses = new HashSet<>();
+
+
 }

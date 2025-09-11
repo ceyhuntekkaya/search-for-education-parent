@@ -70,7 +70,6 @@ public interface SchoolRepository extends JpaRepository<School, Long> {
             "FROM School s WHERE s.isActive = true ORDER BY s.name ASC")
     List<SchoolSummaryDto> findSchoolSummaries();
 
-    // Complex search query
     @Query("SELECT DISTINCT s FROM School s " +
             "LEFT JOIN s.campus c " +
             "LEFT JOIN c.brand b " +
@@ -78,19 +77,21 @@ public interface SchoolRepository extends JpaRepository<School, Long> {
             "LEFT JOIN s.propertyValues pv " +
             "LEFT JOIN pv.property p " +
             "WHERE s.isActive = true " +
-            "AND (:searchTerm IS NULL OR " +
-            "    LOWER(s.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "    LOWER(s.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "    LOWER(c.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "    LOWER(b.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "    LOWER(it.displayName) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) " +
+            "AND (:searchTerm IS NULL OR :searchTerm = '' OR " +
+            "    LOWER(CAST(s.name AS string)) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "    LOWER(CAST(s.description AS string)) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "    LOWER(CAST(c.name AS string)) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "    LOWER(CAST(b.name AS string)) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "    LOWER(CAST(it.displayName AS string)) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%'))) " +
             "AND (:institutionTypeIds IS NULL OR s.institutionType.id IN :institutionTypeIds) " +
             "AND (:minAge IS NULL OR s.minAge IS NULL OR s.minAge <= :minAge) " +
             "AND (:maxAge IS NULL OR s.maxAge IS NULL OR s.maxAge >= :maxAge) " +
             "AND (:minFee IS NULL OR s.monthlyFee IS NULL OR s.monthlyFee >= :minFee) " +
             "AND (:maxFee IS NULL OR s.monthlyFee IS NULL OR s.monthlyFee <= :maxFee) " +
-            "AND (:curriculumType IS NULL OR LOWER(s.curriculumType) LIKE LOWER(CONCAT('%', :curriculumType, '%'))) " +
-            "AND (:languageOfInstruction IS NULL OR LOWER(s.languageOfInstruction) LIKE LOWER(CONCAT('%', :languageOfInstruction, '%'))) " +
+            "AND (:curriculumType IS NULL OR :curriculumType = '' OR " +
+            "    LOWER(CAST(s.curriculumType AS string)) LIKE LOWER(CONCAT('%', CAST(:curriculumType AS string), '%'))) " +
+            "AND (:languageOfInstruction IS NULL OR :languageOfInstruction = '' OR " +
+            "    LOWER(CAST(s.languageOfInstruction AS string)) LIKE LOWER(CONCAT('%', CAST(:languageOfInstruction AS string), '%'))) " +
             "AND (:countryId IS NULL OR c.province.country.id = :countryId) " +
             "AND (:provinceId IS NULL OR c.province.id = :provinceId) " +
             "AND (:districtId IS NULL OR c.neighborhood.district.id = :districtId) " +
@@ -99,11 +100,7 @@ public interface SchoolRepository extends JpaRepository<School, Long> {
             "AND (:hasActiveCampaigns IS NULL OR " +
             "    (:hasActiveCampaigns = true AND EXISTS(SELECT 1 FROM CampaignSchool cs WHERE cs.school.id = s.id AND cs.status = 'ACTIVE')) OR " +
             "    (:hasActiveCampaigns = false AND NOT EXISTS(SELECT 1 FROM CampaignSchool cs WHERE cs.school.id = s.id AND cs.status = 'ACTIVE'))) " +
-            "AND (:isSubscribed IS NULL OR c.isSubscribed = :isSubscribed) " +
-            "AND (:latitude IS NULL OR :longitude IS NULL OR :radiusKm IS NULL OR " +
-            "    (6371 * acos(cos(radians(:latitude)) * cos(radians(COALESCE(c.latitude, 0))) * " +
-            "    cos(radians(COALESCE(c.longitude, 0)) - radians(:longitude)) + " +
-            "    sin(radians(:latitude)) * sin(radians(COALESCE(c.latitude, 0))))) <= :radiusKm)")
+            "AND (:isSubscribed IS NULL OR c.isSubscribed = :isSubscribed) ")
     Page<School> searchSchools(
             @Param("searchTerm") String searchTerm,
             @Param("institutionTypeIds") List<Long> institutionTypeIds,

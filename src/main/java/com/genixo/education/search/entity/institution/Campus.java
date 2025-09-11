@@ -8,14 +8,16 @@ import com.genixo.education.search.entity.location.Neighborhood;
 import com.genixo.education.search.entity.location.Province;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.proxy.HibernateProxy;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @Table(name = "campuses")
 @Data
-@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class Campus extends BaseEntity {
@@ -57,6 +59,7 @@ public class Campus extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "district_id", nullable = false)
+    @ToString.Exclude
     private District district;
 
     @Column(name = "postal_code")
@@ -64,6 +67,7 @@ public class Campus extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "country_id", nullable = false)
+    @ToString.Exclude
     private Country country;
 
     // Location coordinates
@@ -75,11 +79,13 @@ public class Campus extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "province_id")
+    @ToString.Exclude
     private Province province;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "neighborhood_id")
+    @ToString.Exclude
     private Neighborhood neighborhood;
 
     // Social Media Links
@@ -129,6 +135,7 @@ public class Campus extends BaseEntity {
     // Relationships
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brand_id")
+    @ToString.Exclude
     private Brand brand;
 
 
@@ -143,4 +150,7 @@ public class Campus extends BaseEntity {
     @EqualsAndHashCode.Exclude
     @JsonIgnore
     private Set<InstitutionPropertyValue> propertyValues = new HashSet<>();
+
+
+
 }

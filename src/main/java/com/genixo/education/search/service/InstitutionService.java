@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,9 @@ public class InstitutionService {
     private final BrandRepository brandRepository;
     private final CampusRepository campusRepository;
     private final SchoolRepository schoolRepository;
+    private final PropertyGroupTypeRepository propertyGroupTypeRepository;
+    private final PropertyTypeRepository propertyTypeRepository;
+    private final InstitutionTypeGroupRepository institutionTypeGroupRepository;
     private final InstitutionTypeRepository institutionTypeRepository;
     private final InstitutionPropertyRepository institutionPropertyRepository;
     private final InstitutionPropertyValueRepository institutionPropertyValueRepository;
@@ -439,15 +443,7 @@ public class InstitutionService {
 
     // ================================ INSTITUTION TYPE OPERATIONS ================================
 
-    @Cacheable(value = "institution_types")
-    public List<InstitutionTypeDto> getAllInstitutionTypes() {
-        log.info("Fetching all institution types");
 
-        List<InstitutionType> types = institutionTypeRepository.findAllByIsActiveTrueOrderBySortOrderAscNameAsc();
-        return types.stream()
-                .map(converterService::mapToDto)
-                .collect(Collectors.toList());
-    }
 
     @Cacheable(value = "institution_type_summaries")
     public List<InstitutionTypeSummaryDto> getInstitutionTypeSummaries() {
@@ -980,46 +976,233 @@ public class InstitutionService {
         return converterService.mapToDto(institutionType);
     }
 
+
+
+
+
+
     public SchoolSearchDto validateSearchSchools(@Valid SchoolSearchDto searchDto) {
+        if (searchDto.getSearchTerm() == null ) {
+            searchDto.setSearchTerm("");
+        }
+        if (searchDto.getCurriculumType() != null && searchDto.getCurriculumType().trim().isEmpty()) {
+            searchDto.setCurriculumType(null);
+        }
+        if (searchDto.getLanguageOfInstruction() != null && searchDto.getLanguageOfInstruction().trim().isEmpty()) {
+            searchDto.setLanguageOfInstruction(null);
+        }
 
-        if(Objects.equals(searchDto.getSearchTerm(), ""))  searchDto.setSearchTerm(null);
-        if(searchDto.getIsSubscribed()) searchDto.setIsSubscribed(false);
-        if(searchDto.getInstitutionTypeIds().isEmpty()) searchDto.setInstitutionTypeIds(null);
-        if(searchDto.getMinAge()==0) searchDto.setMinAge(null);
-        if(searchDto.getMaxAge()==0) searchDto.setMaxAge(null);
-        if (searchDto.getMinFee()==0) searchDto.setMinFee(null);
-        if (searchDto.getMaxFee()==0) searchDto.setMaxFee(null);
-        if(Objects.equals(searchDto.getCurriculumType(), ""))  searchDto.setCurriculumType(null);
-        if(Objects.equals(searchDto.getLanguageOfInstruction(), ""))  searchDto.setLanguageOfInstruction(null);
-        if(searchDto.getCountryId()==0) searchDto.setCountryId(null);
-        if(searchDto.getProvinceId()==0) searchDto.setProvinceId(null);
-        if(searchDto.getDistrictId()==0) searchDto.setDistrictId(null);
-        if(searchDto.getNeighborhoodId()==0) searchDto.setNeighborhoodId(null);
+        if (searchDto.getInstitutionTypeIds() != null && searchDto.getInstitutionTypeIds().isEmpty()) {
+            searchDto.setInstitutionTypeIds(null);
+        }
 
+        if (searchDto.getMinAge() != null && searchDto.getMinAge() <= 1) {
+            searchDto.setMinAge(null);
+        }
+        if (searchDto.getMaxAge() != null && searchDto.getMaxAge() <= 1) {
+            searchDto.setMaxAge(null);
+        }
 
-        if(searchDto.getLatitude()<1) searchDto.setLatitude(null);
-        if(searchDto.getLongitude()<1) searchDto.setLongitude(null);
-        if(searchDto.getRadiusKm()<1) searchDto.setRadiusKm(null);
+        if (searchDto.getMinFee() != null && searchDto.getMinFee() < 1) {
+            searchDto.setMinFee(null);
+        }
+        if (searchDto.getMaxFee() != null && searchDto.getMaxFee() < 1) {
+            searchDto.setMaxFee(null);
+        }
 
-        if(searchDto.getMinRating()<0) searchDto.setMinRating(null);
+        if (searchDto.getCountryId() != null && searchDto.getCountryId() <= 0) {
+            searchDto.setCountryId(null);
+        }
+        if (searchDto.getProvinceId() != null && searchDto.getProvinceId() <= 0) {
+            searchDto.setProvinceId(null);
+        }
+        if (searchDto.getDistrictId() != null && searchDto.getDistrictId() <= 0) {
+            searchDto.setDistrictId(null);
+        }
+        if (searchDto.getNeighborhoodId() != null && searchDto.getNeighborhoodId() <= 0) {
+            searchDto.setNeighborhoodId(null);
+        }
 
-        if(searchDto.getSortBy() == null ||  Objects.equals(searchDto.getSortBy(), ""))  searchDto.setSortBy("NAME");
+        if (searchDto.getLatitude() != null && (searchDto.getLatitude() < -90 || searchDto.getLatitude() > 90)) {
+            searchDto.setLatitude(null);
+        }
+        if (searchDto.getLongitude() != null && (searchDto.getLongitude() < -180 || searchDto.getLongitude() > 180)) {
+            searchDto.setLongitude(null);
+        }
 
+        if (searchDto.getRadiusKm() != null && searchDto.getRadiusKm() <= 0) {
+            searchDto.setRadiusKm(null);
+        }
 
-        // Quality filters
+        if (searchDto.getMinRating() != null && searchDto.getMinRating() < 0) {
+            searchDto.setMinRating(null);
+        }
 
-        private Boolean hasActiveCampaigns;
-        private Boolean isSubscribed;
+        if (searchDto.getSortBy() == null || searchDto.getSortBy().trim().isEmpty()) {
+            searchDto.setSortBy("NAME");
+        }
 
-        // Property filters
-        private Map<String, Object> propertyFilters;
+        if (searchDto.getPage() == null || searchDto.getPage() <= 0) {
+            searchDto.setPage(0);
+        }
+        if (searchDto.getSize() == null || searchDto.getSize() <= 0) {
+            searchDto.setSize(10);
+        }
 
-        // Sorting
-        private String sortBy; // RATING, PRICE, DISTANCE, NAME, CREATED_DATE
-        private String sortDirection;
+        searchDto.setHasActiveCampaigns(null);
+        searchDto.setIsSubscribed(null);
 
-        // Pagination
-        private Integer page;
-        private Integer size;
+        return searchDto;
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        /**
+         * Tüm aktif InstitutionType'ları PropertyGroupType ve PropertyType'larıyla birlikte getirir
+         */
+        public List<InstitutionTypeListDto> getAllInstitutionTypesWithProperties() {
+            // 1. Tüm aktif InstitutionType'ları getir
+            List<InstitutionType> institutionTypes = institutionTypeRepository.findByIsActiveTrue();
+
+            if (institutionTypes.isEmpty()) {
+                return List.of();
+            }
+
+            // 2. InstitutionType ID'lerini topla
+            List<Long> institutionTypeIds = institutionTypes.stream()
+                    .map(InstitutionType::getId)
+                    .collect(Collectors.toList());
+
+            // 3. Bu InstitutionType'lara ait PropertyGroupType'ları getir
+            List<PropertyGroupType> propertyGroupTypes =
+                    propertyGroupTypeRepository.findByInstitutionTypeIdInAndIsActiveTrue(institutionTypeIds);
+
+            // 4. PropertyGroupType ID'lerini topla
+            List<Long> propertyGroupTypeIds = propertyGroupTypes.stream()
+                    .map(PropertyGroupType::getId)
+                    .collect(Collectors.toList());
+
+            // 5. Bu PropertyGroupType'lara ait PropertyType'ları getir
+            List<PropertyType> propertyTypes = List.of(); // Boş liste, eğer PropertyType'lar da gerekirse
+            if (!propertyGroupTypeIds.isEmpty()) {
+                propertyTypes = propertyTypeRepository.findByPropertyGroupTypeIdInAndIsActiveTrue(propertyGroupTypeIds);
+            }
+
+            // 6. Verileri grupla ve DTO'ya dönüştür
+            return buildInstitutionTypeListDtos(institutionTypes, propertyGroupTypes, propertyTypes);
+        }
+
+        /**
+         * Belirli bir InstitutionType'ı PropertyGroupType ve PropertyType'larıyla birlikte getirir
+         */
+        public InstitutionTypeListDto getInstitutionTypeWithProperties(Long institutionTypeId) {
+            // 1. InstitutionType'ı getir
+            InstitutionType institutionType = institutionTypeRepository.findByIdAndIsActiveTrue(institutionTypeId)
+                    .orElseThrow(() -> new RuntimeException("InstitutionType not found: " + institutionTypeId));
+
+            // 2. Bu InstitutionType'a ait PropertyGroupType'ları getir
+            List<PropertyGroupType> propertyGroupTypes =
+                    propertyGroupTypeRepository.findByInstitutionTypeIdAndIsActiveTrue(institutionTypeId);
+
+            // 3. PropertyGroupType ID'lerini topla
+            List<Long> propertyGroupTypeIds = propertyGroupTypes.stream()
+                    .map(PropertyGroupType::getId)
+                    .collect(Collectors.toList());
+
+            // 4. Bu PropertyGroupType'lara ait PropertyType'ları getir
+            List<PropertyType> propertyTypes = List.of();
+            if (!propertyGroupTypeIds.isEmpty()) {
+                propertyTypes = propertyTypeRepository.findByPropertyGroupTypeIdInAndIsActiveTrue(propertyGroupTypeIds);
+            }
+
+            // 5. DTO'ya dönüştür
+            List<InstitutionTypeListDto> result = buildInstitutionTypeListDtos(
+                    List.of(institutionType), propertyGroupTypes, propertyTypes);
+
+            return result.isEmpty() ? null : result.get(0);
+        }
+
+        /**
+         * Entity'leri grupla ve DTO'lara dönüştür
+         */
+        private List<InstitutionTypeListDto> buildInstitutionTypeListDtos(
+                List<InstitutionType> institutionTypes,
+                List<PropertyGroupType> propertyGroupTypes,
+                List<PropertyType> propertyTypes) {
+
+            // PropertyType'ları PropertyGroupType ID'ye göre grupla
+            Map<Long, List<PropertyType>> propertyTypesByGroupId = propertyTypes.stream()
+                    .collect(Collectors.groupingBy(pt -> pt.getPropertyGroupType().getId()));
+
+            // PropertyGroupType'ları InstitutionType ID'ye göre grupla
+            Map<Long, List<PropertyGroupType>> propertyGroupsByInstitutionId = propertyGroupTypes.stream()
+                    .collect(Collectors.groupingBy(pgt -> pgt.getInstitutionType().getId()));
+
+            // Her InstitutionType için InstitutionTypeListDto oluştur
+            return institutionTypes.stream()
+                    .map(institutionType -> {
+                        // Bu InstitutionType'a ait PropertyGroupType'ları getir
+                        List<PropertyGroupType> institutionPropertyGroups =
+                                propertyGroupsByInstitutionId.getOrDefault(institutionType.getId(), List.of());
+
+                        // PropertyGroupType'ları DTO'ya dönüştür
+                        List<PropertyGroupTypeDto> propertyGroupDtos = institutionPropertyGroups.stream()
+                                .map(propertyGroup -> {
+                                    // Bu PropertyGroup'a ait PropertyType'ları getir
+                                    List<PropertyType> groupPropertyTypes =
+                                            propertyTypesByGroupId.getOrDefault(propertyGroup.getId(), List.of());
+
+                                    // PropertyType'ları DTO'ya dönüştür
+                                    List<PropertyTypeDto> propertyTypeDtos = groupPropertyTypes.stream()
+                                            .map(converterService::mapPropertyTypeToDto)
+                                            .collect(Collectors.toList());
+
+                                    // PropertyGroupTypeDto oluştur
+                                    PropertyGroupTypeDto dto = converterService.mapPropertyGroupTypeToDto(propertyGroup);
+                                    dto.setPropertyTypes(propertyTypeDtos); // PropertyType'ları set et
+                                    return dto;
+                                })
+                                .collect(Collectors.toList());
+
+                        // InstitutionTypeListDto oluştur
+                        return InstitutionTypeListDto.builder()
+                                .institutionTypeDto(converterService.mapToDto(institutionType))
+                                .propertyGroupTypeDtos(propertyGroupDtos)
+                                .build();
+                    })
+                    .collect(Collectors.toList());
+        }
+
+        /**
+         * Sadece InstitutionType'ları getirir (PropertyGroup'lar olmadan)
+         */
+        public List<InstitutionTypeListDto> getAllInstitutionTypes() {
+            List<InstitutionType> institutionTypes = institutionTypeRepository.findByIsActiveTrue();
+
+            return institutionTypes.stream()
+                    .map(institutionType -> InstitutionTypeListDto.builder()
+                            .institutionTypeDto(converterService.mapToDto(institutionType))
+                            .propertyGroupTypeDtos(List.of()) // Boş liste
+                            .build())
+                    .collect(Collectors.toList());
+        }
 }

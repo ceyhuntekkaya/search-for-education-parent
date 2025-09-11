@@ -2,10 +2,8 @@ package com.genixo.education.search.entity.institution;
 
 import com.genixo.education.search.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 
 @Entity
 @Table(name = "institution_property_values")
@@ -17,15 +15,18 @@ public class InstitutionPropertyValue extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "property_id", nullable = false)
+    @ToString.Exclude
     private InstitutionProperty property;
 
     // Either campus or school can have property values
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "campus_id")
+    @ToString.Exclude
     private Campus campus;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "school_id")
+    @ToString.Exclude
     private School school;
 
     @Column(name = "text_value", columnDefinition = "TEXT")
@@ -58,4 +59,5 @@ public class InstitutionPropertyValue extends BaseEntity {
 
     @Column(name = "mime_type")
     private String mimeType;
+
 }
