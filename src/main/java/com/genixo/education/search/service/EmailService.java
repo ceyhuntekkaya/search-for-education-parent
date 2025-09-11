@@ -13,7 +13,7 @@ import java.io.IOException;
 @Service
 public class EmailService {
 
-    private static final String API_KEY = "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\n";
+    private static final String API_KEY = "";
 
 
     public void sendMail() throws Exception {
