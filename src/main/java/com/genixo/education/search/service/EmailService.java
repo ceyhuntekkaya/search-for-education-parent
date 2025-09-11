@@ -6,6 +6,7 @@ import com.genixo.education.search.entity.subscription.Subscription;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Email;
 import com.sendgrid.helpers.mail.objects.Personalization;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.sendgrid.*;
 import java.io.IOException;
@@ -13,8 +14,8 @@ import java.io.IOException;
 @Service
 public class EmailService {
 
-    private static final String API_KEY = "";
-
+    @Value("${sendgrid.api.key}")
+    private String apiKey;
 
     public void sendMail() throws Exception {
         Email from = new Email("noreply@egitimiste.com");
@@ -48,7 +49,7 @@ public class EmailService {
 
         mail.addPersonalization(personalization);
 
-        SendGrid sg = new SendGrid(API_KEY);
+        SendGrid sg = new SendGrid("");
         Request request = new Request();
 
         try {
