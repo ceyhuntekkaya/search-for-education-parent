@@ -736,6 +736,7 @@ public class InstitutionConverterService {
             institutionTypeColor = type.getColorCode();
         }
 
+
         // Get card properties (properties marked as showInCard)
         List<InstitutionPropertyValueDto> cardProperties = entity.getPropertyValues() != null ?
                 entity.getPropertyValues().stream()
@@ -747,6 +748,8 @@ public class InstitutionConverterService {
                         .sorted(Comparator.comparing(dto -> dto.getPropertyId(),
                                 Comparator.nullsLast(Comparator.naturalOrder())))
                         .collect(Collectors.toList()) : new ArrayList<>();
+
+        InstitutionTypeListDto institutionTypeListDto = mapToInstitutionTypeListDto(entity);
 
         boolean hasActiveCampaigns = entity.getCampaignSchools() != null &&
                 entity.getCampaignSchools().stream()
@@ -780,8 +783,55 @@ public class InstitutionConverterService {
                 .hasActiveCampaigns(hasActiveCampaigns)
                 .isSubscribed(entity.getCampus() != null ? entity.getCampus().getIsSubscribed() : false)
                 .isFavorite(false) // Will be set by user service based on current user
+                .properties(institutionTypeListDto)
                 .build();
     }
+
+
+    public InstitutionTypeListDto mapToInstitutionTypeListDto(School entity) {
+        if (entity == null) {
+            return null;
+        }
+        Set<InstitutionPropertyValue> propertyValues = entity.getPropertyValues();
+        InstitutionTypeListDto dto = new InstitutionTypeListDto();
+        List<PropertyGroupTypeDto> propertyGroupTypeDtos = new ArrayList<>();
+
+        for(InstitutionPropertyValue propertyValue : propertyValues){
+            if(entity.getInstitutionType() != null){
+                InstitutionTypeDto institutionTypeDto = mapToDto(entity.getInstitutionType());
+                dto.setInstitutionTypeDto(institutionTypeDto);
+            }
+
+            Optional<PropertyGroupTypeDto> result = propertyGroupTypeDtos.stream()
+                    .filter(p -> p.getId().equals(propertyValue.getId()))
+                    .findFirst();
+
+            PropertyGroupTypeDto propertyGroupTypeDto;
+
+            if(result.isPresent()){
+                propertyGroupTypeDto = result.get();
+            }
+            else {
+                propertyGroupTypeDto = mapPropertyGroupTypeToDto(propertyValue.getProperty().getPropertyType().getPropertyGroupType());
+                propertyGroupTypeDtos.add(propertyGroupTypeDto);
+
+            }
+            PropertyTypeDto propertyTypeDto = new PropertyTypeDto();
+            propertyTypeDto.setId(propertyValue.getId());
+            propertyTypeDto.setName(propertyValue.getProperty().getName());
+            propertyTypeDto.setDisplayName(propertyValue.getProperty().getDisplayName());
+            propertyTypeDto.setPropertyGroupTypeId(propertyGroupTypeDto.getId());
+            propertyTypeDto.setIsActive(true);
+            propertyTypeDto.setCreatedAt(propertyValue.getCreatedAt());
+            if(propertyGroupTypeDto.getPropertyTypes() == null){
+                propertyGroupTypeDto.setPropertyTypes(new ArrayList<>());
+            }
+            propertyGroupTypeDto.getPropertyTypes().add(propertyTypeDto);
+            dto.getPropertyGroupTypeDtos().add(propertyGroupTypeDto);
+        }
+        return dto;
+    }
+
 
     public SchoolDetailDto mapToDetailDto(School entity) {
         if (entity == null) {

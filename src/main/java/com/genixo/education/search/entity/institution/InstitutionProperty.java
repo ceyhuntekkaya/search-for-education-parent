@@ -73,18 +73,22 @@ public class InstitutionProperty extends BaseEntity {
     private String regexPattern;
 
     // Relationships
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "institution_type_id", nullable = false)
     private InstitutionType institutionType;
 
+
+/*
     @OneToMany(mappedBy = "property", fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @JsonIgnore
     private Set<InstitutionPropertyValue> propertyValues = new HashSet<>();
 
+ */
+
 // ceyhun
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "property_type_id", nullable = false)
     private PropertyType propertyType;
 }
