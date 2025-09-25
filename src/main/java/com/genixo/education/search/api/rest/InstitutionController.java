@@ -421,6 +421,10 @@ public class InstitutionController {
             @Valid @RequestBody SchoolSearchDto searchDto,
             HttpServletRequest request) {
 
+
+        //List<InstitutionTypeListDto>>
+       // ceyhun
+
         log.debug("Search schools request");
 
         searchDto = institutionService.validateSearchSchools(searchDto);

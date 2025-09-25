@@ -21,7 +21,7 @@ public class PropertyType extends BaseEntity {
     @Column(name = "display_name", nullable = false)
     private String displayName;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "property_group_type_id", nullable = false)
     @ToString.Exclude
     private PropertyGroupType propertyGroupType;

@@ -438,6 +438,16 @@ public class InstitutionService {
                 pageable
         );
 
+
+        for (School school : schools) {
+            for (InstitutionPropertyValue pv : school.getPropertyValues()) {
+                InstitutionProperty prop = pv.getProperty();
+                PropertyType propType = prop.getPropertyType(); // Bu null olmamalı
+                System.out.println("Property: " + prop.getName() +
+                        ", Type: " + propType.getName());
+            }
+        }
+
         return schools.map(converterService::mapToSearchResultDto);
     }
 

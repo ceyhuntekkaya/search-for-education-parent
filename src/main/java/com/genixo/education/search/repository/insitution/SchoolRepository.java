@@ -76,6 +76,7 @@ public interface SchoolRepository extends JpaRepository<School, Long> {
             "LEFT JOIN s.institutionType it " +
             "LEFT JOIN s.propertyValues pv " +
             "LEFT JOIN pv.property p " +
+            "LEFT JOIN p.propertyType pt " +
             "WHERE s.isActive = true " +
             "AND (:searchTerm IS NULL OR :searchTerm = '' OR " +
             "    LOWER(CAST(s.name AS string)) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +

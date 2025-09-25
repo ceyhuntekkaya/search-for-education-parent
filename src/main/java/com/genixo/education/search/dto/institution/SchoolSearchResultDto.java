@@ -47,4 +47,6 @@ public class SchoolSearchResultDto {
     private Boolean hasActiveCampaigns;
     private Boolean isSubscribed;
     private Boolean isFavorite;
+
+    private InstitutionTypeListDto properties;
 }

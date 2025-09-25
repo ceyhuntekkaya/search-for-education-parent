@@ -46,4 +46,7 @@ public class SchoolSearchDto {
     // Pagination
     private Integer page;
     private Integer size;
+
+
+    List<InstitutionTypeListDto> institutionTypes;
 }

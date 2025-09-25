@@ -13,9 +13,9 @@ import lombok.*;
 @AllArgsConstructor
 public class InstitutionPropertyValue extends BaseEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "property_id", nullable = false)
-    @ToString.Exclude
+    //@ToString.Exclude
     private InstitutionProperty property;
 
     // Either campus or school can have property values
@@ -59,5 +59,6 @@ public class InstitutionPropertyValue extends BaseEntity {
 
     @Column(name = "mime_type")
     private String mimeType;
+
 
 }
