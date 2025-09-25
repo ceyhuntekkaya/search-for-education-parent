@@ -49,4 +49,5 @@ public class SchoolSearchResultDto {
     private Boolean isFavorite;
 
     private InstitutionTypeListDto properties;
+
 }
