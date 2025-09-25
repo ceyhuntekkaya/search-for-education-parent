@@ -12,7 +12,7 @@ spring:
         show_sql: false
         transaction:
           jta:
-            platform: org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform
+            platform: org.hibernate.engine.trans1"action.jta.platform.internal.NoJtaPlatform
   datasource:
     dbName: search_edu_app
     dbUrl: jdbc:postgresql://localhost:5432/ #3

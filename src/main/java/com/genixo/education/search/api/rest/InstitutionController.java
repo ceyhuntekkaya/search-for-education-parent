@@ -476,7 +476,7 @@ public class InstitutionController {
 
         log.debug("Get institution types request");
 
-        List<InstitutionTypeListDto> types = institutionService.getAllInstitutionTypes();
+        List<InstitutionTypeListDto> types = institutionService.getAllInstitutionTypesWithProperties();
 
         ApiResponse<List<InstitutionTypeListDto>> response = ApiResponse.success(types, "Institution types retrieved successfully");
         response.setPath(request.getRequestURI());

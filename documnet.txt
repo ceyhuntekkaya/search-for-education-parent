@@ -3,13 +3,12 @@ http://localhost:8080/api/v3/api-docs (API docs JSON)
 http://localhost:8080/api/swagger-ui.html (Swagger UI)
 
 
-AuWFtCxp7mkN
-i4kNRRuanuHt
-
-
-
 
 46.62.141.0
+
+ujLwUfnrKCX3
+
+7jkCerVUnjVm
 
 
 http://46.62.141.0:8080/api/test/health
