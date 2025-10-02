@@ -15,6 +15,7 @@ import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -204,7 +205,7 @@ public class InstitutionConverterService {
 
         if (StringUtils.hasText(dto.getDateValue())) {
             try {
-                entity.setDateValue(java.time.LocalDate.parse(dto.getDateValue()));
+                entity.setDateValue(LocalDate.parse(dto.getDateValue()));
             } catch (Exception ignored) {
                 // Invalid date format, keep null
             }
@@ -212,7 +213,7 @@ public class InstitutionConverterService {
 
         if (StringUtils.hasText(dto.getDatetimeValue())) {
             try {
-                entity.setDatetimeValue(java.time.LocalDateTime.parse(dto.getDatetimeValue()));
+                entity.setDatetimeValue(LocalDateTime.parse(dto.getDatetimeValue()));
             } catch (Exception ignored) {
                 // Invalid datetime format, keep null
             }
@@ -745,7 +746,7 @@ public class InstitutionConverterService {
                                 pv.getProperty().getShowInCard())
                         .map(this::mapToDto)
                         .filter(Objects::nonNull)
-                        .sorted(Comparator.comparing(dto -> dto.getPropertyId(),
+                        .sorted(Comparator.comparing(InstitutionPropertyValueDto::getPropertyId,
                                 Comparator.nullsLast(Comparator.naturalOrder())))
                         .collect(Collectors.toList()) : new ArrayList<>();
 
@@ -806,27 +807,39 @@ public class InstitutionConverterService {
                     .filter(p -> p.getId().equals(propertyValue.getId()))
                     .findFirst();
 
-            PropertyGroupTypeDto propertyGroupTypeDto;
+            PropertyGroupTypeDto propertyGroupTypeDto = null;
 
             if(result.isPresent()){
                 propertyGroupTypeDto = result.get();
             }
             else {
-                propertyGroupTypeDto = mapPropertyGroupTypeToDto(propertyValue.getProperty().getPropertyType().getPropertyGroupType());
-                propertyGroupTypeDtos.add(propertyGroupTypeDto);
-
+                if(propertyValue.getProperty() != null && propertyValue.getProperty().getPropertyType() != null && propertyValue.getProperty().getPropertyType().getPropertyGroupType() != null){
+                    propertyGroupTypeDto = mapPropertyGroupTypeToDto(propertyValue.getProperty().getPropertyType().getPropertyGroupType());
+                    propertyGroupTypeDtos.add(propertyGroupTypeDto);
+                }
             }
             PropertyTypeDto propertyTypeDto = new PropertyTypeDto();
             propertyTypeDto.setId(propertyValue.getId());
             propertyTypeDto.setName(propertyValue.getProperty().getName());
             propertyTypeDto.setDisplayName(propertyValue.getProperty().getDisplayName());
-            propertyTypeDto.setPropertyGroupTypeId(propertyGroupTypeDto.getId());
+
+
+            if(propertyGroupTypeDto != null){
+                propertyTypeDto.setPropertyGroupTypeId(propertyGroupTypeDto.getId());
+
+                if(propertyGroupTypeDto.getPropertyTypes() == null){
+                    propertyGroupTypeDto.setPropertyTypes(new ArrayList<>());
+                }
+                propertyGroupTypeDto.getPropertyTypes().add(propertyTypeDto);
+            }
+
             propertyTypeDto.setIsActive(true);
             propertyTypeDto.setCreatedAt(propertyValue.getCreatedAt());
-            if(propertyGroupTypeDto.getPropertyTypes() == null){
-                propertyGroupTypeDto.setPropertyTypes(new ArrayList<>());
+
+            if(dto.getPropertyGroupTypeDtos() == null){
+                dto.setPropertyGroupTypeDtos(new ArrayList<>());
             }
-            propertyGroupTypeDto.getPropertyTypes().add(propertyTypeDto);
+
             dto.getPropertyGroupTypeDtos().add(propertyGroupTypeDto);
         }
         return dto;
@@ -1097,7 +1110,7 @@ public class InstitutionConverterService {
                 .errors(ConversionUtils.defaultIfNull(errors, new ArrayList<>()))
                 .warnings(ConversionUtils.defaultIfNull(warnings, new ArrayList<>()))
                 .operationId(operationId)
-                .operationDate(java.time.LocalDateTime.now())
+                .operationDate(LocalDateTime.now())
                 .build();
     }
 

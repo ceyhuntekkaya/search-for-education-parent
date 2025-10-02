@@ -6,6 +6,7 @@ import com.genixo.education.search.dto.institution.SchoolSummaryDto;
 import com.genixo.education.search.entity.institution.School;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -70,41 +71,123 @@ public interface SchoolRepository extends JpaRepository<School, Long> {
             "FROM School s WHERE s.isActive = true ORDER BY s.name ASC")
     List<SchoolSummaryDto> findSchoolSummaries();
 
-    @Query("SELECT DISTINCT s FROM School s " +
-            "LEFT JOIN s.campus c " +
-            "LEFT JOIN c.brand b " +
-            "LEFT JOIN s.institutionType it " +
-            "LEFT JOIN s.propertyValues pv " +
-            "LEFT JOIN pv.property p " +
-            "LEFT JOIN p.propertyType pt " +
-            "WHERE s.isActive = true " +
-            "AND (:searchTerm IS NULL OR :searchTerm = '' OR " +
-            "    LOWER(CAST(s.name AS string)) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
-            "    LOWER(CAST(s.description AS string)) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
-            "    LOWER(CAST(c.name AS string)) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
-            "    LOWER(CAST(b.name AS string)) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
-            "    LOWER(CAST(it.displayName AS string)) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%'))) " +
-            "AND (:institutionTypeIds IS NULL OR s.institutionType.id IN :institutionTypeIds) " +
-            "AND (:minAge IS NULL OR s.minAge IS NULL OR s.minAge <= :minAge) " +
-            "AND (:maxAge IS NULL OR s.maxAge IS NULL OR s.maxAge >= :maxAge) " +
-            "AND (:minFee IS NULL OR s.monthlyFee IS NULL OR s.monthlyFee >= :minFee) " +
-            "AND (:maxFee IS NULL OR s.monthlyFee IS NULL OR s.monthlyFee <= :maxFee) " +
-            "AND (:curriculumType IS NULL OR :curriculumType = '' OR " +
-            "    LOWER(CAST(s.curriculumType AS string)) LIKE LOWER(CONCAT('%', CAST(:curriculumType AS string), '%'))) " +
-            "AND (:languageOfInstruction IS NULL OR :languageOfInstruction = '' OR " +
-            "    LOWER(CAST(s.languageOfInstruction AS string)) LIKE LOWER(CONCAT('%', CAST(:languageOfInstruction AS string), '%'))) " +
-            "AND (:countryId IS NULL OR c.province.country.id = :countryId) " +
-            "AND (:provinceId IS NULL OR c.province.id = :provinceId) " +
-            "AND (:districtId IS NULL OR c.neighborhood.district.id = :districtId) " +
-            "AND (:neighborhoodId IS NULL OR c.neighborhood.id = :neighborhoodId) " +
-            "AND (:minRating IS NULL OR s.ratingAverage IS NULL OR s.ratingAverage >= :minRating) " +
-            "AND (:hasActiveCampaigns IS NULL OR " +
-            "    (:hasActiveCampaigns = true AND EXISTS(SELECT 1 FROM CampaignSchool cs WHERE cs.school.id = s.id AND cs.status = 'ACTIVE')) OR " +
-            "    (:hasActiveCampaigns = false AND NOT EXISTS(SELECT 1 FROM CampaignSchool cs WHERE cs.school.id = s.id AND cs.status = 'ACTIVE'))) " +
-            "AND (:isSubscribed IS NULL OR c.isSubscribed = :isSubscribed) ")
-    Page<School> searchSchools(
+    // Repository
+
+        // 1. Sadece ID'leri getir (pagination burada)
+        // Repository
+        @Query(value = """
+    WITH filtered_schools AS (
+        SELECT DISTINCT s.id, s.name, s.rating_average, s.created_at
+        FROM schools s
+        LEFT JOIN campuses c ON c.id = s.campus_id
+        LEFT JOIN brands b ON b.id = c.brand_id
+        LEFT JOIN provinces p ON p.id = c.province_id
+        LEFT JOIN neighborhoods n ON n.id = c.neighborhood_id
+        LEFT JOIN institution_types it ON it.id = s.institution_type_id
+        LEFT JOIN institution_property_values pv ON pv.school_id = s.id
+        WHERE s.is_active = true
+        AND (:searchTerm IS NULL OR :searchTerm = '' OR
+            LOWER(s.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
+            LOWER(s.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
+            LOWER(c.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
+            LOWER(b.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
+            LOWER(it.display_name) LIKE LOWER(CONCAT('%', :searchTerm, '%')))
+        AND (:institutionTypeIds IS NULL OR it.id = ANY(CAST(:institutionTypeIds AS bigint[])))
+        AND (:minAge IS NULL OR s.min_age IS NULL OR s.min_age <= :minAge)
+        AND (:maxAge IS NULL OR s.max_age IS NULL OR s.max_age >= :maxAge)
+        AND (:minFee IS NULL OR s.monthly_fee IS NULL OR s.monthly_fee >= :minFee)
+        AND (:maxFee IS NULL OR s.monthly_fee IS NULL OR s.monthly_fee <= :maxFee)
+        AND (:curriculumType IS NULL OR :curriculumType = '' OR
+            LOWER(s.curriculum_type) LIKE LOWER(CONCAT('%', :curriculumType, '%')))
+        AND (:languageOfInstruction IS NULL OR :languageOfInstruction = '' OR
+            LOWER(s.language_of_instruction) LIKE LOWER(CONCAT('%', :languageOfInstruction, '%')))
+        AND (:countryId IS NULL OR p.country_id = :countryId)
+        AND (:provinceId IS NULL OR c.province_id = :provinceId)
+        AND (:districtId IS NULL OR n.district_id = :districtId)
+        AND (:neighborhoodId IS NULL OR c.neighborhood_id = :neighborhoodId)
+        AND (:minRating IS NULL OR s.rating_average IS NULL OR s.rating_average >= :minRating)
+        AND (:hasActiveCampaigns IS NULL OR
+            (:hasActiveCampaigns = true AND EXISTS(
+                SELECT 1 FROM campaign_schools cs 
+                WHERE cs.school_id = s.id AND cs.status = 'ACTIVE')) OR
+            (:hasActiveCampaigns = false AND NOT EXISTS(
+                SELECT 1 FROM campaign_schools cs 
+                WHERE cs.school_id = s.id AND cs.status = 'ACTIVE')))
+        AND (:isSubscribed IS NULL OR c.is_subscribed = :isSubscribed)
+    )
+    SELECT id FROM filtered_schools
+    ORDER BY 
+        CASE WHEN :sortBy = 'name' AND :sortDirection = 'ASC' THEN name END ASC,
+        CASE WHEN :sortBy = 'name' AND :sortDirection = 'DESC' THEN name END DESC,
+        CASE WHEN :sortBy = 'rating' AND :sortDirection = 'ASC' THEN rating_average END ASC,
+        CASE WHEN :sortBy = 'rating' AND :sortDirection = 'DESC' THEN rating_average END DESC,
+        CASE WHEN :sortBy = 'created' AND :sortDirection = 'ASC' THEN created_at END ASC,
+        CASE WHEN :sortBy = 'created' AND :sortDirection = 'DESC' THEN created_at END DESC
+    LIMIT :limit OFFSET :offset
+    """, nativeQuery = true)
+        List<Long> searchSchoolIds(
+                @Param("searchTerm") String searchTerm,
+                @Param("institutionTypeIds") String institutionTypeIds, // PostgreSQL array olarak
+                @Param("minAge") Integer minAge,
+                @Param("maxAge") Integer maxAge,
+                @Param("minFee") Double minFee,
+                @Param("maxFee") Double maxFee,
+                @Param("curriculumType") String curriculumType,
+                @Param("languageOfInstruction") String languageOfInstruction,
+                @Param("countryId") Long countryId,
+                @Param("provinceId") Long provinceId,
+                @Param("districtId") Long districtId,
+                @Param("neighborhoodId") Long neighborhoodId,
+                @Param("minRating") Double minRating,
+                @Param("hasActiveCampaigns") Boolean hasActiveCampaigns,
+                @Param("isSubscribed") Boolean isSubscribed,
+                @Param("sortBy") String sortBy,
+                @Param("sortDirection") String sortDirection,
+                @Param("limit") int limit,
+                @Param("offset") int offset);
+
+    @Query(value = """
+    SELECT COUNT(DISTINCT s.id)
+    FROM schools s
+    LEFT JOIN campuses c ON c.id = s.campus_id
+    LEFT JOIN brands b ON b.id = c.brand_id
+    LEFT JOIN provinces p ON p.id = c.province_id
+    LEFT JOIN neighborhoods n ON n.id = c.neighborhood_id
+    LEFT JOIN institution_types it ON it.id = s.institution_type_id
+    LEFT JOIN institution_property_values pv ON pv.school_id = s.id
+    WHERE s.is_active = true
+    AND (:searchTerm IS NULL OR :searchTerm = '' OR
+        LOWER(s.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
+        LOWER(s.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
+        LOWER(c.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
+        LOWER(b.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
+        LOWER(it.display_name) LIKE LOWER(CONCAT('%', :searchTerm, '%')))
+    AND (:institutionTypeIds IS NULL OR it.id = ANY(CAST(:institutionTypeIds AS bigint[])))
+    AND (:minAge IS NULL OR s.min_age IS NULL OR s.min_age <= :minAge)
+    AND (:maxAge IS NULL OR s.max_age IS NULL OR s.max_age >= :maxAge)
+    AND (:minFee IS NULL OR s.monthly_fee IS NULL OR s.monthly_fee >= :minFee)
+    AND (:maxFee IS NULL OR s.monthly_fee IS NULL OR s.monthly_fee <= :maxFee)
+    AND (:curriculumType IS NULL OR :curriculumType = '' OR
+        LOWER(s.curriculum_type) LIKE LOWER(CONCAT('%', :curriculumType, '%')))
+    AND (:languageOfInstruction IS NULL OR :languageOfInstruction = '' OR
+        LOWER(s.language_of_instruction) LIKE LOWER(CONCAT('%', :languageOfInstruction, '%')))
+    AND (:countryId IS NULL OR p.country_id = :countryId)
+    AND (:provinceId IS NULL OR c.province_id = :provinceId)
+    AND (:districtId IS NULL OR n.district_id = :districtId)
+    AND (:neighborhoodId IS NULL OR c.neighborhood_id = :neighborhoodId)
+    AND (:minRating IS NULL OR s.rating_average IS NULL OR s.rating_average >= :minRating)
+    AND (:hasActiveCampaigns IS NULL OR
+        (:hasActiveCampaigns = true AND EXISTS(
+            SELECT 1 FROM campaign_schools cs 
+            WHERE cs.school_id = s.id AND cs.status = 'ACTIVE')) OR
+        (:hasActiveCampaigns = false AND NOT EXISTS(
+            SELECT 1 FROM campaign_schools cs 
+            WHERE cs.school_id = s.id AND cs.status = 'ACTIVE')))
+    AND (:isSubscribed IS NULL OR c.is_subscribed = :isSubscribed)
+    """, nativeQuery = true)
+    long countSchools(
             @Param("searchTerm") String searchTerm,
-            @Param("institutionTypeIds") List<Long> institutionTypeIds,
+            @Param("institutionTypeIds") String institutionTypeIds,
             @Param("minAge") Integer minAge,
             @Param("maxAge") Integer maxAge,
             @Param("minFee") Double minFee,
@@ -115,13 +198,27 @@ public interface SchoolRepository extends JpaRepository<School, Long> {
             @Param("provinceId") Long provinceId,
             @Param("districtId") Long districtId,
             @Param("neighborhoodId") Long neighborhoodId,
-            @Param("latitude") Double latitude,
-            @Param("longitude") Double longitude,
-            @Param("radiusKm") Double radiusKm,
             @Param("minRating") Double minRating,
             @Param("hasActiveCampaigns") Boolean hasActiveCampaigns,
-            @Param("isSubscribed") Boolean isSubscribed,
-            Pageable pageable);
+            @Param("isSubscribed") Boolean isSubscribed);
+
+    @EntityGraph(attributePaths = {
+            "campus.brand",
+            "campus.province.country",
+            "campus.neighborhood.district",
+            "institutionType",
+            "propertyValues.property.propertyType"
+    })
+    // Repository'de
+    @Query("SELECT s FROM School s " +
+            "LEFT JOIN FETCH s.campus c " +
+            "LEFT JOIN FETCH s.institutionType it " +
+            "LEFT JOIN FETCH s.propertyValues pv " +
+            "LEFT JOIN FETCH pv.property p " +
+            "LEFT JOIN FETCH p.propertyType pt " +
+            "WHERE s.id IN :ids")
+    List<School> findByIdsWithAllDetails(@Param("ids") List<Long> ids);
+
 
 
     /* ceyhun

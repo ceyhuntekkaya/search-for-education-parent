@@ -16,10 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -30,6 +27,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -416,9 +414,55 @@ public class InstitutionService {
                 createSort(searchDto.getSortBy(), searchDto.getSortDirection())
         );
 
-        Page<School> schools = schoolRepository.searchSchools(
+        Page<School> schools = searchSchoolPages(
+                searchDto,
+                pageable
+        );
+
+/*
+        for (School school : schools) {
+            for (InstitutionPropertyValue pv : school.getPropertyValues()) {
+                InstitutionProperty prop = pv.getProperty();
+                PropertyType propType = prop.getPropertyType(); // Bu null olmamalı
+                System.out.println("Property: " + prop.getName() +
+                        ", Type: " + propType.getName());
+            }
+        }
+
+ */
+
+        return schools.map(converterService::mapToSearchResultDto);
+    }
+
+
+
+
+
+    public Page<School> searchSchoolPages(SchoolSearchDto searchDto, Pageable pageable) {
+
+        // 1. ID'leri getir (pagination ve sıralama burada)
+        String sortBy = "name"; // default
+        String sortDirection = "ASC"; // default
+
+        if (pageable.getSort().isSorted()) {
+            Sort.Order order = pageable.getSort().iterator().next();
+            sortBy = order.getProperty();
+            sortDirection = order.getDirection().name();
+        }
+
+        // institutionTypeIds'i PostgreSQL array formatına çevir
+        String institutionTypeIdsArray = null;
+        if (searchDto.getInstitutionTypeIds() != null && !searchDto.getInstitutionTypeIds().isEmpty()) {
+            institutionTypeIdsArray = "{" +
+                    searchDto.getInstitutionTypeIds().stream()
+                            .map(String::valueOf)
+                            .collect(Collectors.joining(",")) + "}";
+        }
+
+        // 1. ID'leri getir (sıralı ve paginated)
+        List<Long> schoolIds = schoolRepository.searchSchoolIds(
                 searchDto.getSearchTerm(),
-                searchDto.getInstitutionTypeIds(),
+                institutionTypeIdsArray,
                 searchDto.getMinAge(),
                 searchDto.getMaxAge(),
                 searchDto.getMinFee(),
@@ -429,28 +473,52 @@ public class InstitutionService {
                 searchDto.getProvinceId(),
                 searchDto.getDistrictId(),
                 searchDto.getNeighborhoodId(),
-                searchDto.getLatitude(),
-                searchDto.getLongitude(),
-                searchDto.getRadiusKm(),
                 searchDto.getMinRating(),
                 searchDto.getHasActiveCampaigns(),
                 searchDto.getIsSubscribed(),
-                pageable
+                sortBy,
+                sortDirection,
+                pageable.getPageSize(),
+                (int) pageable.getOffset()
         );
 
-
-        for (School school : schools) {
-            for (InstitutionPropertyValue pv : school.getPropertyValues()) {
-                InstitutionProperty prop = pv.getProperty();
-                PropertyType propType = prop.getPropertyType(); // Bu null olmamalı
-                System.out.println("Property: " + prop.getName() +
-                        ", Type: " + propType.getName());
-            }
+        if (schoolIds.isEmpty()) {
+            return Page.empty(pageable);
         }
 
-        return schools.map(converterService::mapToSearchResultDto);
-    }
+        // 2. Total count'u al
+        long total = schoolRepository.countSchools(
+                searchDto.getSearchTerm(),
+                institutionTypeIdsArray,
+                searchDto.getMinAge(),
+                searchDto.getMaxAge(),
+                searchDto.getMinFee(),
+                searchDto.getMaxFee(),
+                searchDto.getCurriculumType(),
+                searchDto.getLanguageOfInstruction(),
+                searchDto.getCountryId(),
+                searchDto.getProvinceId(),
+                searchDto.getDistrictId(),
+                searchDto.getNeighborhoodId(),
+                searchDto.getMinRating(),
+                searchDto.getHasActiveCampaigns(),
+                searchDto.getIsSubscribed()
+        );
 
+        // 3. Detayları getir
+        List<School> schools = schoolRepository.findByIdsWithAllDetails(schoolIds);
+
+        // 4. ID sırasına göre düzenle (database'den gelen sırayı koru)
+        Map<Long, School> schoolMap = schools.stream()
+                .collect(Collectors.toMap(School::getId, Function.identity()));
+
+        List<School> orderedSchools = schoolIds.stream()
+                .map(schoolMap::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(orderedSchools, pageable, total);
+    }
     // ================================ INSTITUTION TYPE OPERATIONS ================================
 
 

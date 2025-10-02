@@ -3,20 +3,22 @@ spring:
     active: auto-db-create
   jpa:
     database: POSTGRESQL
-    show-sql: true
+    show-sql: false
     hibernate:
       ddl-auto: none
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         show_sql: false
+        format_sql: false  # Bunu ekleyin
+        se_sql_comments: false  # Bunu ekleyin
         transaction:
           jta:
             platform: org.hibernate.engine.trans1"action.jta.platform.internal.NoJtaPlatform
   datasource:
     dbName: search_edu_app
-    dbUrl: jdbc:postgresql://localhost:5432/ #3
-    #dbUrl: jdbc:postgresql://postgres:5432/
+    #dbUrl: jdbc:postgresql://localhost:5432/ #3
+    dbUrl: jdbc:postgresql://postgres:5432/
 
     url: ${spring.datasource.dbUrl}${spring.datasource.dbName}
     username: genixo
@@ -64,8 +66,13 @@ server:
     max-http-form-post-size: 1GB
 logging:
   level:
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    root: INFO
+    com.genixo.education.search: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
+    org.hibernate.SQL: OFF
+    org.hibernate.type.descriptor.sql.BasicBinder: OFF
+    org.hibernate.orm.jdbc.bind: OFF
 
 storage:
   base: /app/uploads/
