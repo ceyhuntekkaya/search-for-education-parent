@@ -11,4 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class RegisterVerificationCodeDto {
     private Long userId;
+
+
 }
