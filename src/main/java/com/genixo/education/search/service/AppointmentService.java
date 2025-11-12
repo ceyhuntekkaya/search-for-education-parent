@@ -864,8 +864,8 @@ public class AppointmentService {
             LocalDateTime appointmentDateTime = LocalDateTime.of(appointment.getAppointmentDate(), appointment.getStartTime());
             LocalDateTime now = LocalDateTime.now();
             long hoursUntilAppointment = ChronoUnit.HOURS.between(now, appointmentDateTime);
-
-            return hoursUntilAppointment >= appointment.getAppointmentSlot().getCancellationHours();
+            return true;
+            // ceyhun return hoursUntilAppointment >= appointment.getAppointmentSlot().getCancellationHours();
         }
 
         return true;
@@ -959,6 +959,9 @@ public class AppointmentService {
         newAppointment.setRescheduledFromId(originalAppointment.getId());
         newAppointment.setRescheduleCount(originalAppointment.getRescheduleCount() + 1);
         newAppointment.setCreatedBy(userId);
+        newAppointment.setAppointmentDate(newSlot.getSlotDate().toLocalDate());
+        newAppointment.setStartTime(newSlot.getStartTime());
+        newAppointment.setEndTime(newSlot.getEndTime());
 
         if (newAppointment.getStatus() == AppointmentStatus.CONFIRMED) {
             newAppointment.setConfirmedAt(LocalDateTime.now());

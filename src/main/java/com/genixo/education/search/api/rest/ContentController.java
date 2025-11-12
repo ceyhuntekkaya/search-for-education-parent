@@ -77,8 +77,6 @@ public class ContentController {
         return ResponseEntity.ok(response);
     }
 
-
-
     @GetMapping("/posts/school/{id}")
     @Operation(summary = "Get post by ID", description = "Get post details by ID")
     @ApiResponses(value = {
@@ -281,13 +279,6 @@ public class ContentController {
 
         GalleryDto galleryDto = contentService.updateGallery(id, updateDto, request);
 
-
-
-
-
-
-
-
         ApiResponse<GalleryDto> response = ApiResponse.success(galleryDto, "Gallery created successfully");
         response.setPath(request.getRequestURI());
         response.setTimestamp(LocalDateTime.now());
@@ -317,9 +308,6 @@ public class ContentController {
         return ResponseEntity.ok(response);
     }
 
-
-
-
     @GetMapping("/galleries/school/{id}")
     @Operation(summary = "Get gallery by ID", description = "Get gallery details by ID")
     @ApiResponses(value = {
@@ -341,9 +329,6 @@ public class ContentController {
 
         return ResponseEntity.ok(response);
     }
-
-
-
 
     @PostMapping("/galleries/search")
     @Operation(summary = "Search galleries", description = "Search galleries with filters")
@@ -438,10 +423,6 @@ public class ContentController {
         return ResponseEntity.ok(response);
     }
 
-
-
-
-
     @GetMapping("/messages/{id}/read")
     @Operation(summary = "Get message by ID", description = "Get message details by ID")
     @ApiResponses(value = {
@@ -463,13 +444,6 @@ public class ContentController {
 
         return ResponseEntity.ok(response);
     }
-
-
-
-
-
-
-
 
     @GetMapping("/messages/school/{id}/ceyhun")
     @Operation(summary = "Get message by ID", description = "Get message details by ID")
@@ -493,9 +467,6 @@ public class ContentController {
         return ResponseEntity.ok(response);
     }
 
-
-
-
     @PutMapping("/messages/{id}")
     @Operation(summary = "Update message", description = "Update message status and details")
     @ApiResponses(value = {
@@ -510,16 +481,12 @@ public class ContentController {
             HttpServletRequest request) {
 
         log.info("Update message request: {}", id);
-
         MessageDto messageDto = contentService.updateMessage(id, updateDto, request);
-
         ApiResponse<MessageDto> response = ApiResponse.success(messageDto, "Message updated successfully");
         response.setPath(request.getRequestURI());
         response.setTimestamp(LocalDateTime.now());
-
         return ResponseEntity.ok(response);
     }
-
 
 
     @GetMapping("/messages/user/{userId}")
@@ -562,6 +529,5 @@ public class ContentController {
 
         return ResponseEntity.ok(response);
     }
-
 
 }

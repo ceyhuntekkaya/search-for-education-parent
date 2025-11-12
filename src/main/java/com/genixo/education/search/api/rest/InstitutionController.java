@@ -624,30 +624,11 @@ public class InstitutionController {
     public ResponseEntity<ApiResponse<Page<SchoolSearchResultDto>>> searchSchools(
             @Valid @RequestBody SchoolSearchDto searchDto,
             HttpServletRequest request) {
-
-
-        //List<InstitutionTypeListDto>>
-       // ceyhun
-
-        log.debug("Search schools request");
-
         searchDto = institutionService.validateSearchSchools(searchDto);
-
-        log.info("Search parameters:");
-        log.info("searchTerm: '{}'", searchDto.getSearchTerm());
-        log.info("curriculumType: '{}'", searchDto.getCurriculumType());
-        log.info("languageOfInstruction: '{}'", searchDto.getLanguageOfInstruction());
-        log.info("institutionTypeIds: {}", searchDto.getInstitutionTypeIds());
-        log.info("hasActiveCampaigns: {}", searchDto.getHasActiveCampaigns());
-        log.info("isSubscribed: {}", searchDto.getIsSubscribed());
-
-
         Page<SchoolSearchResultDto> results = institutionService.searchSchools(searchDto);
-
         ApiResponse<Page<SchoolSearchResultDto>> response = ApiResponse.success(results, "Search completed successfully");
         response.setPath(request.getRequestURI());
         response.setTimestamp(LocalDateTime.now());
-
         return ResponseEntity.ok(response);
     }
 

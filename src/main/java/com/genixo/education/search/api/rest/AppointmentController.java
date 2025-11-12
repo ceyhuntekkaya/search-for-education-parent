@@ -225,7 +225,7 @@ public class AppointmentController {
     }
 
     @PostMapping("/reschedule")
-    @Operation(summary = "Create appointment", description = "Book a new appointment")
+    @Operation(summary = "Reschedule appointment", description = "Book a new appointment")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Appointment created successfully"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid appointment data or no available capacity"),
