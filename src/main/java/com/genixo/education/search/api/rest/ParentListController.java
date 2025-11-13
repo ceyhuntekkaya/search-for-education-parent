@@ -46,7 +46,6 @@ public class ParentListController {
             @Valid @RequestBody CreateParentSchoolListRequest createRequest,
             HttpServletRequest request) {
 
-        log.info("Create school list request: {}", createRequest.getListName());
 
         Long parentUserId = jwtService.getUser(request).getId();
         ParentSchoolListResponse listResponse = parentListService.createList(parentUserId, createRequest);
@@ -71,7 +70,6 @@ public class ParentListController {
             @Valid @RequestBody UpdateParentSchoolListRequest updateRequest,
             HttpServletRequest request) {
 
-        log.info("Update school list request for ID: {}", listId);
 
         Long parentUserId = jwtService.getUser(request).getId();
         ParentSchoolListResponse listResponse = parentListService.updateList(parentUserId, listId, updateRequest);
@@ -94,7 +92,6 @@ public class ParentListController {
             @Parameter(description = "School list ID") @PathVariable Long listId,
             HttpServletRequest request) {
 
-        log.info("Delete school list request for ID: {}", listId);
 
         Long parentUserId = jwtService.getUser(request).getId();
         parentListService.deleteList(parentUserId, listId);
@@ -114,7 +111,6 @@ public class ParentListController {
     })
     public ResponseEntity<ApiResponse<List<ParentSchoolListResponse>>> getParentLists(HttpServletRequest request) {
 
-        log.info("Get parent school lists request");
 
         Long parentUserId = jwtService.getUser(request).getId();
         List<ParentSchoolListResponse> lists = parentListService.getParentLists(parentUserId);
@@ -134,7 +130,6 @@ public class ParentListController {
     })
     public ResponseEntity<ApiResponse<List<ParentSchoolListSummaryResponse>>> getParentListsSummary(HttpServletRequest request) {
 
-        log.info("Get parent school lists summary request");
 
         Long parentUserId = jwtService.getUser(request).getId();
         List<ParentSchoolListSummaryResponse> listsSummary = parentListService.getParentListsSummary(parentUserId);
@@ -157,7 +152,6 @@ public class ParentListController {
             @Parameter(description = "School list ID") @PathVariable Long listId,
             HttpServletRequest request) {
 
-        log.info("Get school list details request for ID: {}", listId);
 
         Long parentUserId = jwtService.getUser(request).getId();
         ParentSchoolListResponse listResponse = parentListService.getListById(parentUserId, listId);
@@ -183,7 +177,6 @@ public class ParentListController {
             @Valid @RequestBody AddSchoolToListRequest addRequest,
             HttpServletRequest request) {
 
-        log.info("Add school to list request - School ID: {}, List ID: {}", addRequest.getSchoolId(), addRequest.getParentSchoolListId());
 
         Long parentUserId = jwtService.getUser(request).getId();
         ParentSchoolListItemResponse itemResponse = parentListService.addSchoolToList(parentUserId, addRequest);
@@ -206,7 +199,6 @@ public class ParentListController {
             @Valid @RequestBody QuickAddSchoolRequest quickAddRequest,
             HttpServletRequest request) {
 
-        log.info("Quick add schools request - {} schools", quickAddRequest.getSchoolIds().size());
 
         Long parentUserId = jwtService.getUser(request).getId();
         List<ParentSchoolListItemResponse> itemResponses = parentListService.quickAddSchools(parentUserId, quickAddRequest);
@@ -231,7 +223,6 @@ public class ParentListController {
             @Valid @RequestBody UpdateSchoolInListRequest updateRequest,
             HttpServletRequest request) {
 
-        log.info("Update school in list request for item ID: {}", itemId);
 
         Long parentUserId = jwtService.getUser(request).getId();
         ParentSchoolListItemResponse itemResponse = parentListService.updateSchoolInList(parentUserId, itemId, updateRequest);
@@ -254,7 +245,6 @@ public class ParentListController {
             @Parameter(description = "School list item ID") @PathVariable Long itemId,
             HttpServletRequest request) {
 
-        log.info("Remove school from list request for item ID: {}", itemId);
 
         Long parentUserId = jwtService.getUser(request).getId();
         parentListService.removeSchoolFromList(parentUserId, itemId);
@@ -277,7 +267,6 @@ public class ParentListController {
             @Parameter(description = "School list ID") @PathVariable Long listId,
             HttpServletRequest request) {
 
-        log.info("Get list items request for list ID: {}", listId);
 
         List<SchoolSearchResultDto> items = parentListService.getListSchools(listId);
 
@@ -302,7 +291,6 @@ public class ParentListController {
             @Valid @RequestBody BulkSchoolListOperationRequest bulkRequest,
             HttpServletRequest request) {
 
-        log.info("Bulk operation request: {} for {} schools", bulkRequest.getOperation(), bulkRequest.getSchoolIds().size());
 
         Long parentUserId = jwtService.getUser(request).getId();
         parentListService.performBulkOperation(parentUserId, bulkRequest);
@@ -328,7 +316,6 @@ public class ParentListController {
             @Valid @RequestBody CreateParentSchoolNoteRequest createRequest,
             HttpServletRequest request) {
 
-        log.info("Create school note request for school ID: {}", createRequest.getSchoolId());
 
         Long parentUserId = jwtService.getUser(request).getId();
         ParentSchoolNoteResponse noteResponse = parentListService.createSchoolNote(parentUserId, createRequest);
@@ -353,7 +340,6 @@ public class ParentListController {
             @Valid @RequestBody UpdateParentSchoolNoteRequest updateRequest,
             HttpServletRequest request) {
 
-        log.info("Update school note request for note ID: {}", noteId);
 
         Long parentUserId = jwtService.getUser(request).getId();
         ParentSchoolNoteResponse noteResponse = parentListService.updateSchoolNote(parentUserId, noteId, updateRequest);
@@ -376,7 +362,6 @@ public class ParentListController {
             @Parameter(description = "Note ID") @PathVariable Long noteId,
             HttpServletRequest request) {
 
-        log.info("Delete school note request for note ID: {}", noteId);
 
         Long parentUserId = jwtService.getUser(request).getId();
         parentListService.deleteSchoolNote(parentUserId, noteId);
@@ -398,7 +383,6 @@ public class ParentListController {
             @Parameter(description = "School ID") @PathVariable Long schoolId,
             HttpServletRequest request) {
 
-        log.info("Get school notes request for school ID: {}", schoolId);
 
         Long parentUserId = jwtService.getUser(request).getId();
         List<ParentSchoolNoteResponse> notes = parentListService.getSchoolNotes(parentUserId, schoolId);
@@ -425,7 +409,6 @@ public class ParentListController {
             @Valid @RequestBody CreateParentListNoteRequest createRequest,
             HttpServletRequest request) {
 
-        log.info("Create list note request for list ID: {}", listId);
 
         createRequest.setParentSchoolListId(listId);
         Long parentUserId = jwtService.getUser(request).getId();
@@ -449,7 +432,6 @@ public class ParentListController {
             @Parameter(description = "Note ID") @PathVariable Long noteId,
             HttpServletRequest request) {
 
-        log.info("Delete list note request for note ID: {}", noteId);
 
         Long parentUserId = jwtService.getUser(request).getId();
         parentListService.deleteListNote(parentUserId, noteId);
@@ -472,7 +454,6 @@ public class ParentListController {
             @Parameter(description = "List ID") @PathVariable Long listId,
             HttpServletRequest request) {
 
-        log.info("Get list notes request for list ID: {}", listId);
 
         Long parentUserId = jwtService.getUser(request).getId();
         List<ParentListNoteResponse> notes = parentListService.getListNotes(parentUserId, listId);
@@ -494,7 +475,6 @@ public class ParentListController {
     })
     public ResponseEntity<ApiResponse<ParentSchoolListDashboardResponse>> getDashboard(HttpServletRequest request) {
 
-        log.info("Get parent dashboard request");
 
         Long parentUserId = jwtService.getUser(request).getId();
         ParentSchoolListDashboardResponse dashboard = parentListService.getDashboard(parentUserId);
@@ -524,7 +504,6 @@ public class ParentListController {
             @RequestParam(defaultValue = "20") Integer size,
             HttpServletRequest request) {
 
-        log.info("Search all schools request");
 
         Long parentUserId = jwtService.getUser(request).getId();
 
@@ -559,7 +538,6 @@ public class ParentListController {
             @Parameter(description = "Number of days ahead to check") @RequestParam(defaultValue = "7") Integer days,
             HttpServletRequest request) {
 
-        log.info("Get upcoming reminders request for {} days", days);
 
         Long parentUserId = jwtService.getUser(request).getId();
         List<ParentSchoolNoteResponse> reminders = parentListService.getUpcomingReminders(parentUserId, days);
@@ -581,7 +559,6 @@ public class ParentListController {
             @Parameter(description = "School ID") @PathVariable Long schoolId,
             HttpServletRequest request) {
 
-        log.info("Get school status request for school ID: {}", schoolId);
 
         Long parentUserId = jwtService.getUser(request).getId();
         boolean isInAnyList = parentListService.isSchoolInAnyList(parentUserId, schoolId);
@@ -609,7 +586,6 @@ public class ParentListController {
     })
     public ResponseEntity<ApiResponse<ParentSchoolListResponse>> createDefaultList(HttpServletRequest request) {
 
-        log.info("Create default list request");
 
         Long parentUserId = jwtService.getUser(request).getId();
         ParentSchoolListResponse defaultList = parentListService.createDefaultList(parentUserId);

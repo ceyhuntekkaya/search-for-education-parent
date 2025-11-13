@@ -49,8 +49,7 @@ public class PricingService {
     @Transactional
     @CacheEvict(value = {"school_pricing", "pricing_summaries"}, allEntries = true)
     public SchoolPricingDto createSchoolPricing(SchoolPricingCreateDto createDto, HttpServletRequest request) {
-        log.info("Creating school pricing for school ID: {} - Academic Year: {}",
-                createDto.getSchoolId(), createDto.getAcademicYear());
+
 
         User user = jwtService.getUser(request);
 
@@ -112,14 +111,12 @@ public class PricingService {
         pricing.setIsCurrent(true);
 
         pricing = schoolPricingRepository.save(pricing);
-        log.info("School pricing created successfully with ID: {}", pricing.getId());
 
         return converterService.mapToDto(pricing);
     }
 
     @Cacheable(value = "school_pricing", key = "#id")
     public SchoolPricingDto getSchoolPricingById(Long id, HttpServletRequest request) {
-        log.info("Fetching school pricing with ID: {}", id);
 
         User user = jwtService.getUser(request);
         SchoolPricing pricing = schoolPricingRepository.findByIdAndIsActiveTrue(id)
@@ -132,7 +129,6 @@ public class PricingService {
 
     @Cacheable(value = "school_pricing", key = "#schoolId + '_' + #gradeLevel + '_' + #academicYear")
     public SchoolPricingDto getCurrentSchoolPricing(Long schoolId, String gradeLevel, String academicYear, HttpServletRequest request) {
-        log.info("Fetching current pricing for school: {}, grade: {}, year: {}", schoolId, gradeLevel, academicYear);
 
         User user = jwtService.getUser(request);
         validateUserCanAccessSchoolPricing(user, schoolId);
@@ -145,7 +141,6 @@ public class PricingService {
     }
 
     public List<SchoolPricingDto> getAllSchoolPricings(Long schoolId, HttpServletRequest request) {
-        log.info("Fetching all pricings for school: {}", schoolId);
 
         User user = jwtService.getUser(request);
         validateUserCanAccessSchoolPricing(user, schoolId);
@@ -158,7 +153,6 @@ public class PricingService {
 
 
     public List<PricingSummaryDto> getAllSchoolPricingSummaries(Long schoolId, HttpServletRequest request) {
-        log.info("Fetching all pricings for school: {}", schoolId);
 
         //User user = jwtService.getUser(request);
         //validateUserCanAccessSchoolPricing(user, schoolId);
@@ -172,7 +166,6 @@ public class PricingService {
     @Transactional
     @CacheEvict(value = {"school_pricing", "pricing_summaries"}, allEntries = true)
     public SchoolPricingDto updateSchoolPricing(Long id, SchoolPricingUpdateDto updateDto, HttpServletRequest request) {
-        log.info("Updating school pricing with ID: {}", id);
 
         User user = jwtService.getUser(request);
         SchoolPricing existingPricing = schoolPricingRepository.findByIdAndIsActiveTrue(id)
@@ -198,7 +191,6 @@ public class PricingService {
         }
 
         existingPricing = schoolPricingRepository.save(existingPricing);
-        log.info("School pricing updated successfully with ID: {}", existingPricing.getId());
 
         return converterService.mapToDto(existingPricing);
     }
@@ -206,7 +198,6 @@ public class PricingService {
     @Transactional
     @CacheEvict(value = {"school_pricing", "pricing_summaries"}, allEntries = true)
     public SchoolPricingDto approveSchoolPricing(Long id, String approvalNotes, HttpServletRequest request) {
-        log.info("Approving school pricing with ID: {}", id);
 
         User user = jwtService.getUser(request);
         SchoolPricing pricing = schoolPricingRepository.findByIdAndIsActiveTrue(id)
@@ -230,13 +221,11 @@ public class PricingService {
         pricing.setApprovalNotes(approvalNotes);
 
         pricing = schoolPricingRepository.save(pricing);
-        log.info("School pricing approved and activated with ID: {}", pricing.getId());
 
         return converterService.mapToDto(pricing);
     }
 
     public PricingComparisonDto comparePricing(List<Long> schoolIds, String gradeLevel, String academicYear) {
-        log.info("Comparing pricing for schools: {} - Grade: {}, Year: {}", schoolIds, gradeLevel, academicYear);
 
         List<SchoolPricing> pricings = schoolPricingRepository.findCurrentPricingBySchoolIdsAndGradeAndYear(
                 schoolIds, gradeLevel, academicYear);
@@ -249,7 +238,6 @@ public class PricingService {
     @Transactional
     @CacheEvict(value = {"custom_fees", "school_pricing"}, allEntries = true)
     public CustomFeeDto createCustomFee(CustomFeeCreateDto createDto, HttpServletRequest request) {
-        log.info("Creating custom fee: {} for pricing ID: {}", createDto.getFeeName(), createDto.getSchoolId());
 
         User user = jwtService.getUser(request);
 
@@ -317,14 +305,12 @@ public class PricingService {
                 createDto.getAdvanceNoticeDays() : 30);
 
         customFee = customFeeRepository.save(customFee);
-        log.info("Custom fee created successfully with ID: {}", customFee.getId());
 
         return converterService.mapToDto(customFee);
     }
 
     @Cacheable(value = "custom_fees", key = "#schoolId")
     public List<CustomFeeDto> getCustomFeesBySchool(Long schoolId, HttpServletRequest request) {
-        log.info("Fetching custom fees for school ID: {}", schoolId);
         //User user = jwtService.getUser(request);
         //validateUserCanAccessSchoolPricing(user, schoolId);
         List<CustomFee> customFees = customFeeRepository.findBySchoolIdAndIsActiveTrueOrderByDisplayOrder(schoolId);
@@ -336,7 +322,6 @@ public class PricingService {
     @Transactional
     @CacheEvict(value = {"custom_fees", "school_pricing"}, allEntries = true)
     public CustomFeeDto updateCustomFee(Long id, CustomFeeCreateDto updateDto, HttpServletRequest request) {
-        log.info("Updating custom fee with ID: {}", id);
 
         User user = jwtService.getUser(request);
         CustomFee customFee = customFeeRepository.findByIdAndIsActiveTrue(id)
@@ -371,7 +356,6 @@ public class PricingService {
         customFee.setUpdatedBy(user.getId());
 
         customFee = customFeeRepository.save(customFee);
-        log.info("Custom fee updated successfully with ID: {}", customFee.getId());
 
         return converterService.mapToDto(customFee);
     }
@@ -379,7 +363,6 @@ public class PricingService {
     @Transactional
     @CacheEvict(value = {"custom_fees", "school_pricing"}, allEntries = true)
     public void deleteCustomFee(Long id, HttpServletRequest request) {
-        log.info("Deleting custom fee with ID: {}", id);
 
         User user = jwtService.getUser(request);
         CustomFee customFee = customFeeRepository.findByIdAndIsActiveTrue(id)
@@ -391,13 +374,11 @@ public class PricingService {
         customFee.setUpdatedBy(user.getId());
         customFeeRepository.save(customFee);
 
-        log.info("Custom fee deleted successfully with ID: {}", id);
     }
 
     // ================================ PRICE HISTORY OPERATIONS ================================
 
     public List<PriceHistoryDto> getPriceHistory(Long pricingId, HttpServletRequest request) {
-        log.info("Fetching price history for pricing ID: {}", pricingId);
 
         User user = jwtService.getUser(request);
 
@@ -415,8 +396,6 @@ public class PricingService {
     public PriceTrendsDto getSchoolPriceTrends(Long schoolId, String gradeLevel,
                                                LocalDateTime startDate, LocalDateTime endDate,
                                                HttpServletRequest request) {
-        log.info("Fetching price trends for school: {}, grade: {} between {} and {}",
-                schoolId, gradeLevel, startDate, endDate);
 
         User user = jwtService.getUser(request);
         validateUserCanAccessSchoolPricing(user, schoolId);
@@ -430,7 +409,6 @@ public class PricingService {
     // ================================ PRICING ANALYTICS ================================
 
     public PricingAnalyticsDto getPricingAnalytics(Long schoolId, HttpServletRequest request) {
-        log.info("Fetching pricing analytics for school: {}", schoolId);
 
         User user = jwtService.getUser(request);
         validateUserCanAccessSchoolPricing(user, schoolId);
@@ -440,7 +418,6 @@ public class PricingService {
 
     public MarketComparisonDto getMarketComparison(Long schoolId, String gradeLevel,
                                                    String academicYear, HttpServletRequest request) {
-        log.info("Fetching market comparison for school: {}, grade: {}", schoolId, gradeLevel);
 
         User user = jwtService.getUser(request);
         validateUserCanAccessSchoolPricing(user, schoolId);
@@ -459,7 +436,6 @@ public class PricingService {
     @Transactional
     @CacheEvict(value = {"school_pricing", "custom_fees"}, allEntries = true)
     public BulkPricingResultDto bulkUpdatePricing(BulkPricingUpdateDto bulkDto, HttpServletRequest request) {
-        log.info("Performing bulk pricing update for {} items", bulkDto.getPricingUpdates().size());
 
         User user = jwtService.getUser(request);
 
@@ -492,8 +468,7 @@ public class PricingService {
         }
 
         result.setSuccess(result.getFailedOperations() == 0);
-        log.info("Bulk pricing update completed. Success: {}, Failed: {}",
-                result.getSuccessfulOperations(), result.getFailedOperations());
+
 
         return result;
     }
@@ -501,7 +476,6 @@ public class PricingService {
     // ================================ PUBLIC METHODS (NO AUTH REQUIRED) ================================
 
     public SchoolPricingDto getPublicSchoolPricing(String schoolSlug, String gradeLevel, String academicYear) {
-        log.info("Fetching public pricing for school: {}, grade: {}", schoolSlug, gradeLevel);
 
         School school = schoolRepository.findBySlugAndIsActiveTrueAndCampusIsSubscribedTrue(schoolSlug)
                 .orElseThrow(() -> new ResourceNotFoundException("School not found or not available"));
@@ -520,7 +494,6 @@ public class PricingService {
     }
 
     public List<PricingSummaryDto> getPublicPricingSummary(String schoolSlug) {
-        log.info("Fetching public pricing summary for school: {}", schoolSlug);
 
         School school = schoolRepository.findBySlugAndIsActiveTrueAndCampusIsSubscribedTrue(schoolSlug)
                 .orElseThrow(() -> new ResourceNotFoundException("School not found or not available"));
@@ -935,8 +908,6 @@ public class PricingService {
     // ================================ PRICING CALCULATION METHODS ================================
 
     public PricingCalculationDto calculateTotalCost(PricingCalculationRequestDto calculationRequest) {
-        log.info("Calculating total cost for school: {}, grade: {}",
-                calculationRequest.getSchoolId(), calculationRequest.getGradeLevel());
 
         SchoolPricing pricing = schoolPricingRepository.findCurrentPricingBySchoolAndGradeAndYear(
                         calculationRequest.getSchoolId(),
@@ -1003,7 +974,6 @@ public class PricingService {
     // ================================ REPORTING METHODS ================================
 
     public PricingReportDto generatePricingReport(PricingReportRequestDto reportRequest, HttpServletRequest request) {
-        log.info("Generating pricing report for criteria: {}", reportRequest);
 
         User user = jwtService.getUser(request);
         validateUserCanAccessPricingReports(user);
@@ -1019,7 +989,6 @@ public class PricingService {
     }
 
     public byte[] exportPricingData(PricingExportRequestDto exportRequest, HttpServletRequest request) {
-        log.info("Exporting pricing data in format: {}", exportRequest.getFormat());
 
         User user = jwtService.getUser(request);
         validateUserCanExportPricingData(user);
@@ -1035,7 +1004,6 @@ public class PricingService {
 
     @Cacheable(value = "pricing_analytics", key = "#schoolId + '_' + #period")
     public PriceTrendsDto getPricingTrends(Long schoolId, String period, HttpServletRequest request) {
-        log.info("Fetching pricing trends for school: {}, period: {}", schoolId, period);
 
         User user = jwtService.getUser(request);
         validateUserCanAccessSchoolPricing(user, schoolId);

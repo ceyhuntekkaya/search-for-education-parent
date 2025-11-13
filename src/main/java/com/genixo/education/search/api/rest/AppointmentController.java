@@ -46,8 +46,6 @@ public class AppointmentController {
             @Valid @RequestBody AppointmentSlotCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Create appointment slot request for school: {}", createDto.getSchoolId());
-
         AppointmentSlotDto slotDto = appointmentService.createAppointmentSlot(createDto, request);
 
         ApiResponse<AppointmentSlotDto> response = ApiResponse.success(slotDto, "Appointment slot created successfully");
@@ -305,8 +303,6 @@ public class AppointmentController {
             @Valid @RequestBody AppointmentUpdateDto updateDto,
             HttpServletRequest request) {
 
-        log.info("Update appointment request: {}", id);
-
         AppointmentDto appointmentDto = appointmentService.updateAppointment(id, updateDto, request);
 
         ApiResponse<AppointmentDto> response = ApiResponse.success(appointmentDto, "Appointment updated successfully");
@@ -327,8 +323,6 @@ public class AppointmentController {
     public ResponseEntity<ApiResponse<AppointmentDto>> cancelAppointment(
             @Valid @RequestBody AppointmentCancelDto cancelDto,
             HttpServletRequest request) {
-
-        log.info("Cancel appointment request: {}", cancelDto.getAppointmentId());
 
         AppointmentDto appointmentDto = appointmentService.cancelAppointment(cancelDto, request);
 
@@ -452,8 +446,6 @@ public class AppointmentController {
             @Valid @RequestBody AppointmentNoteCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Add note to appointment request: {}", appointmentId);
-
         // Set appointment ID from path
         createDto.setAppointmentId(appointmentId);
 
@@ -549,8 +541,6 @@ public class AppointmentController {
             @Valid @RequestBody ReportGenerationRequestDto reportRequest,
             HttpServletRequest request) {
 
-        log.info("Generate appointment report request: {} for school: {}", reportRequest.getReportType(), reportRequest.getSchoolId());
-
         AppointmentReportDto report = appointmentService.generateAppointmentReport(
                 reportRequest.getReportType(),
                 reportRequest.getSchoolId(),
@@ -579,7 +569,6 @@ public class AppointmentController {
             @Valid @RequestBody BulkAppointmentOperationDto bulkDto,
             HttpServletRequest request) {
 
-        log.info("Bulk appointment operation request: {} on {} appointments", bulkDto.getOperation(), bulkDto.getAppointmentIds().size());
 
         BulkAppointmentResultDto result = appointmentService.bulkUpdateAppointments(bulkDto, request);
 
@@ -603,7 +592,6 @@ public class AppointmentController {
             @Valid @RequestBody AppointmentWaitlistCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Add to waitlist request for school: {}", createDto.getSchoolId());
 
         AppointmentWaitlistDto waitlistDto = appointmentService.addToWaitlist(createDto, request);
 
@@ -699,7 +687,6 @@ public class AppointmentController {
             @Valid @RequestBody AppointmentNotificationDto notificationDto,
             HttpServletRequest request) {
 
-        log.info("Send appointment notifications request: {}", notificationDto.getAppointmentId());
 
         appointmentService.sendAppointmentNotifications(notificationDto, request);
 
@@ -719,7 +706,6 @@ public class AppointmentController {
     public ResponseEntity<ApiResponse<Void>> sendAppointmentReminders(
             HttpServletRequest request) {
 
-        log.info("Send appointment reminders request");
 
         appointmentService.sendAppointmentReminders(request);
 
@@ -744,7 +730,6 @@ public class AppointmentController {
             @Parameter(description = "Integration type (google, outlook, apple)") @RequestParam String integrationType,
             HttpServletRequest request) {
 
-        log.info("Sync appointment {} with external calendar: {}", appointmentId, integrationType);
 
         AppointmentIntegrationDto integration = appointmentService.syncWithExternalCalendar(appointmentId, integrationType, request);
 
@@ -767,7 +752,6 @@ public class AppointmentController {
             @Parameter(description = "Days old threshold") @RequestParam(defaultValue = "365") Integer daysOld,
             HttpServletRequest request) {
 
-        log.info("Archive old appointments request: {} days", daysOld);
 
         Map<String, Integer> result = appointmentService.archiveOldAppointments(daysOld, request);
 
@@ -787,7 +771,6 @@ public class AppointmentController {
     public ResponseEntity<ApiResponse<Map<String, Integer>>> cleanupExpiredSlots(
             HttpServletRequest request) {
 
-        log.info("Cleanup expired slots request");
 
         Map<String, Integer> result = appointmentService.cleanupExpiredSlots(request);
 
@@ -833,7 +816,6 @@ public class AppointmentController {
             @Valid @RequestBody AppointmentCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Create public appointment request for school: {}", createDto.getSchoolId());
 
         AppointmentDto appointmentDto = appointmentService.createPublicAppointment(createDto);
 
@@ -877,7 +859,6 @@ public class AppointmentController {
             @Valid @RequestBody PublicCancellationRequestDto cancellationRequest,
             HttpServletRequest request) {
 
-        log.info("Cancel public appointment request: {}", appointmentNumber);
 
         AppointmentDto appointmentDto = appointmentService.cancelPublicAppointment(
                 appointmentNumber, cancellationRequest.getCancellationReason());

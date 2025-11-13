@@ -89,17 +89,11 @@ public class FileUploadService {
         // Veritabanına kaydet
         FileUpload savedFile = fileUploadRepository.save(fileUpload);
 
-        log.info("File uploaded successfully: {} (ID: {})", uniqueFileName, savedFile.getId());
 
         return savedFile;
     }
 
-    /**
-     * Dosya adını temizle
-     * - Türkçe karakterleri İngilizce'ye çevir
-     * - Boşlukları alt çizgi ile değiştir
-     * - Özel karakterleri kaldır
-     */
+
     private String sanitizeFileName(String fileName) {
         if (fileName == null || fileName.isEmpty()) {
             return "file";

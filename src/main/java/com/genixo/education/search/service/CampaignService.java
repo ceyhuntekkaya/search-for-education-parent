@@ -52,7 +52,6 @@ public class CampaignService {
     @Transactional
     @CacheEvict(value = {"campaigns", "campaign_summaries", "active_campaigns"}, allEntries = true)
     public CampaignDto createCampaign(CampaignCreateDto createDto, HttpServletRequest request) {
-        log.info("Creating new campaign: {}", createDto.getTitle());
 
         User user = jwtService.getUser(request);
         validateUserCanCreateCampaign(user);
@@ -130,7 +129,6 @@ public class CampaignService {
             assignSchoolsToCampaign(campaign.getId(), createDto.getSchoolIds(), user);
         }
 
-        log.info("Campaign created successfully with ID: {}", campaign.getId());
 
         return converterService.mapToDto(campaign);
     }
@@ -138,7 +136,6 @@ public class CampaignService {
     @Operation(summary = "Get campaign by ID", description = "Retrieve campaign details by campaign ID")
     @Cacheable(value = "campaigns", key = "#id")
     public CampaignDto getCampaignById(Long id, HttpServletRequest request) {
-        log.info("Fetching campaign with ID: {}", id);
 
         User user = jwtService.getUser(request);
         Campaign campaign = campaignRepository.findByIdAndIsActiveTrue(id)
@@ -152,7 +149,6 @@ public class CampaignService {
     @Operation(summary = "Get campaign by slug", description = "Retrieve campaign details by slug")
     @Cacheable(value = "campaigns", key = "#slug")
     public CampaignDto getCampaignBySlug(String slug) {
-        log.info("Fetching campaign with slug: {}", slug);
 
         Campaign campaign = campaignRepository.findBySlugAndIsActiveTrue(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Campaign not found with slug: " + slug));
@@ -164,7 +160,6 @@ public class CampaignService {
     @Transactional
     @CacheEvict(value = {"campaigns", "campaign_summaries", "active_campaigns"}, allEntries = true)
     public CampaignDto updateCampaign(Long id, CampaignUpdateDto updateDto, HttpServletRequest request) {
-        log.info("Updating campaign with ID: {}", id);
 
         User user = jwtService.getUser(request);
         Campaign campaign = campaignRepository.findByIdAndIsActiveTrue(id)
@@ -227,7 +222,6 @@ public class CampaignService {
         campaign.setUpdatedBy(user.getId());
 
         campaign = campaignRepository.save(campaign);
-        log.info("Campaign updated successfully with ID: {}", campaign.getId());
 
         return converterService.mapToDto(campaign);
     }
@@ -236,7 +230,6 @@ public class CampaignService {
     @Transactional
     @CacheEvict(value = {"campaigns", "campaign_summaries", "active_campaigns"}, allEntries = true)
     public void deleteCampaign(Long id, HttpServletRequest request) {
-        log.info("Deleting campaign with ID: {}", id);
 
         User user = jwtService.getUser(request);
         Campaign campaign = campaignRepository.findByIdAndIsActiveTrue(id)
@@ -255,14 +248,12 @@ public class CampaignService {
         campaign.setUpdatedBy(user.getId());
         campaignRepository.save(campaign);
 
-        log.info("Campaign deleted successfully with ID: {}", id);
     }
 
     // ================================ SEARCH AND LISTING ================================
 
     @Operation(summary = "Search campaigns", description = "Search campaigns with various filters")
     public Page<CampaignDto> searchCampaigns(CampaignSearchDto searchDto, HttpServletRequest request) {
-        log.info("Searching campaigns with criteria: {}", searchDto.getSearchTerm());
 
         User user = jwtService.getUser(request);
 
@@ -307,7 +298,6 @@ public class CampaignService {
     @Operation(summary = "Get active campaigns", description = "Get all currently active campaigns")
     @Cacheable(value = "active_campaigns")
     public List<CampaignSummaryDto> getActiveCampaigns() {
-        log.info("Fetching active campaigns");
 
         List<Campaign> campaigns = campaignRepository.findActiveCampaigns(LocalDate.now());
         return campaigns.stream()
@@ -317,7 +307,6 @@ public class CampaignService {
 
     @Operation(summary = "Get campaigns by school", description = "Get all campaigns assigned to a specific school")
     public List<CampaignDto> getCampaignsBySchool(Long schoolId, HttpServletRequest request) {
-        log.info("Fetching campaigns for school: {}", schoolId);
 
         User user = jwtService.getUser(request);
         //validateUserCanAccessSchool(user, schoolId);
@@ -331,7 +320,6 @@ public class CampaignService {
 
     @Operation(summary = "Get campaigns by school", description = "Get all campaigns assigned to a specific school")
     public List<CampaignSchoolDto> getCampaignSummariesBySchool(Long schoolId, HttpServletRequest request) {
-        log.info("Fetching campaigns for school: {}", schoolId);
 
         //User user = jwtService.getUser(request);
         //validateUserCanAccessSchool(user, schoolId);
@@ -348,7 +336,6 @@ public class CampaignService {
     @Transactional
     @CacheEvict(value = {"campaigns", "campaign_summaries"}, allEntries = true)
     public BulkCampaignResultDto assignSchoolsToCampaign(Long campaignId, List<Long> schoolIds, HttpServletRequest request) {
-        log.info("Assigning {} schools to campaign: {}", schoolIds.size(), campaignId);
 
         User user = jwtService.getUser(request);
         return assignSchoolsToCampaign(campaignId, schoolIds, user);
@@ -358,7 +345,6 @@ public class CampaignService {
     @Transactional
     public CampaignSchoolDto updateCampaignSchoolAssignment(Long campaignId, Long schoolId,
                                                             CampaignSchoolAssignDto assignDto, HttpServletRequest request) {
-        log.info("Updating campaign school assignment: campaign={}, school={}", campaignId, schoolId);
 
         User user = jwtService.getUser(request);
 
@@ -393,7 +379,6 @@ public class CampaignService {
     @Transactional
     @CacheEvict(value = {"campaigns", "campaign_summaries"}, allEntries = true)
     public void removeSchoolFromCampaign(Long campaignId, Long schoolId, HttpServletRequest request) {
-        log.info("Removing school {} from campaign: {}", schoolId, campaignId);
 
         User user = jwtService.getUser(request);
 
@@ -423,7 +408,6 @@ public class CampaignService {
     @Operation(summary = "Create campaign usage", description = "Create a new campaign usage record")
     @Transactional
     public CampaignUsageDto createCampaignUsage(CampaignUsageCreateDto createDto, HttpServletRequest request) {
-        log.info("Creating campaign usage for campaign: {}, school: {}", createDto.getCampaignId(), createDto.getSchoolId());
 
         User user = jwtService.getUser(request);
 
@@ -489,14 +473,12 @@ public class CampaignService {
         campaign.setUsageCount(campaign.getUsageCount() + 1);
         campaignRepository.save(campaign);
 
-        log.info("Campaign usage created with ID: {}", campaignUsage.getId());
 
         return converterService.mapCampaignUsageToDto(campaignUsage);
     }
 
     @Operation(summary = "Get campaign usages", description = "Get all usages for a specific campaign")
     public Page<CampaignUsageDto> getCampaignUsages(Long campaignId, Pageable pageable, HttpServletRequest request) {
-        log.info("Fetching campaign usages for campaign: {}", campaignId);
 
         User user = jwtService.getUser(request);
 
@@ -514,7 +496,6 @@ public class CampaignService {
     @Operation(summary = "Get campaign analytics", description = "Get comprehensive analytics for a campaign")
     @Cacheable(value = "campaign_analytics", key = "#campaignId")
     public CampaignAnalyticsDto getCampaignAnalytics(Long campaignId, HttpServletRequest request) {
-        log.info("Generating analytics for campaign: {}", campaignId);
 
         User user = jwtService.getUser(request);
 
@@ -532,7 +513,6 @@ public class CampaignService {
     @Operation(summary = "Get campaign report", description = "Generate comprehensive campaign report")
     public CampaignReportDto generateCampaignReport(List<Long> campaignIds, LocalDate startDate, LocalDate endDate,
                                                     String reportType, HttpServletRequest request) {
-        log.info("Generating campaign report for {} campaigns", campaignIds.size());
 
         User user = jwtService.getUser(request);
 
@@ -579,7 +559,6 @@ public class CampaignService {
     @Transactional
     @CacheEvict(value = {"campaigns", "campaign_summaries", "active_campaigns"}, allEntries = true)
     public BulkCampaignResultDto bulkCampaignOperation(BulkCampaignOperationDto operationDto, HttpServletRequest request) {
-        log.info("Performing bulk operation: {} on {} campaigns", operationDto.getOperation(), operationDto.getCampaignIds().size());
 
         User user = jwtService.getUser(request);
 
@@ -646,7 +625,6 @@ public class CampaignService {
 
     @Operation(summary = "Get public active campaigns", description = "Get active campaigns visible to public")
     public List<CampaignSummaryDto> getPublicActiveCampaigns() {
-        log.info("Fetching public active campaigns");
 
         List<Campaign> campaigns = campaignRepository.findPublicActiveCampaigns(LocalDate.now());
         return campaigns.stream()
@@ -656,7 +634,6 @@ public class CampaignService {
 
     @Operation(summary = "Get public campaigns by school", description = "Get active campaigns for a specific school (public view)")
     public List<CampaignSummaryDto> getPublicCampaignsBySchool(Long schoolId) {
-        log.info("Fetching public campaigns for school: {}", schoolId);
 
         List<Campaign> campaigns = campaignRepository.findPublicCampaignsBySchool(schoolId, LocalDate.now());
         return campaigns.stream()
@@ -666,7 +643,6 @@ public class CampaignService {
 
     @Operation(summary = "Validate promo code", description = "Validate promo code and return campaign details")
     public CampaignDto validatePromoCode(String promoCode, Long schoolId) {
-        log.info("Validating promo code: {} for school: {}", promoCode, schoolId);
 
         Campaign campaign = campaignRepository.findByPromoCodeIgnoreCaseAndIsActiveTrue(promoCode)
                 .orElseThrow(() -> new BusinessException("Invalid promo code: " + promoCode));

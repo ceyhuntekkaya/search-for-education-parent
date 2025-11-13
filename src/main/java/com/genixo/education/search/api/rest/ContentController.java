@@ -44,7 +44,6 @@ public class ContentController {
             @Valid @RequestBody PostCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Create post request for school: {}", createDto.getSchoolId());
 
         PostDto postDto = contentService.createPost(createDto, request);
 
@@ -132,7 +131,6 @@ public class ContentController {
             @Valid @RequestBody PostUpdateDto updateDto,
             HttpServletRequest request) {
 
-        log.info("Update post request: {}", id);
 
         PostDto postDto = contentService.updatePost(id, updateDto, request);
 
@@ -177,7 +175,6 @@ public class ContentController {
             @Parameter(description = "Reaction type") @RequestParam(defaultValue = "LIKE") ReactionType reactionType,
             HttpServletRequest request) {
 
-        log.info("Toggle like for post: {} with reaction: {}", postId, reactionType);
 
         PostLikeDto likeDto = contentService.togglePostLike(postId, reactionType, request);
 
@@ -200,7 +197,6 @@ public class ContentController {
             @Valid @RequestBody PostCommentCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Create comment for post: {}", createDto.getPostId());
 
         PostCommentDto commentDto = contentService.createPostComment(createDto, request);
 
@@ -248,7 +244,6 @@ public class ContentController {
             @Valid @RequestBody GalleryCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Create gallery request: {}", createDto.getTitle());
 
         GalleryDto galleryDto = contentService.createGallery(createDto, request);
 
@@ -275,7 +270,6 @@ public class ContentController {
             @Valid @RequestBody GalleryUpdateDto updateDto,
             HttpServletRequest request) {
 
-        log.info("Update gallery request: {}", updateDto.getTitle());
 
         GalleryDto galleryDto = contentService.updateGallery(id, updateDto, request);
 
@@ -365,7 +359,6 @@ public class ContentController {
             @Valid @RequestBody GalleryItemCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Create gallery item for gallery: {}", createDto.getGalleryId());
 
         GalleryItemDto itemDto = new GalleryItemDto();
         //Ceyhun GalleryItemDto itemDto = contentService.createGalleryItem(createDto, request);
@@ -390,7 +383,6 @@ public class ContentController {
             @Valid @RequestBody MessageCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Create message for school: {}", createDto.getSchoolId());
 
         MessageDto messageDto = contentService.createMessage(createDto, request);
 
@@ -480,7 +472,6 @@ public class ContentController {
             @Valid @RequestBody MessageUpdateDto updateDto,
             HttpServletRequest request) {
 
-        log.info("Update message request: {}", id);
         MessageDto messageDto = contentService.updateMessage(id, updateDto, request);
         ApiResponse<MessageDto> response = ApiResponse.success(messageDto, "Message updated successfully");
         response.setPath(request.getRequestURI());
@@ -508,6 +499,9 @@ public class ContentController {
 
         return ResponseEntity.ok(response);
     }
+
+
+
 
 
     @GetMapping("/messages/school/{schoolId}")

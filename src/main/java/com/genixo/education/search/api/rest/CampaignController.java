@@ -48,7 +48,6 @@ public class CampaignController {
             @Valid @RequestBody CampaignCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Create campaign request: {}", createDto.getTitle());
 
         CampaignDto campaignDto = campaignService.createCampaign(createDto, request);
 
@@ -115,7 +114,6 @@ public class CampaignController {
             @Valid @RequestBody CampaignUpdateDto updateDto,
             HttpServletRequest request) {
 
-        log.info("Update campaign request: {}", id);
 
         CampaignDto campaignDto = campaignService.updateCampaign(id, updateDto, request);
 
@@ -138,7 +136,6 @@ public class CampaignController {
             @Parameter(description = "Campaign ID") @PathVariable Long id,
             HttpServletRequest request) {
 
-        log.info("Delete campaign request: {}", id);
 
         campaignService.deleteCampaign(id, request);
 
@@ -227,7 +224,6 @@ public class CampaignController {
             @Valid @RequestBody SchoolAssignmentRequestDto assignmentRequest,
             HttpServletRequest request) {
 
-        log.info("Assign schools to campaign request: {}", campaignId);
 
         BulkCampaignResultDto result = campaignService.assignSchoolsToCampaign(
                 campaignId, assignmentRequest.getSchoolIds(), request);
@@ -252,7 +248,6 @@ public class CampaignController {
             @Valid @RequestBody CampaignSchoolAssignDto assignDto,
             HttpServletRequest request) {
 
-        log.info("Update campaign school assignment: campaign={}, school={}", campaignId, schoolId);
 
         CampaignSchoolDto campaignSchoolDto = campaignService.updateCampaignSchoolAssignment(
                 campaignId, schoolId, assignDto, request);
@@ -277,7 +272,6 @@ public class CampaignController {
             @Parameter(description = "School ID") @PathVariable Long schoolId,
             HttpServletRequest request) {
 
-        log.info("Remove school from campaign: campaign={}, school={}", campaignId, schoolId);
 
         campaignService.removeSchoolFromCampaign(campaignId, schoolId, request);
 
@@ -301,8 +295,7 @@ public class CampaignController {
             @Valid @RequestBody CampaignUsageCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Create campaign usage request for campaign: {}, school: {}",
-                createDto.getCampaignId(), createDto.getSchoolId());
+
 
         CampaignUsageDto usageDto = campaignService.createCampaignUsage(createDto, request);
 
@@ -371,7 +364,6 @@ public class CampaignController {
             @Valid @RequestBody CampaignReportRequestDto reportRequest,
             HttpServletRequest request) {
 
-        log.info("Generate campaign report request for {} campaigns", reportRequest.getCampaignIds().size());
 
         CampaignReportDto report = campaignService.generateCampaignReport(
                 reportRequest.getCampaignIds(),
@@ -401,8 +393,6 @@ public class CampaignController {
             @Valid @RequestBody BulkCampaignOperationDto operationDto,
             HttpServletRequest request) {
 
-        log.info("Bulk campaign operation request: {} on {} campaigns",
-                operationDto.getOperation(), operationDto.getCampaignIds().size());
 
         BulkCampaignResultDto result = campaignService.bulkCampaignOperation(operationDto, request);
 
@@ -466,8 +456,6 @@ public class CampaignController {
             @Valid @RequestBody PromoCodeValidationRequestDto validationRequest,
             HttpServletRequest request) {
 
-        log.info("Validate promo code request: {} for school: {}",
-                validationRequest.getPromoCode(), validationRequest.getSchoolId());
 
         CampaignDto campaignDto = campaignService.validatePromoCode(
                 validationRequest.getPromoCode(), validationRequest.getSchoolId());
@@ -493,7 +481,6 @@ public class CampaignController {
             @Parameter(description = "Campaign ID") @PathVariable Long campaignId,
             HttpServletRequest request) {
 
-        log.info("Activate campaign request: {}", campaignId);
 
         CampaignUpdateDto updateDto = new CampaignUpdateDto();
         updateDto.setStatus(com.genixo.education.search.enumaration.CampaignStatus.ACTIVE);
@@ -518,7 +505,6 @@ public class CampaignController {
             @Parameter(description = "Campaign ID") @PathVariable Long campaignId,
             HttpServletRequest request) {
 
-        log.info("Pause campaign request: {}", campaignId);
 
         CampaignUpdateDto updateDto = new CampaignUpdateDto();
         updateDto.setStatus(com.genixo.education.search.enumaration.CampaignStatus.PAUSED);
@@ -544,7 +530,6 @@ public class CampaignController {
             @Valid @RequestBody CampaignDuplicateRequestDto duplicateRequest,
             HttpServletRequest request) {
 
-        log.info("Duplicate campaign request: {}", campaignId);
 
         // This would be implemented in the service
         // For now, return a placeholder response
@@ -656,7 +641,6 @@ public class CampaignController {
             @Valid @RequestBody CampaignContentCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Add campaign content request: {}", campaignId);
 
         // This would be implemented in the service
 

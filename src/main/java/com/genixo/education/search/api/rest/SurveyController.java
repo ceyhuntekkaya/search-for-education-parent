@@ -46,7 +46,6 @@ public class SurveyController {
             @Valid @RequestBody SurveyCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Create survey request: {}", createDto.getTitle());
 
         SurveyDto survey = surveyService.createSurvey(createDto, request);
 
@@ -110,7 +109,6 @@ public class SurveyController {
             @Valid @RequestBody SurveyCreateDto updateDto,
             HttpServletRequest request) {
 
-        log.info("Update survey request: {}", id);
 
         SurveyDto survey = surveyService.updateSurvey(id, updateDto, request);
 
@@ -133,7 +131,6 @@ public class SurveyController {
             @Parameter(description = "Survey ID") @PathVariable Long id,
             HttpServletRequest request) {
 
-        log.info("Delete survey request: {}", id);
 
         surveyService.deleteSurvey(id, request);
 
@@ -180,7 +177,6 @@ public class SurveyController {
             @Valid @RequestBody SurveyQuestionCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Add question to survey: {}", surveyId);
 
         SurveyQuestionDto question = surveyService.addQuestionToSurvey(surveyId, createDto, request);
 
@@ -203,7 +199,6 @@ public class SurveyController {
             @Parameter(description = "Question ID") @PathVariable Long questionId,
             HttpServletRequest request) {
 
-        log.info("Delete survey question: {}", questionId);
 
         surveyService.deleteQuestion(questionId, request);
 
@@ -227,7 +222,6 @@ public class SurveyController {
             @Valid @RequestBody SurveyResponseCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Create survey response for survey: {}", createDto.getSurveyId());
 
         SurveyResponseDto response = surveyService.createSurveyResponse(createDto);
 
@@ -249,7 +243,6 @@ public class SurveyController {
             @Parameter(description = "Response token") @PathVariable String responseToken,
             HttpServletRequest request) {
 
-        log.info("Submit survey response: {}", responseToken);
 
         SurveyResponseDto response = surveyService.submitSurveyResponse(responseToken, request);
 
@@ -315,7 +308,6 @@ public class SurveyController {
             @RequestBody SurveyResponseDto surveyResponseData,
             HttpServletRequest request) {
 
-        log.info("Update survey response request: {}", surveyResponseId);
 
         String result = surveyService.updateServerResponse(surveyResponseId, surveyResponseData);
 
@@ -457,7 +449,6 @@ public class SurveyController {
             @Valid @RequestBody SchoolComparisonRequest comparisonRequest,
             HttpServletRequest request) {
 
-        log.info("Get school performance comparison for {} schools", comparisonRequest.getSchoolIds().size());
 
         List<SchoolSurveyPerformanceDto> performance = surveyService.getSchoolPerformanceComparison(
                 comparisonRequest.getSchoolIds(), request);
@@ -484,7 +475,6 @@ public class SurveyController {
             @Valid @RequestBody BulkSurveyOperationDto bulkDto,
             HttpServletRequest request) {
 
-        log.info("Bulk survey operation: {} for {} surveys", bulkDto.getOperation(), bulkDto.getSurveyIds().size());
 
         BulkSurveyResultDto result = surveyService.bulkSurveyOperation(bulkDto, request);
 
@@ -511,7 +501,6 @@ public class SurveyController {
             @Valid @RequestBody SurveyReportRequest reportRequest,
             HttpServletRequest request) {
 
-        log.info("Generate survey report for survey: {}, type: {}", surveyId, reportRequest.getReportType());
 
         SurveyReportDto report = surveyService.generateSurveyReport(
                 surveyId,
@@ -635,7 +624,6 @@ public class SurveyController {
             @Valid @RequestBody ModerationRequest moderationRequest,
             HttpServletRequest request) {
 
-        log.info("Moderate rating: {}", ratingId);
 
         surveyService.moderateRating(ratingId, moderationRequest.getIsPublic(),
                 moderationRequest.getModeratorNotes(), request);
@@ -659,7 +647,6 @@ public class SurveyController {
             @Valid @RequestBody FlagRequest flagRequest,
             HttpServletRequest request) {
 
-        log.info("Flag rating: {} with reason: {}", ratingId, flagRequest.getFlagReason());
 
         surveyService.flagRating(ratingId, flagRequest.getFlagReason(), request);
 

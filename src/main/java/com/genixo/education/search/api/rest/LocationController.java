@@ -124,8 +124,6 @@ public class LocationController {
             @Valid @RequestBody CountryDto countryDto,
             HttpServletRequest request) {
 
-        log.info("Create country request: {}", countryDto.getName());
-
         CountryDto createdCountry = locationService.createCountry(countryDto, request);
 
         ApiResponse<CountryDto> response = ApiResponse.success(createdCountry, "Country created successfully");
@@ -147,8 +145,6 @@ public class LocationController {
             @Valid @RequestBody LocationUpdateDto updateDto,
             HttpServletRequest request) {
 
-        log.info("Update country request: {}", id);
-
         CountryDto countryDto = locationService.updateCountry(id, updateDto, request);
 
         ApiResponse<CountryDto> response = ApiResponse.success(countryDto, "Country updated successfully");
@@ -169,8 +165,6 @@ public class LocationController {
     public ResponseEntity<ApiResponse<Void>> deleteCountry(
             @Parameter(description = "Country ID") @PathVariable Long id,
             HttpServletRequest request) {
-
-        log.info("Delete country request: {}", id);
 
         locationService.deleteCountry(id, request);
 
@@ -277,8 +271,6 @@ public class LocationController {
             @Valid @RequestBody LocationCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Create province request: {}", createDto.getName());
-
         ProvinceDto provinceDto = locationService.createProvince(createDto, request);
 
         ApiResponse<ProvinceDto> response = ApiResponse.success(provinceDto, "Province created successfully");
@@ -301,8 +293,6 @@ public class LocationController {
             @Valid @RequestBody LocationUpdateDto updateDto,
             HttpServletRequest request) {
 
-        log.info("Update province request: {}", id);
-
         ProvinceDto provinceDto = locationService.updateProvince(id, updateDto, request);
 
         ApiResponse<ProvinceDto> response = ApiResponse.success(provinceDto, "Province updated successfully");
@@ -323,8 +313,6 @@ public class LocationController {
     public ResponseEntity<ApiResponse<Void>> deleteProvince(
             @Parameter(description = "Province ID") @PathVariable Long id,
             HttpServletRequest request) {
-
-        log.info("Delete province request: {}", id);
 
         locationService.deleteProvince(id, request);
 
@@ -452,8 +440,6 @@ public class LocationController {
             @Valid @RequestBody LocationCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Create district request: {}", createDto.getName());
-
         DistrictDto districtDto = locationService.createDistrict(createDto, request);
 
         ApiResponse<DistrictDto> response = ApiResponse.success(districtDto, "District created successfully");
@@ -476,8 +462,6 @@ public class LocationController {
             @Valid @RequestBody LocationUpdateDto updateDto,
             HttpServletRequest request) {
 
-        log.info("Update district request: {}", id);
-
         DistrictDto districtDto = locationService.updateDistrict(id, updateDto, request);
 
         ApiResponse<DistrictDto> response = ApiResponse.success(districtDto, "District updated successfully");
@@ -498,8 +482,6 @@ public class LocationController {
     public ResponseEntity<ApiResponse<Void>> deleteDistrict(
             @Parameter(description = "District ID") @PathVariable Long id,
             HttpServletRequest request) {
-
-        log.info("Delete district request: {}", id);
 
         locationService.deleteDistrict(id, request);
 
@@ -567,8 +549,6 @@ public class LocationController {
             @Valid @RequestBody LocationCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Create neighborhood request: {}", createDto.getName());
-
         NeighborhoodDto neighborhoodDto = locationService.createNeighborhood(createDto, request);
 
         ApiResponse<NeighborhoodDto> response = ApiResponse.success(neighborhoodDto, "Neighborhood created successfully");
@@ -591,8 +571,6 @@ public class LocationController {
             @Valid @RequestBody LocationUpdateDto updateDto,
             HttpServletRequest request) {
 
-        log.info("Update neighborhood request: {}", id);
-
         NeighborhoodDto neighborhoodDto = locationService.updateNeighborhood(id, updateDto, request);
 
         ApiResponse<NeighborhoodDto> response = ApiResponse.success(neighborhoodDto, "Neighborhood updated successfully");
@@ -612,8 +590,6 @@ public class LocationController {
     public ResponseEntity<ApiResponse<Void>> deleteNeighborhood(
             @Parameter(description = "Neighborhood ID") @PathVariable Long id,
             HttpServletRequest request) {
-
-        log.info("Delete neighborhood request: {}", id);
 
         locationService.deleteNeighborhood(id, request);
 
@@ -832,8 +808,6 @@ public class LocationController {
     public ResponseEntity<ApiResponse<LocationImportResultDto>> bulkImportLocations(
             @Valid @RequestBody BulkLocationImportDto importDto,
             HttpServletRequest request) {
-
-        log.info("Bulk import locations request from: {}", importDto.getFileUrl());
 
         LocationImportResultDto result = locationService.bulkImportLocations(importDto, request);
 

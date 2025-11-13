@@ -50,7 +50,6 @@ public class InstitutionController {
             @Valid @RequestBody BrandCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Create brand request: {}", createDto.getName());
         BrandDto brandDto = institutionService.createBrand(createDto, request);
         ApiResponse<BrandDto> response = ApiResponse.success(brandDto, "Brand created successfully");
         response.setPath(request.getRequestURI());
@@ -114,7 +113,6 @@ public class InstitutionController {
             @Valid @RequestBody BrandCreateDto updateDto,
             HttpServletRequest request) {
 
-        log.info("Update brand request: {}", id);
 
         BrandDto brandDto = institutionService.updateBrand(id, updateDto, request);
 
@@ -137,7 +135,6 @@ public class InstitutionController {
             @Parameter(description = "Brand ID") @PathVariable Long id,
             HttpServletRequest request) {
 
-        log.info("Delete brand request: {}", id);
 
         institutionService.deleteBrand(id, request);
 
@@ -179,7 +176,6 @@ public class InstitutionController {
             @Valid @RequestBody CampusCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Create campus request: {}", createDto.getName());
 
         CampusDto campusDto = institutionService.createCampus(createDto, request);
 
@@ -228,7 +224,6 @@ public class InstitutionController {
             @Valid @RequestBody CampusCreateDto updateDto,
             HttpServletRequest request) {
 
-        log.info("Update brand request: {}", id);
 
         CampusDto campusDto = institutionService.updateCampus(id, updateDto, request);
 
@@ -294,7 +289,6 @@ public class InstitutionController {
             @Valid @RequestBody List<InstitutionPropertyValueSetDto> propertyValues,
             HttpServletRequest request) {
 
-        log.info("Set campus property values request: {}", campusId);
 
         institutionService.setCampusPropertyValues(campusId, propertyValues, request);
 
@@ -319,7 +313,6 @@ public class InstitutionController {
             @Valid @RequestBody SchoolCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Create school request: {}", createDto.getName());
 
         SchoolDto schoolDto = institutionService.createSchool(createDto, request);
 
@@ -371,7 +364,6 @@ public class InstitutionController {
             @Valid @RequestBody SchoolCreateDto updateDto,
             HttpServletRequest request) {
 
-        log.info("Update school request: {}", id);
 
         SchoolDto schoolDto = institutionService.updateSchool(id, updateDto, request);
 
@@ -413,9 +405,6 @@ public class InstitutionController {
 
         return ResponseEntity.ok(response);
     }
-
-
-
 
     @GetMapping("/schools/{id}/property")
     @Operation(summary = "Get school by ID", description = "Get school details by ID")
@@ -518,7 +507,6 @@ public class InstitutionController {
             @Valid @RequestBody List<InstitutionPropertyValueSetDto> propertyValues,
             HttpServletRequest request) {
 
-        log.info("Set school property values request: {}", schoolId);
 
         institutionService.setSchoolPropertyValues(schoolId, propertyValues, request);
 
@@ -726,7 +714,6 @@ public class InstitutionController {
             @Valid @RequestBody InstitutionTypeDto typeDto,
             HttpServletRequest request) {
 
-        log.info("Create institution type request: {}", typeDto.getName());
 
         InstitutionTypeDto createdType = institutionService.createInstitutionType(typeDto, request);
 
@@ -751,7 +738,6 @@ public class InstitutionController {
             @Valid @RequestBody InstitutionPropertyCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Create institution property request: {}", createDto.getName());
 
         InstitutionPropertyDto propertyDto = institutionService.createInstitutionProperty(createDto, request);
 
@@ -796,7 +782,6 @@ public class InstitutionController {
             @Valid @RequestBody BulkOperationDto bulkDto,
             HttpServletRequest request) {
 
-        log.info("Bulk operation request: {} on {} schools", bulkDto.getOperation(), bulkDto.getEntityIds().size());
 
         BulkOperationResultDto result = institutionService.bulkUpdateSchools(bulkDto, request);
 
@@ -839,7 +824,6 @@ public class InstitutionController {
             @Valid @RequestBody List<Long> schoolIds,
             HttpServletRequest request) {
 
-        log.info("Compare schools request: {}", schoolIds);
 
         InstitutionComparisonDto comparison = institutionService.compareSchools(schoolIds, request);
 

@@ -19,6 +19,7 @@ spring:
     dbName: search_edu_app
     #dbUrl: jdbc:postgresql://localhost:5432/ #3
     dbUrl: jdbc:postgresql://postgres:5432/
+    #dbUrl: jdbc:postgresql://185.123.156.110:5432/ #3
     #dbUrl: jdbc:postgresql://46.62.141.0:5432/ #3
 
     url: ${spring.datasource.dbUrl}${spring.datasource.dbName}

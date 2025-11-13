@@ -54,7 +54,6 @@ public class SubscriptionService {
 
     @Cacheable(value = "subscription_plans")
     public List<SubscriptionPlanDto> getAllSubscriptionPlans() {
-        log.info("Fetching all subscription plans");
 
         List<SubscriptionPlan> plans = subscriptionPlanRepository.findAllByIsVisibleTrueOrderBySortOrderAsc();
         return plans.stream()
@@ -64,7 +63,6 @@ public class SubscriptionService {
 
     @Cacheable(value = "subscription_plan", key = "#id")
     public SubscriptionPlanDto getSubscriptionPlanById(Long id) {
-        log.info("Fetching subscription plan with ID: {}", id);
 
         SubscriptionPlan plan = subscriptionPlanRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Subscription plan not found with ID: " + id));
@@ -77,7 +75,6 @@ public class SubscriptionService {
     @Transactional
     @CacheEvict(value = {"subscriptions", "campus_subscription"}, allEntries = true)
     public SubscriptionDto createSubscription(SubscriptionCreateDto createDto, HttpServletRequest request) {
-        log.info("Creating subscription for campus: {} with plan: {}", createDto.getCampusId(), createDto.getSubscriptionPlanId());
 
         User user = jwtService.getUser(request);
         validateUserCanManageCampus(user, createDto.getCampusId());
@@ -142,13 +139,11 @@ public class SubscriptionService {
         // Send welcome email
         emailService.sendSubscriptionWelcomeEmail(subscription);
 
-        log.info("Subscription created successfully with ID: {}", subscription.getId());
         return converterService.mapToDto(subscription);
     }
 
     @Cacheable(value = "campus_subscription", key = "#campusId")
     public SubscriptionDto getSubscriptionByCampusId(Long campusId, HttpServletRequest request) {
-        log.info("Fetching subscription for campus: {}", campusId);
 
         User user = jwtService.getUser(request);
         validateUserCanAccessCampus(user, campusId);
@@ -162,7 +157,6 @@ public class SubscriptionService {
     @Transactional
     @CacheEvict(value = {"subscriptions", "campus_subscription"}, allEntries = true)
     public SubscriptionDto updateSubscription(Long subscriptionId, SubscriptionUpdateDto updateDto, HttpServletRequest request) {
-        log.info("Updating subscription: {}", subscriptionId);
 
         User user = jwtService.getUser(request);
         Subscription subscription = subscriptionRepository.findByIdAndIsActiveTrue(subscriptionId)
@@ -182,14 +176,12 @@ public class SubscriptionService {
         subscription.setUpdatedBy(user.getId());
         subscription = subscriptionRepository.save(subscription);
 
-        log.info("Subscription updated successfully: {}", subscriptionId);
         return converterService.mapToDto(subscription);
     }
 
     @Transactional
     @CacheEvict(value = {"subscriptions", "campus_subscription"}, allEntries = true)
     public void cancelSubscription(Long subscriptionId, SubscriptionCancellationDto cancelDto, HttpServletRequest request) {
-        log.info("Canceling subscription: {}", subscriptionId);
 
         User user = jwtService.getUser(request);
         Subscription subscription = subscriptionRepository.findByIdAndIsActiveTrue(subscriptionId)
@@ -222,13 +214,11 @@ public class SubscriptionService {
         // Send cancellation email
         emailService.sendSubscriptionCancellationEmail(subscription);
 
-        log.info("Subscription canceled successfully: {}", subscriptionId);
     }
 
     @Transactional
     @CacheEvict(value = {"subscriptions", "campus_subscription"}, allEntries = true)
     public SubscriptionDto changeSubscriptionPlan(Long subscriptionId, ChangeSubscriptionPlanDto changeDto, HttpServletRequest request) {
-        log.info("Changing subscription plan for subscription: {} to plan: {}", subscriptionId, changeDto.getNewPlanId());
 
         User user = jwtService.getUser(request);
         Subscription subscription = subscriptionRepository.findByIdAndIsActiveTrue(subscriptionId)
@@ -270,7 +260,6 @@ public class SubscriptionService {
         // Send plan change email
         emailService.sendSubscriptionPlanChangeEmail(subscription, proratedAmount);
 
-        log.info("Subscription plan changed successfully for subscription: {}", subscriptionId);
         return converterService.mapToDto(subscription);
     }
 
@@ -278,7 +267,6 @@ public class SubscriptionService {
 
 
     private void createProratedPayment(Subscription subscription, ProratedAmount proratedAmount, PaymentMethod paymentMethod) {
-        log.info("Creating prorated payment for subscription: {}", subscription.getId());
 
         Payment payment = new Payment();
         payment.setSubscription(subscription);
@@ -295,12 +283,10 @@ public class SubscriptionService {
     }
 
     private void createCredit(Subscription subscription, BigDecimal creditAmount) {
-        log.info("Creating credit for subscription: {}, amount: {}", subscription.getId(), creditAmount);
         // Implementation for creating credit/refund
     }
 
     private void updateSubscriptionAfterPayment(Subscription subscription) {
-        log.info("Updating subscription after successful payment: {}", subscription.getId());
 
         // Update subscription status if it was past due
         if (subscription.getStatus() == SubscriptionStatus.PAST_DUE) {
@@ -318,7 +304,6 @@ public class SubscriptionService {
     }
 
     private void processRecurringBilling(Subscription subscription) {
-        log.info("Processing recurring billing for subscription: {}", subscription.getId());
 
         try {
             // Create payment record
@@ -352,7 +337,6 @@ public class SubscriptionService {
                 Invoice invoice = invoiceService.createInvoiceForPayment(payment);
                 payment.setInvoice(invoice);
 
-                log.info("Recurring payment processed successfully: {}", payment.getId());
 
                 // Send payment confirmation
                 emailService.sendPaymentConfirmationEmail(payment);
@@ -377,7 +361,6 @@ public class SubscriptionService {
     }
 
     private void handleFailedRecurringPayment(Subscription subscription, Payment failedPayment) {
-        log.info("Handling failed recurring payment for subscription: {}", subscription.getId());
 
         // Set subscription to past due
         subscription.setStatus(SubscriptionStatus.PAST_DUE);
@@ -396,7 +379,6 @@ public class SubscriptionService {
 
     private void schedulePaymentRetry(Subscription subscription, int attemptNumber) {
         // Implementation for scheduling payment retry
-        log.info("Scheduling payment retry #{} for subscription: {}", attemptNumber, subscription.getId());
     }
 
     private void handleRecurringBillingError(Subscription subscription, Exception error) {
@@ -413,7 +395,6 @@ public class SubscriptionService {
     }
 
     private void handleExpiredSubscription(Subscription subscription) {
-        log.info("Handling expired subscription: {}", subscription.getId());
 
         if (subscription.getStatus() == SubscriptionStatus.CANCELED) {
             // For canceled subscriptions, check if grace period has ended
@@ -427,7 +408,6 @@ public class SubscriptionService {
                 subscription.setStatus(SubscriptionStatus.EXPIRED);
                 subscriptionRepository.save(subscription);
 
-                log.info("Subscription expired and campus disabled: {}", subscription.getId());
             }
         } else if (subscription.getStatus() == SubscriptionStatus.PAST_DUE) {
             // For past due subscriptions, check if grace period has ended
@@ -443,7 +423,6 @@ public class SubscriptionService {
                 // Send suspension notification
                 emailService.sendSubscriptionSuspensionEmail(subscription);
 
-                log.info("Subscription suspended due to non-payment: {}", subscription.getId());
             }
         }
     }
@@ -451,7 +430,6 @@ public class SubscriptionService {
     // ================================ INVOICE OPERATIONS ================================
 
     public Page<InvoiceDto> getInvoices(Long subscriptionId, int page, int size, HttpServletRequest request) {
-        log.info("Fetching invoices for subscription: {}", subscriptionId);
 
         User user = jwtService.getUser(request);
         Subscription subscription = subscriptionRepository.findByIdAndIsActiveTrue(subscriptionId)
@@ -466,7 +444,6 @@ public class SubscriptionService {
     }
 
     public byte[] downloadInvoice(Long invoiceId, HttpServletRequest request) {
-        log.info("Downloading invoice: {}", invoiceId);
 
         User user = jwtService.getUser(request);
         Invoice invoice = invoiceRepository.findByIdAndIsActiveTrue(invoiceId)
@@ -486,7 +463,6 @@ public class SubscriptionService {
 
     @Cacheable(value = "subscription_analytics", key = "#subscriptionId")
     public SubscriptionAnalyticsDto getSubscriptionAnalytics(Long subscriptionId, HttpServletRequest request) {
-        log.info("Fetching analytics for subscription: {}", subscriptionId);
 
         User user = jwtService.getUser(request);
         Subscription subscription = subscriptionRepository.findByIdAndIsActiveTrue(subscriptionId)
@@ -535,7 +511,6 @@ public class SubscriptionService {
     // ================================ ADMIN OPERATIONS ================================
 
     public Page<SubscriptionDto> getAllSubscriptions(SubscriptionFilterDto filter, int page, int size, HttpServletRequest request) {
-        log.info("Admin fetching all subscriptions");
 
         User user = jwtService.getUser(request);
         validateUserIsSystemAdmin(user);
@@ -552,7 +527,6 @@ public class SubscriptionService {
     @Transactional
     @CacheEvict(value = "subscription_plans", allEntries = true)
     public SubscriptionPlanDto createSubscriptionPlan(SubscriptionPlanCreateDto createDto, HttpServletRequest request) {
-        log.info("Creating subscription plan: {}", createDto.getName());
 
         User user = jwtService.getUser(request);
         validateUserIsSystemAdmin(user);
@@ -586,13 +560,11 @@ public class SubscriptionService {
         plan.setCreatedBy(user.getId());
 
         plan = subscriptionPlanRepository.save(plan);
-        log.info("Subscription plan created with ID: {}", plan.getId());
 
         return converterService.mapToDto(plan);
     }
 
     public SubscriptionStatisticsDto getSubscriptionStatistics(HttpServletRequest request) {
-        log.info("Fetching subscription statistics");
 
         User user = jwtService.getUser(request);
         validateUserIsSystemAdmin(user);
@@ -626,7 +598,6 @@ public class SubscriptionService {
 
     @Transactional
     public void handlePaymentWebhook(PaymentWebhookDto webhookDto) {
-        log.info("Processing payment webhook: {}", webhookDto.getEventType());
 
         try {
             Payment payment = paymentRepository.findByExternalPaymentId(webhookDto.getTransactionId())
@@ -652,7 +623,6 @@ public class SubscriptionService {
     }
 
     private void handleSuccessfulPaymentWebhook(Payment payment, PaymentWebhookDto webhookDto) {
-        log.info("Processing successful payment webhook for payment: {}", payment.getId());
 
         if (payment.getPaymentStatus() != PaymentStatus.COMPLETED) {
             payment.setPaymentStatus(PaymentStatus.COMPLETED);
@@ -675,7 +645,6 @@ public class SubscriptionService {
     }
 
     private void handleFailedPaymentWebhook(Payment payment, PaymentWebhookDto webhookDto) {
-        log.info("Processing failed payment webhook for payment: {}", payment.getId());
 
         payment.setPaymentStatus(PaymentStatus.FAILED);
         payment.setFailureReason(webhookDto.getErrorMessage());
@@ -688,7 +657,6 @@ public class SubscriptionService {
     }
 
     private void handleRefundedPaymentWebhook(Payment payment, PaymentWebhookDto webhookDto) {
-        log.info("Processing refunded payment webhook for payment: {}", payment.getId());
 
         BigDecimal refundAmount = webhookDto.getRefundAmount();
         payment.setRefundAmount(refundAmount);
@@ -703,7 +671,6 @@ public class SubscriptionService {
 
 
     public Page<PaymentDto> getPaymentHistory(Long subscriptionId, int page, int size, HttpServletRequest request) {
-        log.info("Fetching payment history for subscription: {}", subscriptionId);
 
         User user = jwtService.getUser(request);
         Subscription subscription = subscriptionRepository.findByIdAndIsActiveTrue(subscriptionId)
@@ -720,7 +687,6 @@ public class SubscriptionService {
 // ================================ USAGE TRACKING ================================
 
     public UsageLimitsDto checkUsageLimits(Long campusId, HttpServletRequest request) {
-        log.info("Checking usage limits for campus: {}", campusId);
 
         User user = jwtService.getUser(request);
         validateUserCanAccessCampus(user, campusId);
@@ -749,7 +715,6 @@ public class SubscriptionService {
 
     @Transactional
     public void updateUsageCounters(Long campusId, UsageUpdateDto usageUpdate) {
-        log.info("Updating usage counters for campus: {}", campusId);
 
         Subscription subscription = subscriptionRepository.findByCampusIdAndStatusIn(campusId,
                         List.of(SubscriptionStatus.ACTIVE, SubscriptionStatus.TRIAL))
@@ -800,7 +765,6 @@ public class SubscriptionService {
     @Scheduled(cron = "0 0 2 * * *") // Every day at 2 AM
     @Transactional
     public void processRecurringBillings() {
-        log.info("Processing recurring billings");
 
         LocalDateTime today = LocalDateTime.now();
         List<Subscription> subscriptionsForBilling = subscriptionRepository
@@ -814,13 +778,11 @@ public class SubscriptionService {
             }
         }
 
-        log.info("Processed {} recurring billings", subscriptionsForBilling.size());
     }
 
     @Scheduled(cron = "0 30 2 * * *") // Every day at 2:30 AM
     @Transactional
     public void handleExpiredSubscriptions() {
-        log.info("Handling expired subscriptions");
 
         LocalDateTime now = LocalDateTime.now();
         List<Subscription> expiredSubscriptions = subscriptionRepository
@@ -834,16 +796,13 @@ public class SubscriptionService {
             }
         }
 
-        log.info("Handled {} expired subscriptions", expiredSubscriptions.size());
     }
 
     @Scheduled(cron = "0 0 1 * * *") // First day of every month at 1 AM
     @Transactional
     public void resetMonthlyUsageCounters() {
-        log.info("Resetting monthly usage counters");
 
         int updatedSubscriptions = subscriptionRepository.resetMonthlyCounters();
-        log.info("Reset monthly counters for {} subscriptions", updatedSubscriptions);
     }
 
 // ================================ PRIVATE HELPER METHODS ================================
@@ -871,11 +830,9 @@ public class SubscriptionService {
 
     private void applyDiscount(Subscription subscription, String couponCode) {
         // Implementation for coupon/discount logic
-        log.info("Applying discount with coupon: {}", couponCode);
     }
 
     private void createInitialPayment(Subscription subscription, PaymentMethod paymentMethod) {
-        log.info("Creating initial payment for subscription: {}", subscription.getId());
 
         Payment payment = new Payment();
         payment.setSubscription(subscription);
@@ -919,7 +876,6 @@ public class SubscriptionService {
 
     @Transactional
     public PaymentDto processPayment(Long subscriptionId, PaymentCreateDto paymentDto, HttpServletRequest request) {
-        log.info("Processing payment for subscription: {}", subscriptionId);
 
         User user = jwtService.getUser(request);
         Subscription subscription = subscriptionRepository.findByIdAndIsActiveTrue(subscriptionId)
@@ -976,7 +932,6 @@ public class SubscriptionService {
                 Invoice invoice = invoiceService.createInvoiceForPayment(payment);
                 payment.setInvoice(invoice);
 
-                log.info("Payment processed successfully: {}", payment.getId());
             } else {
                 payment.setPaymentStatus(PaymentStatus.FAILED);
                 payment.setFailureReason(gatewayResponse.getErrorMessage());

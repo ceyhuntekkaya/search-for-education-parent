@@ -40,9 +40,6 @@ public class PricingController {
             @Valid @RequestBody SchoolPricingCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Create school pricing request for school ID: {}, grade: {}, year: {}",
-                createDto.getSchoolId(), createDto.getGradeLevel(), createDto.getAcademicYear());
-
         SchoolPricingDto pricing = pricingService.createSchoolPricing(createDto, request);
 
         ApiResponse<SchoolPricingDto> response = ApiResponse.success(pricing, "School pricing created successfully");
@@ -135,7 +132,6 @@ public class PricingController {
             @Valid @RequestBody SchoolPricingUpdateDto updateDto,
             HttpServletRequest request) {
 
-        log.info("Update school pricing request: {}", id);
 
         SchoolPricingDto pricing = pricingService.updateSchoolPricing(id, updateDto, request);
 
@@ -159,7 +155,6 @@ public class PricingController {
             @RequestBody ApprovalRequest approvalRequest,
             HttpServletRequest request) {
 
-        log.info("Approve school pricing request: {}", id);
 
         SchoolPricingDto pricing = pricingService.approveSchoolPricing(id,
                 approvalRequest.getApprovalNotes(), request);
@@ -181,7 +176,6 @@ public class PricingController {
             @Valid @RequestBody PricingComparisonRequest comparisonRequest,
             HttpServletRequest request) {
 
-        log.info("Compare pricing request for {} schools", comparisonRequest.getSchoolIds().size());
 
         PricingComparisonDto comparison = pricingService.comparePricing(
                 comparisonRequest.getSchoolIds(),
@@ -210,8 +204,6 @@ public class PricingController {
             @Valid @RequestBody CustomFeeCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Create custom fee request: {} for pricing ID: {}",
-                createDto.getFeeName(), createDto.getSchoolId());
 
         CustomFeeDto customFee = pricingService.createCustomFee(createDto, request);
 
@@ -288,7 +280,6 @@ public class PricingController {
             @Valid @RequestBody CustomFeeCreateDto updateDto,
             HttpServletRequest request) {
 
-        log.info("Update custom fee request: {}", id);
 
         CustomFeeDto customFee = pricingService.updateCustomFee(id, updateDto, request);
 
@@ -310,7 +301,6 @@ public class PricingController {
             @Parameter(description = "Custom fee ID") @PathVariable Long id,
             HttpServletRequest request) {
 
-        log.info("Delete custom fee request: {}", id);
 
         pricingService.deleteCustomFee(id, request);
 
@@ -436,8 +426,6 @@ public class PricingController {
             @Valid @RequestBody PricingCalculationRequestDto calculationRequest,
             HttpServletRequest request) {
 
-        log.info("Calculate total cost request for school: {}, grade: {}",
-                calculationRequest.getSchoolId(), calculationRequest.getGradeLevel());
 
         PricingCalculationDto calculation = pricingService.calculateTotalCost(calculationRequest);
 
@@ -463,7 +451,6 @@ public class PricingController {
             @Valid @RequestBody BulkPricingUpdateDto bulkDto,
             HttpServletRequest request) {
 
-        log.info("Bulk update pricing request for {} items", bulkDto.getPricingUpdates().size());
 
         BulkPricingResultDto result = pricingService.bulkUpdatePricing(bulkDto, request);
 
@@ -489,7 +476,6 @@ public class PricingController {
             @Valid @RequestBody PricingReportRequestDto reportRequest,
             HttpServletRequest request) {
 
-        log.info("Generate pricing report request");
 
         PricingReportDto report = pricingService.generatePricingReport(reportRequest, request);
 
@@ -511,7 +497,6 @@ public class PricingController {
             @Valid @RequestBody PricingExportRequestDto exportRequest,
             HttpServletRequest request) {
 
-        log.info("Export pricing data request in format: {}", exportRequest.getFormat());
 
         byte[] exportData = pricingService.exportPricingData(exportRequest, request);
 

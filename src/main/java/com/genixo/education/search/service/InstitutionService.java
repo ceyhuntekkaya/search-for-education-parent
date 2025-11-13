@@ -53,7 +53,6 @@ public class InstitutionService {
     @Transactional
     @CacheEvict(value = {"brands", "brand_summaries"}, allEntries = true)
     public BrandDto createBrand(BrandCreateDto createDto, HttpServletRequest request) {
-        log.info("Creating new brand: {}", createDto.getName());
 
         User user = jwtService.getUser(request);
         validateUserCanCreateBrand(user);
@@ -90,14 +89,12 @@ public class InstitutionService {
         brand.setCreatedBy(user.getId());
 
         brand = brandRepository.save(brand);
-        log.info("Brand created successfully with ID: {}", brand.getId());
 
         return converterService.mapToDto(brand);
     }
 
     @Cacheable(value = "brands", key = "#id")
     public BrandDto getBrandById(Long id, HttpServletRequest request) {
-        log.info("Fetching brand with ID: {}", id);
 
         User user = jwtService.getUser(request);
         Brand brand = brandRepository.findByIdAndIsActiveTrue(id)
@@ -113,7 +110,6 @@ public class InstitutionService {
     }
 
 
-
     @Cacheable(value = "brands", key = "#id")
     public Brand getBrandClassById(Long id) {
         Brand brand = brandRepository.findByIdAndIsActiveTrue(id)
@@ -122,11 +118,8 @@ public class InstitutionService {
     }
 
 
-
-
     @Cacheable(value = "brands", key = "#slug")
     public BrandDto getBrandBySlug(String slug) {
-        log.info("Fetching brand with slug: {}", slug);
 
         Brand brand = brandRepository.findBySlugAndIsActiveTrue(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Brand not found with slug: " + slug));
@@ -137,7 +130,6 @@ public class InstitutionService {
     @Transactional
     @CacheEvict(value = {"brands", "brand_summaries"}, allEntries = true)
     public BrandDto updateBrand(Long id, BrandCreateDto updateDto, HttpServletRequest request) {
-        log.info("Updating brand with ID: {}", id);
 
         User user = jwtService.getUser(request);
         Brand brand = brandRepository.findByIdAndIsActiveTrue(id)
@@ -170,7 +162,6 @@ public class InstitutionService {
         brand.setUpdatedBy(user.getId());
 
         brand = brandRepository.save(brand);
-        log.info("Brand updated successfully with ID: {}", brand.getId());
 
         return converterService.mapToDto(brand);
     }
@@ -178,7 +169,6 @@ public class InstitutionService {
     @Transactional
     @CacheEvict(value = {"brands", "brand_summaries", "campuses", "schools"}, allEntries = true)
     public void deleteBrand(Long id, HttpServletRequest request) {
-        log.info("Deleting brand with ID: {}", id);
 
         User user = jwtService.getUser(request);
         Brand brand = brandRepository.findByIdAndIsActiveTrue(id)
@@ -195,17 +185,12 @@ public class InstitutionService {
         brand.setUpdatedBy(user.getId());
         brandRepository.save(brand);
 
-        log.info("Brand deleted successfully with ID: {}", id);
     }
 
     @Cacheable(value = "brand_summaries")
     public List<BrandSummaryDto> getAllBrandSummaries() {
-        log.info("Fetching all brand summaries");
-
         List<Brand> brands;
-
         brands = brandRepository.findAllActiveOrderByName();
-
         return brands.stream()
                 .map(converterService::mapToSummaryDto)
                 .collect(Collectors.toList());
@@ -216,7 +201,6 @@ public class InstitutionService {
     @Transactional
     @CacheEvict(value = {"campuses", "campus_summaries"}, allEntries = true)
     public CampusDto createCampus(CampusCreateDto createDto, HttpServletRequest request) {
-        log.info("Creating new campus: {}", createDto.getName());
 
         User user = jwtService.getUser(request);
 
@@ -273,11 +257,9 @@ public class InstitutionService {
         }
 
         campus = campusRepository.save(campus);
-        log.info("Campus created successfully with ID: {}", campus.getId());
 
         return converterService.mapToDto(campus);
     }
-
 
 
     @Transactional
@@ -287,7 +269,6 @@ public class InstitutionService {
 
     @Cacheable(value = "campuses", key = "#id")
     public CampusDto getCampusById(Long id, HttpServletRequest request) {
-        log.info("Fetching campus with ID: {}", id);
 
         User user = jwtService.getUser(request);
         Campus campus = campusRepository.findByIdAndIsActiveTrue(id)
@@ -300,7 +281,6 @@ public class InstitutionService {
 
     @Cacheable(value = "campuses", key = "#slug")
     public CampusDto getCampusBySlug(String slug) {
-        log.info("Fetching campus with slug: {}", slug);
 
         Campus campus = campusRepository.findBySlugAndIsActiveTrue(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Campus not found with slug: " + slug));
@@ -310,7 +290,6 @@ public class InstitutionService {
 
     @Cacheable(value = "campus_summaries", key = "#brandId")
     public List<CampusSummaryDto> getCampusesByBrand(Long brandId, HttpServletRequest request) {
-        log.info("Fetching campuses for brand ID: {}", brandId);
 
         User user = jwtService.getUser(request);
         validateUserCanAccessBrand(user, brandId);
@@ -326,7 +305,6 @@ public class InstitutionService {
     @Transactional
     @CacheEvict(value = {"schools", "school_summaries"}, allEntries = true)
     public SchoolDto createSchool(SchoolCreateDto createDto, HttpServletRequest request) {
-        log.info("Creating new school: {}", createDto.getName());
 
         User user = jwtService.getUser(request);
 
@@ -377,16 +355,13 @@ public class InstitutionService {
         school.setCreatedBy(user.getId());
 
         school = schoolRepository.save(school);
-        log.info("School created successfully with ID: {}", school.getId());
 
         return converterService.mapToDto(school);
     }
 
 
-
     @Cacheable(value = "schools", key = "#id")
     public SchoolDto getSchoolById(Long id) {
-        log.info("Fetching school with ID: {}", id);
 
         School school = schoolRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("School not found with ID: " + id));
@@ -395,14 +370,12 @@ public class InstitutionService {
 
     @Cacheable(value = "schools", key = "#id")
     public List<SchoolDto> getSchoolByBrandId(Long id) {
-        log.info("Fetching school with ID: {}", id);
         Set<School> schools = schoolRepository.findByBrandIdAndIsActiveTrue(id);
         return converterService.mapSchoolsToDto(schools);
     }
 
     @Cacheable(value = "schools", key = "#id")
     public List<SchoolDto> getSchoolByCampusId(Long id) {
-        log.info("Fetching school with ID: {}", id);
         Set<School> schools = schoolRepository.findByCampusIdAndIsActiveTrue(id);
         return converterService.mapSchoolsToDto(schools);
     }
@@ -410,7 +383,6 @@ public class InstitutionService {
 
     @Cacheable(value = "schools", key = "#slug")
     public SchoolDto getSchoolBySlug(String slug) {
-        log.info("Fetching school with slug: {}", slug);
 
         School school = schoolRepository.findBySlugAndIsActiveTrue(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("School not found with slug: " + slug));
@@ -419,7 +391,6 @@ public class InstitutionService {
     }
 
     public SchoolDetailDto getSchoolDetailById(Long id, HttpServletRequest request) {
-        log.info("Fetching school detail with ID: {}", id);
 
         User user = jwtService.getUser(request);
         School school = schoolRepository.findByIdAndIsActiveTrue(id)
@@ -433,7 +404,6 @@ public class InstitutionService {
     // ================================ SEARCH OPERATIONS ================================
 
     public Page<SchoolSearchResultDto> searchSchools(SchoolSearchDto searchDto) {
-        log.info("Searching schools with criteria: {}", searchDto.getSearchTerm());
 
         Pageable pageable = PageRequest.of(
                 searchDto.getPage() != null ? searchDto.getPage() : 0,
@@ -482,7 +452,6 @@ public class InstitutionService {
                             .map(String::valueOf)
                             .collect(Collectors.joining(",")) + "}";
         }
-
 
 
         String propertyIdsArray = null;
@@ -559,7 +528,6 @@ public class InstitutionService {
 
     @Cacheable(value = "institution_type_summaries")
     public List<InstitutionTypeSummaryDto> getInstitutionTypeSummaries() {
-        log.info("Fetching institution type summaries");
 
         return institutionTypeRepository.findInstitutionTypeSummaries();
     }
@@ -569,7 +537,6 @@ public class InstitutionService {
     @Transactional
     @CacheEvict(value = {"institution_properties"}, allEntries = true)
     public InstitutionPropertyDto createInstitutionProperty(InstitutionPropertyCreateDto createDto, HttpServletRequest request) {
-        log.info("Creating institution property: {}", createDto.getName());
 
         User user = jwtService.getUser(request);
         validateUserCanManageInstitutionTypes(user);
@@ -605,14 +572,12 @@ public class InstitutionService {
         property.setCreatedBy(user.getId());
 
         property = institutionPropertyRepository.save(property);
-        log.info("Institution property created with ID: {}", property.getId());
 
         return converterService.mapToDto(property);
     }
 
     @Cacheable(value = "institution_properties", key = "#institutionTypeId")
     public List<InstitutionPropertyDto> getPropertiesByInstitutionType(Long institutionTypeId) {
-        log.info("Fetching properties for institution type: {}", institutionTypeId);
 
         List<InstitutionProperty> properties = institutionPropertyRepository
                 .findByInstitutionTypeIdAndIsActiveTrueOrderBySortOrderAscDisplayNameAsc(institutionTypeId);
@@ -626,7 +591,6 @@ public class InstitutionService {
 
     @Transactional
     public void setSchoolPropertyValues(Long schoolId, List<InstitutionPropertyValueSetDto> propertyValues, HttpServletRequest request) {
-        log.info("Setting property values for school: {}", schoolId);
 
         User user = jwtService.getUser(request);
         School school = schoolRepository.findByIdAndIsActiveTrue(schoolId)
@@ -653,7 +617,6 @@ public class InstitutionService {
 
     @Transactional
     public void setCampusPropertyValues(Long campusId, List<InstitutionPropertyValueSetDto> propertyValues, HttpServletRequest request) {
-        log.info("Setting property values for campus: {}", campusId);
 
         User user = jwtService.getUser(request);
         Campus campus = campusRepository.findByIdAndIsActiveTrue(campusId)
@@ -682,7 +645,6 @@ public class InstitutionService {
     @Transactional
     @CacheEvict(value = {"schools", "school_summaries"}, allEntries = true)
     public BulkOperationResultDto bulkUpdateSchools(BulkOperationDto bulkDto, HttpServletRequest request) {
-        log.info("Performing bulk operation: {} on {} schools", bulkDto.getOperation(), bulkDto.getEntityIds().size());
 
         User user = jwtService.getUser(request);
         BulkOperationResultDto result = BulkOperationResultDto.builder()
@@ -895,7 +857,6 @@ public class InstitutionService {
 
     @Cacheable(value = "school_statistics", key = "#schoolId")
     public SchoolStatisticsDto getSchoolStatistics(Long schoolId, HttpServletRequest request) {
-        log.info("Fetching statistics for school: {}", schoolId);
 
         User user = jwtService.getUser(request);
         validateUserCanAccessSchool(user, schoolId);
@@ -904,7 +865,6 @@ public class InstitutionService {
     }
 
     public InstitutionFavoritesDto getUserFavorites(HttpServletRequest request) {
-        log.info("Fetching user favorites");
 
         User user = jwtService.getUser(request);
 
@@ -920,7 +880,6 @@ public class InstitutionService {
     }
 
     public InstitutionComparisonDto compareSchools(List<Long> schoolIds, HttpServletRequest request) {
-        log.info("Comparing schools: {}", schoolIds);
 
         User user = jwtService.getUser(request);
 
@@ -1014,7 +973,6 @@ public class InstitutionService {
     // ================================ PUBLIC SEARCH METHODS (NO AUTH REQUIRED) ================================
 
     public Page<SchoolSearchResultDto> publicSearchSchools(SchoolSearchDto searchDto) {
-        log.info("Public search for schools with criteria: {}", searchDto.getSearchTerm());
 
         // Only show schools from subscribed campuses
         searchDto.setIsSubscribed(true);
@@ -1023,7 +981,6 @@ public class InstitutionService {
     }
 
     public SchoolDto getPublicSchoolBySlug(String slug) {
-        log.info("Public access to school with slug: {}", slug);
 
         School school = schoolRepository.findBySlugAndIsActiveTrueAndCampusIsSubscribedTrue(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("School not found or not available"));
@@ -1035,7 +992,6 @@ public class InstitutionService {
     }
 
     public CampusDto getPublicCampusBySlug(String slug) {
-        log.info("Public access to campus with slug: {}", slug);
 
         Campus campus = campusRepository.findBySlugAndIsActiveTrueAndIsSubscribedTrue(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Campus not found or not available"));
@@ -1047,7 +1003,6 @@ public class InstitutionService {
     }
 
     public BrandDto getPublicBrandBySlug(String slug) {
-        log.info("Public access to brand with slug: {}", slug);
 
         Brand brand = brandRepository.findBySlugAndIsActiveTrueWithSubscribedCampuses(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Brand not found or not available"));
@@ -1063,7 +1018,6 @@ public class InstitutionService {
     @Transactional
     @CacheEvict(value = {"institution_types"}, allEntries = true)
     public InstitutionTypeDto createInstitutionType(InstitutionTypeDto typeDto, HttpServletRequest request) {
-        log.info("Creating institution type: {}", typeDto.getName());
 
         User user = jwtService.getUser(request);
         validateUserCanManageInstitutionTypes(user);
@@ -1083,7 +1037,6 @@ public class InstitutionService {
         institutionType.setCreatedBy(user.getId());
 
         institutionType = institutionTypeRepository.save(institutionType);
-        log.info("Institution type created with ID: {}", institutionType.getId());
 
         return converterService.mapToDto(institutionType);
     }
@@ -1298,7 +1251,6 @@ public class InstitutionService {
     @Transactional
     @CacheEvict(value = {"campuses", "campus_summaries"}, allEntries = true)
     public CampusDto updateCampus(Long id, CampusCreateDto updateDto, HttpServletRequest request) {
-        log.info("Updating brand with ID: {}", id);
 
         User user = jwtService.getUser(request);
         Campus campus = campusRepository.findByIdAndIsActiveTrue(id)
@@ -1330,7 +1282,6 @@ public class InstitutionService {
         campus.setUpdatedBy(user.getId());
 
         campus = campusRepository.save(campus);
-        log.info("Campus updated successfully with ID: {}", campus.getId());
 
         return converterService.mapToDto(campus);
     }
@@ -1339,7 +1290,6 @@ public class InstitutionService {
     @Transactional
     @CacheEvict(value = {"schools", "school_summaries"}, allEntries = true)
     public SchoolDto updateSchool(Long id, SchoolCreateDto updateDto, HttpServletRequest request) {
-        log.info("Updating brand with ID: {}", id);
 
         User user = jwtService.getUser(request);
         School school = schoolRepository.findByIdAndIsActiveTrue(id)
@@ -1390,7 +1340,6 @@ public class InstitutionService {
         school.setUpdatedBy(user.getId());
 
         school = schoolRepository.save(school);
-        log.info("Campus updated successfully with ID: {}", school.getId());
 
         return converterService.mapToDto(school);
     }
@@ -1439,21 +1388,26 @@ public class InstitutionService {
 
         List<SchoolPropertyDto> schoolPropertyDtos = new ArrayList<>();
         for (InstitutionPropertyValue pv : institutionPropertyValues) {
-            SchoolPropertyDto schoolPropertyDto = new SchoolPropertyDto();
-            schoolPropertyDto.setSchoolId(id); //schoolId;
-            schoolPropertyDto.setPropertyTypeId(pv.getProperty().getPropertyType().getId()); //propertyTypeId
-            schoolPropertyDto.setInstitutionPropertyValueId(pv.getId()); //institutionPropertyValueId
-            schoolPropertyDto.setInstitutionPropertyId(pv.getProperty().getId()); //institutionPropertyId
-            schoolPropertyDto.setName(pv.getProperty().getPropertyType().getName());//name
-            schoolPropertyDto.setDisplayName(pv.getProperty().getPropertyType().getDisplayName()); //displayName
-            schoolPropertyDto.setPropertyGroupTypeId(pv.getProperty().getPropertyType().getPropertyGroupType().getId()); //propertyGroupTypeId
-            schoolPropertyDto.setGroupSortOrder(pv.getProperty().getPropertyType().getPropertyGroupType().getSortOrder()); //propertyGroupTypeId
-            schoolPropertyDto.setSortOrder(pv.getProperty().getPropertyType().getSortOrder()); //sortOrder;
-            schoolPropertyDto.setGroupName(pv.getProperty().getPropertyType().getPropertyGroupType().getName()); //groupName
-            schoolPropertyDto.setGroupDisplayName(pv.getProperty().getPropertyType().getPropertyGroupType().getDisplayName()); //groupDisplayName;
-            schoolPropertyDto.setInstitutionTypeId(pv.getProperty().getInstitutionType().getId()); //institutionTypeId;
-            schoolPropertyDto.setInstitutionTypeName(pv.getProperty().getInstitutionType().getName()); //institutionTypeName;
-            schoolPropertyDtos.add(schoolPropertyDto);
+            if (pv.getProperty() != null) {
+                if (pv.getProperty().getPropertyType() != null) {
+                    SchoolPropertyDto schoolPropertyDto = new SchoolPropertyDto();
+                    schoolPropertyDto.setSchoolId(id); //schoolId;
+                    schoolPropertyDto.setPropertyTypeId(pv.getProperty().getPropertyType().getId()); //propertyTypeId
+                    schoolPropertyDto.setInstitutionPropertyValueId(pv.getId()); //institutionPropertyValueId
+                    schoolPropertyDto.setInstitutionPropertyId(pv.getProperty().getId()); //institutionPropertyId
+                    schoolPropertyDto.setName(pv.getProperty().getPropertyType().getName());//name
+                    schoolPropertyDto.setDisplayName(pv.getProperty().getPropertyType().getDisplayName()); //displayName
+                    schoolPropertyDto.setPropertyGroupTypeId(pv.getProperty().getPropertyType().getPropertyGroupType().getId()); //propertyGroupTypeId
+                    schoolPropertyDto.setGroupSortOrder(pv.getProperty().getPropertyType().getPropertyGroupType().getSortOrder()); //propertyGroupTypeId
+                    schoolPropertyDto.setSortOrder(pv.getProperty().getPropertyType().getSortOrder()); //sortOrder;
+                    schoolPropertyDto.setGroupName(pv.getProperty().getPropertyType().getPropertyGroupType().getName()); //groupName
+                    schoolPropertyDto.setGroupDisplayName(pv.getProperty().getPropertyType().getPropertyGroupType().getDisplayName()); //groupDisplayName;
+                    schoolPropertyDto.setInstitutionTypeId(pv.getProperty().getInstitutionType().getId()); //institutionTypeId;
+                    schoolPropertyDto.setInstitutionTypeName(pv.getProperty().getInstitutionType().getName()); //institutionTypeName;
+                    schoolPropertyDtos.add(schoolPropertyDto);
+                }
+            }
+
         }
         return schoolPropertyDtos;
     }

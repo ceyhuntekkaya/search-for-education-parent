@@ -55,7 +55,6 @@ public class AppointmentService {
     @Transactional
     @CacheEvict(value = {"appointment_slots", "school_availability"}, allEntries = true)
     public AppointmentSlotDto createAppointmentSlot(AppointmentSlotCreateDto createDto, HttpServletRequest request) {
-        log.info("Creating appointment slot for school: {}", createDto.getSchoolId());
 
         User user = jwtService.getUser(request);
         validateUserCanManageSchoolAppointments(user, createDto.getSchoolId());
@@ -109,14 +108,12 @@ public class AppointmentService {
         slot.setCreatedBy(user.getId());
 
         slot = appointmentSlotRepository.save(slot);
-        log.info("Appointment slot created with ID: {}", slot.getId());
 
         return converterService.mapToDto(slot);
     }
 
     @Cacheable(value = "appointment_slots", key = "#id")
     public AppointmentSlotDto getAppointmentSlotById(Long id, HttpServletRequest request) {
-        log.info("Fetching appointment slot with ID: {}", id);
 
         User user = jwtService.getUser(request);
         AppointmentSlot slot = appointmentSlotRepository.findByIdAndIsActiveTrue(id)
@@ -128,7 +125,6 @@ public class AppointmentService {
     }
 
     public List<AppointmentSlotDto> getSchoolAppointmentSlots(Long schoolId, HttpServletRequest request) {
-        log.info("Fetching appointment slots for school: {}", schoolId);
 
         User user = jwtService.getUser(request);
         validateUserCanAccessSchool(user, schoolId);
@@ -224,7 +220,6 @@ public class AppointmentService {
 
          */
 
-        log.info("Appointment created with ID: {} and number: {}", appointment.getId(), appointmentNumber);
 
         if(slot.getAppointments() == null){
             slot.setAppointments(new HashSet<>());
@@ -237,7 +232,6 @@ public class AppointmentService {
 
     @Cacheable(value = "appointments", key = "#id")
     public AppointmentDto getAppointmentById(Long id, HttpServletRequest request) {
-        log.info("Fetching appointment with ID: {}", id);
 
         User user = jwtService.getUser(request);
         Appointment appointment = appointmentRepository.findByIdAndIsActiveTrue(id)
@@ -249,7 +243,6 @@ public class AppointmentService {
     }
 
     public AppointmentDto getAppointmentByNumber(String appointmentNumber) {
-        log.info("Fetching appointment with number: {}", appointmentNumber);
 
         Appointment appointment = appointmentRepository.findByAppointmentNumberAndIsActiveTrue(appointmentNumber)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with number: " + appointmentNumber));
@@ -260,7 +253,6 @@ public class AppointmentService {
     @Transactional
     @CacheEvict(value = {"appointments", "school_availability"}, allEntries = true)
     public AppointmentDto updateAppointment(Long id, AppointmentUpdateDto updateDto, HttpServletRequest request) {
-        log.info("Updating appointment with ID: {}", id);
 
         User user = jwtService.getUser(request);
         Appointment appointment = appointmentRepository.findByIdAndIsActiveTrue(id)
@@ -291,7 +283,6 @@ public class AppointmentService {
         appointment.setUpdatedBy(user.getId());
         appointment = appointmentRepository.save(appointment);
 
-        log.info("Appointment updated with ID: {}", appointment.getId());
 
         return converterService.mapToDto(appointment);
     }
@@ -299,7 +290,6 @@ public class AppointmentService {
     @Transactional
     @CacheEvict(value = {"appointments", "school_availability"}, allEntries = true)
     public AppointmentDto cancelAppointment(AppointmentCancelDto cancelDto, HttpServletRequest request) {
-        log.info("Canceling appointment with ID: {}", cancelDto.getAppointmentId());
 
         User user = jwtService.getUser(request);
         Appointment appointment = appointmentRepository.findByIdAndIsActiveTrue(cancelDto.getAppointmentId())
@@ -321,7 +311,6 @@ public class AppointmentService {
 
         appointment = appointmentRepository.save(appointment);
 
-        log.info("Appointment canceled with ID: {}", appointment.getId());
 
         return converterService.mapToDto(appointment);
     }
@@ -329,7 +318,6 @@ public class AppointmentService {
     @Transactional
     @CacheEvict(value = {"appointments", "school_availability"}, allEntries = true)
     public AppointmentDto rescheduleAppointment(AppointmentRescheduleDto rescheduleDto, HttpServletRequest request) {
-        log.info("Rescheduling appointment with ID: {}", rescheduleDto.getAppointmentId());
 
         User user = jwtService.getUser(request);
         Appointment appointment = appointmentRepository.findByIdAndIsActiveTrue(rescheduleDto.getAppointmentId())
@@ -359,7 +347,6 @@ public class AppointmentService {
         appointment.setUpdatedBy(user.getId());
         appointmentRepository.save(appointment);
 
-        log.info("Appointment rescheduled. Old ID: {}, New ID: {}", appointment.getId(), newAppointment.getId());
 
         return converterService.mapToDto(newAppointment);
     }
@@ -367,7 +354,6 @@ public class AppointmentService {
     // ================================ APPOINTMENT SEARCH AND FILTERING ================================
 
     public Page<AppointmentSummaryDto> searchAppointments(AppointmentSearchDto searchDto, HttpServletRequest request) {
-        log.info("Searching appointments with criteria: {}", searchDto.getSearchTerm());
 
         User user = jwtService.getUser(request);
 
@@ -414,7 +400,6 @@ public class AppointmentService {
     @Cacheable(value = "appointment_calendar", key = "#schoolId + '_' + #startDate + '_' + #endDate")
     public List<AppointmentCalendarDto> getAppointmentCalendar(Long schoolId, LocalDate startDate,
                                                                LocalDate endDate, HttpServletRequest request) {
-        log.info("Fetching appointment calendar for school: {} from {} to {}", schoolId, startDate, endDate);
 
         User user = jwtService.getUser(request);
         validateUserCanAccessSchool(user, schoolId);
@@ -427,7 +412,6 @@ public class AppointmentService {
     @Transactional
     @CacheEvict(value = "appointments", allEntries = true)
     public AppointmentNoteDto addAppointmentNote(AppointmentNoteCreateDto createDto, HttpServletRequest request) {
-        log.info("Adding note to appointment: {}", createDto.getAppointmentId());
 
         User user = jwtService.getUser(request);
         Appointment appointment = appointmentRepository.findByIdAndIsActiveTrue(createDto.getAppointmentId())
@@ -453,13 +437,11 @@ public class AppointmentService {
         note.setCreatedBy(user.getId());
 
         note = appointmentNoteRepository.save(note);
-        log.info("Appointment note added with ID: {}", note.getId());
 
         return converterService.mapToDto(note);
     }
 
     public List<AppointmentNoteDto> getAppointmentNotes(Long appointmentId, HttpServletRequest request) {
-        log.info("Fetching notes for appointment: {}", appointmentId);
 
         User user = jwtService.getUser(request);
         Appointment appointment = appointmentRepository.findByIdAndIsActiveTrue(appointmentId)
@@ -486,7 +468,6 @@ public class AppointmentService {
     @Cacheable(value = "appointment_stats", key = "#schoolId + '_' + #periodStart + '_' + #periodEnd")
     public AppointmentStatisticsDto getAppointmentStatistics(Long schoolId, LocalDate periodStart,
                                                              LocalDate periodEnd, HttpServletRequest request) {
-        log.info("Fetching appointment statistics for school: {} from {} to {}", schoolId, periodStart, periodEnd);
 
         User user = jwtService.getUser(request);
         validateUserCanAccessSchool(user, schoolId);
@@ -496,7 +477,6 @@ public class AppointmentService {
 
     public List<StaffPerformanceDto> getStaffPerformance(Long schoolId, LocalDate periodStart,
                                                          LocalDate periodEnd, HttpServletRequest request) {
-        log.info("Fetching staff performance for school: {} from {} to {}", schoolId, periodStart, periodEnd);
 
         User user = jwtService.getUser(request);
         validateUserCanAccessSchool(user, schoolId);
@@ -507,8 +487,6 @@ public class AppointmentService {
     public AppointmentReportDto generateAppointmentReport(String reportType, Long schoolId,
                                                           LocalDate periodStart, LocalDate periodEnd,
                                                           HttpServletRequest request) {
-        log.info("Generating appointment report type: {} for school: {} from {} to {}",
-                reportType, schoolId, periodStart, periodEnd);
 
         User user = jwtService.getUser(request);
         validateUserCanAccessSchool(user, schoolId);
@@ -545,7 +523,6 @@ public class AppointmentService {
     @Transactional
     @CacheEvict(value = {"appointments", "school_availability"}, allEntries = true)
     public BulkAppointmentResultDto bulkUpdateAppointments(BulkAppointmentOperationDto bulkDto, HttpServletRequest request) {
-        log.info("Performing bulk operation: {} on {} appointments", bulkDto.getOperation(), bulkDto.getAppointmentIds().size());
 
         User user = jwtService.getUser(request);
         String operationId = UUID.randomUUID().toString();
@@ -590,8 +567,6 @@ public class AppointmentService {
 
         result.setSuccess(result.getFailedOperations() == 0);
 
-        log.info("Bulk operation completed. Success: {}, Failed: {}",
-                result.getSuccessfulOperations(), result.getFailedOperations());
 
         return result;
     }
@@ -600,7 +575,6 @@ public class AppointmentService {
 
     @Transactional
     public AppointmentWaitlistDto addToWaitlist(AppointmentWaitlistCreateDto createDto, HttpServletRequest request) {
-        log.info("Adding to waitlist for school: {}", createDto.getSchoolId());
 
         User user = jwtService.getUser(request);
 
@@ -1192,7 +1166,6 @@ public class AppointmentService {
     // ================================ PUBLIC METHODS (NO AUTH REQUIRED) ================================
 
     public List<AppointmentAvailabilityDto> getPublicSchoolAvailability(Long schoolId, LocalDate date) {
-        log.info("Fetching public availability for school: {} to {}", schoolId, date);
 
         School school = schoolRepository.findByIdAndIsActiveTrueAndCampusIsSubscribedTrue(schoolId)
                 .orElseThrow(() -> new ResourceNotFoundException("School not found or not available for public booking"));
@@ -1203,7 +1176,6 @@ public class AppointmentService {
     @Transactional
     public AppointmentDto createPublicAppointment(AppointmentCreateDto createDto) {
         /*
-        log.info("Creating public appointment for school: {}", createDto.getSchoolId());
 
         School school = schoolRepository.findByIdAndIsActiveTrueAndCampusIsSubscribedTrue(createDto.getSchoolId())
                 .orElseThrow(() -> new ResourceNotFoundException("School not found or not available for booking"));
@@ -1255,7 +1227,6 @@ public class AppointmentService {
 
         appointment = appointmentRepository.save(appointment);
 
-        log.info("Public appointment created with ID: {} and number: {}", appointment.getId(), appointmentNumber);
 
         return converterService.mapToDto(appointment);
 
@@ -1264,7 +1235,6 @@ public class AppointmentService {
     }
 
     public AppointmentDto getPublicAppointmentByNumber(String appointmentNumber) {
-        log.info("Fetching public appointment with number: {}", appointmentNumber);
 
         Appointment appointment = appointmentRepository.findByAppointmentNumberAndIsActiveTrue(appointmentNumber)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with number: " + appointmentNumber));
@@ -1275,7 +1245,6 @@ public class AppointmentService {
 
     @Transactional
     public AppointmentDto cancelPublicAppointment(String appointmentNumber, String cancellationReason) {
-        log.info("Canceling public appointment with number: {}", appointmentNumber);
 
         Appointment appointment = appointmentRepository.findByAppointmentNumberAndIsActiveTrue(appointmentNumber)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with number: " + appointmentNumber));
@@ -1291,7 +1260,6 @@ public class AppointmentService {
 
         appointment = appointmentRepository.save(appointment);
 
-        log.info("Public appointment canceled with number: {}", appointmentNumber);
 
         return converterService.mapToPublicAppointmentDto(appointment);
     }
@@ -1304,7 +1272,6 @@ public class AppointmentService {
     public List<AppointmentMetricsDto> getAppointmentMetrics(Long schoolId, LocalDate periodStart,
                                                              LocalDate periodEnd, String metricType,
                                                              HttpServletRequest request) {
-        log.info("Fetching appointment metrics for school: {} type: {}", schoolId, metricType);
 
         User user = jwtService.getUser(request);
         validateUserCanAccessSchool(user, schoolId);
@@ -1316,7 +1283,6 @@ public class AppointmentService {
 
     public List<TimeSlotAnalysisDto> getTimeSlotAnalysis(Long schoolId, LocalDate periodStart,
                                                          LocalDate periodEnd, HttpServletRequest request) {
-        log.info("Fetching time slot analysis for school: {}", schoolId);
 
         User user = jwtService.getUser(request);
         validateUserCanAccessSchool(user, schoolId);
@@ -1326,7 +1292,6 @@ public class AppointmentService {
 
     public Map<String, Object> getAppointmentTrends(Long schoolId, LocalDate periodStart,
                                                     LocalDate periodEnd, HttpServletRequest request) {
-        log.info("Fetching appointment trends for school: {}", schoolId);
 
         User user = jwtService.getUser(request);
         validateUserCanAccessSchool(user, schoolId);
@@ -1360,7 +1325,6 @@ public class AppointmentService {
 
     @Transactional
     public void sendAppointmentNotifications(AppointmentNotificationDto notificationDto, HttpServletRequest request) {
-        log.info("Sending appointment notifications for appointment: {}", notificationDto.getAppointmentId());
 
         User user = jwtService.getUser(request);
         Appointment appointment = appointmentRepository.findByIdAndIsActiveTrue(notificationDto.getAppointmentId())
@@ -1375,12 +1339,10 @@ public class AppointmentService {
         // 4. Template processing
         // 5. Scheduling for future delivery
 
-        log.info("Notifications sent successfully for appointment: {}", appointment.getId());
     }
 
     @Transactional
     public void sendAppointmentReminders(HttpServletRequest request) {
-        log.info("Processing appointment reminders");
 
         User user = jwtService.getUser(request);
         if (!hasSystemRole(user)) {
@@ -1398,13 +1360,11 @@ public class AppointmentService {
                 appointment.setReminderSentAt(LocalDateTime.now());
                 appointmentRepository.save(appointment);
 
-                log.info("Reminder sent for appointment: {}", appointment.getId());
             } catch (Exception e) {
                 log.error("Failed to send reminder for appointment: {}", appointment.getId(), e);
             }
         }
 
-        log.info("Processed {} appointment reminders", appointmentsNeedingReminder.size());
     }
 
     // ================================ INTEGRATION METHODS ================================
@@ -1412,7 +1372,6 @@ public class AppointmentService {
     @Transactional
     public AppointmentIntegrationDto syncWithExternalCalendar(Long appointmentId, String integrationType,
                                                               HttpServletRequest request) {
-        log.info("Syncing appointment {} with external calendar: {}", appointmentId, integrationType);
 
         User user = jwtService.getUser(request);
         Appointment appointment = appointmentRepository.findByIdAndIsActiveTrue(appointmentId)
@@ -1437,7 +1396,6 @@ public class AppointmentService {
 
     @Transactional
     public Map<String, Integer> archiveOldAppointments(Integer daysOld, HttpServletRequest request) {
-        log.info("Archiving appointments older than {} days", daysOld);
 
         User user = jwtService.getUser(request);
         if (!hasSystemRole(user)) {
@@ -1451,14 +1409,12 @@ public class AppointmentService {
         result.put("archivedCount", archivedCount);
         result.put("cutoffDays", daysOld);
 
-        log.info("Archived {} old appointments", archivedCount);
 
         return result;
     }
 
     @Transactional
     public Map<String, Integer> cleanupExpiredSlots(HttpServletRequest request) {
-        log.info("Cleaning up expired appointment slots");
 
         User user = jwtService.getUser(request);
         if (!hasSystemRole(user)) {
@@ -1470,7 +1426,6 @@ public class AppointmentService {
         Map<String, Integer> result = new java.util.HashMap<>();
         result.put("cleanedCount", cleanedCount);
 
-        log.info("Cleaned up {} expired appointment slots", cleanedCount);
 
         return result;
     }
@@ -1770,7 +1725,6 @@ public class AppointmentService {
         appointment.setConfirmedBy(user.getId());
         appointment.setConfirmedAt(LocalDateTime.now());
         appointmentRepository.saveAndFlush(appointment);
-        log.info("Appointment confim. Old ID: {}, New ID: {}", appointment.getId(), appointment.getId());
         return converterService.mapToDto(appointment);
     }
 

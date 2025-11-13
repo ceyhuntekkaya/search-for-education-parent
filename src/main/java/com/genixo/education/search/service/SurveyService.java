@@ -60,7 +60,6 @@ public class SurveyService {
     @Transactional
     @CacheEvict(value = {"surveys", "survey_analytics"}, allEntries = true)
     public SurveyDto createSurvey(SurveyCreateDto createDto, HttpServletRequest request) {
-        log.info("Creating new survey: {}", createDto.getTitle());
 
         User user = jwtService.getUser(request);
         validateUserCanManageSurveys(user);
@@ -101,13 +100,11 @@ public class SurveyService {
             createSurveyQuestions(survey, createDto.getQuestions(), user.getId());
         }
 
-        log.info("Survey created successfully with ID: {}", survey.getId());
         return converterService.mapToDto(survey);
     }
 
     @Cacheable(value = "surveys", key = "#id")
     public SurveyDto getSurveyById(Long id, HttpServletRequest request) {
-        log.info("Fetching survey with ID: {}", id);
 
         User user = jwtService.getUser(request);
         Survey survey = surveyRepository.findByIdAndIsActiveTrue(id)
@@ -121,7 +118,6 @@ public class SurveyService {
     @Transactional
     @CacheEvict(value = {"surveys", "survey_analytics"}, allEntries = true)
     public SurveyDto updateSurvey(Long id, SurveyCreateDto updateDto, HttpServletRequest request) {
-        log.info("Updating survey with ID: {}", id);
 
         User user = jwtService.getUser(request);
         Survey survey = surveyRepository.findByIdAndIsActiveTrue(id)
@@ -160,7 +156,6 @@ public class SurveyService {
         survey.setUpdatedBy(user.getId());
 
         survey = surveyRepository.save(survey);
-        log.info("Survey updated successfully with ID: {}", survey.getId());
 
         return converterService.mapToDto(survey);
     }
@@ -168,7 +163,6 @@ public class SurveyService {
     @Transactional
     @CacheEvict(value = {"surveys", "survey_analytics"}, allEntries = true)
     public void deleteSurvey(Long id, HttpServletRequest request) {
-        log.info("Deleting survey with ID: {}", id);
 
         User user = jwtService.getUser(request);
         Survey survey = surveyRepository.findByIdAndIsActiveTrue(id)
@@ -186,11 +180,9 @@ public class SurveyService {
         survey.setUpdatedBy(user.getId());
         surveyRepository.save(survey);
 
-        log.info("Survey deleted successfully with ID: {}", id);
     }
 
     public Page<SurveyDto> searchSurveys(SurveySearchDto searchDto, HttpServletRequest request) {
-        log.info("Searching surveys with criteria: {}", searchDto.getSearchTerm());
 
         User user = jwtService.getUser(request);
 
@@ -228,7 +220,6 @@ public class SurveyService {
     @Transactional
     @CacheEvict(value = {"surveys"}, key = "#surveyId")
     public SurveyQuestionDto addQuestionToSurvey(Long surveyId, SurveyQuestionCreateDto createDto, HttpServletRequest request) {
-        log.info("Adding question to survey: {}", surveyId);
 
         User user = jwtService.getUser(request);
         Survey survey = surveyRepository.findByIdAndIsActiveTrue(surveyId)
@@ -268,7 +259,6 @@ public class SurveyService {
         question.setCreatedBy(user.getId());
 
         question = surveyQuestionRepository.save(question);
-        log.info("Question added to survey with ID: {}", question.getId());
 
         return converterService.mapQuestionToDto(question);
     }
@@ -276,7 +266,6 @@ public class SurveyService {
     @Transactional
     @CacheEvict(value = {"surveys"}, allEntries = true)
     public void deleteQuestion(Long questionId, HttpServletRequest request) {
-        log.info("Deleting survey question with ID: {}", questionId);
 
         User user = jwtService.getUser(request);
         SurveyQuestion question = surveyQuestionRepository.findByIdAndIsActiveTrue(questionId)
@@ -294,14 +283,12 @@ public class SurveyService {
         question.setUpdatedBy(user.getId());
         surveyQuestionRepository.save(question);
 
-        log.info("Survey question deleted successfully with ID: {}", questionId);
     }
 
     // ================================ SURVEY RESPONSE OPERATIONS ================================
 
     @Transactional
     public SurveyResponseDto createSurveyResponse(SurveyResponseCreateDto createDto) {
-        log.info("Creating survey response for survey: {}", createDto.getSurveyId());
 
         Survey survey = surveyRepository.findByIdAndIsActiveTrue(createDto.getSurveyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Survey not found with ID: " + createDto.getSurveyId()));
@@ -366,13 +353,11 @@ public class SurveyService {
             }
         }
 
-        log.info("Survey response created with ID: {}", response.getId());
         return converterService.mapResponseToDto(response);
     }
 
     @Transactional
     public SurveyResponseDto submitSurveyResponse(String responseToken, HttpServletRequest request) {
-        log.info("Submitting survey response with token: {}", responseToken);
 
         SurveyResponse response = surveyResponseRepository.findByResponseTokenAndIsActiveTrue(responseToken)
                 .orElseThrow(() -> new ResourceNotFoundException("Survey response not found with token: " + responseToken));
@@ -392,12 +377,10 @@ public class SurveyService {
         // Update survey statistics
         updateSurveyStatistics(response.getSurvey());
 
-        log.info("Survey response submitted successfully with ID: {}", response.getId());
         return converterService.mapResponseToDto(response);
     }
 
     public SurveyResponseDto getSurveyResponseByToken(String responseToken) {
-        log.info("Fetching survey response with token: {}", responseToken);
 
         SurveyResponse response = surveyResponseRepository.findByResponseTokenAndIsActiveTrue(responseToken)
                 .orElseThrow(() -> new ResourceNotFoundException("Survey response not found with token: " + responseToken));
@@ -406,7 +389,6 @@ public class SurveyService {
     }
 
     public Page<SurveyResponseDto> getSurveyResponses(Long surveyId, Pageable pageable, HttpServletRequest request) {
-        log.info("Fetching responses for survey: {}", surveyId);
 
         User user = jwtService.getUser(request);
         Survey survey = surveyRepository.findByIdAndIsActiveTrue(surveyId)
@@ -422,7 +404,6 @@ public class SurveyService {
 
     @Cacheable(value = "survey_analytics", key = "#surveyId")
     public SurveyAnalyticsDto getSurveyAnalytics(Long surveyId, HttpServletRequest request) {
-        log.info("Fetching analytics for survey: {}", surveyId);
 
         User user = jwtService.getUser(request);
         Survey survey = surveyRepository.findByIdAndIsActiveTrue(surveyId)
@@ -434,7 +415,6 @@ public class SurveyService {
     }
 
     public List<SatisfactionTrendDto> getSatisfactionTrends(Long schoolId, LocalDateTime fromDate, LocalDateTime toDate, HttpServletRequest request) {
-        log.info("Fetching satisfaction trends for school: {} from {} to {}", schoolId, fromDate, toDate);
 
         User user = jwtService.getUser(request);
         validateUserCanAccessSchool(user, schoolId);
@@ -443,7 +423,6 @@ public class SurveyService {
     }
 
     public List<SchoolSurveyPerformanceDto> getSchoolPerformanceComparison(List<Long> schoolIds, HttpServletRequest request) {
-        log.info("Fetching school performance comparison for {} schools", schoolIds.size());
 
         User user = jwtService.getUser(request);
 
@@ -459,7 +438,6 @@ public class SurveyService {
 
     @Transactional
     public BulkSurveyResultDto bulkSurveyOperation(BulkSurveyOperationDto bulkDto, HttpServletRequest request) {
-        log.info("Performing bulk survey operation: {}", bulkDto.getOperation());
 
         User user = jwtService.getUser(request);
 
@@ -671,7 +649,6 @@ public class SurveyService {
     private int sendSurveyInvitations(Survey survey, List<String> recipientEmails, String customMessage) {
         // This would integrate with email service
         // For now, just return the count
-        log.info("Sending survey invitations to {} recipients for survey: {}", recipientEmails.size(), survey.getId());
         return recipientEmails.size();
     }
 
@@ -680,7 +657,6 @@ public class SurveyService {
         List<SurveyResponse> incompleteResponses = surveyResponseRepository
                 .findIncompleteResponsesNeedingReminders(survey.getId(), survey.getMaxReminders());
 
-        log.info("Sending reminders to {} incomplete responses for survey: {}", incompleteResponses.size(), survey.getId());
 
         // This would integrate with email/SMS service
         for (SurveyResponse response : incompleteResponses) {
@@ -693,7 +669,6 @@ public class SurveyService {
 
     private String exportSurveyResponses(Survey survey, String format, Boolean includePersonalData) {
         // This would generate and return download URL for exported data
-        log.info("Exporting survey responses for survey: {} in format: {}", survey.getId(), format);
 
         String filename = "survey_" + survey.getId() + "_responses." + format.toLowerCase();
         String downloadUrl = "/api/surveys/" + survey.getId() + "/export/" + filename;
@@ -814,7 +789,6 @@ public class SurveyService {
     // ================================ PUBLIC SURVEY METHODS (NO AUTH REQUIRED) ================================
 
     public SurveyDto getPublicSurvey(Long surveyId) {
-        log.info("Public access to survey: {}", surveyId);
 
         Survey survey = surveyRepository.findByIdAndIsActiveTrueAndShowResultsToPublicTrue(surveyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Survey not found or not available for public access"));
@@ -823,7 +797,6 @@ public class SurveyService {
     }
 
     public SurveyDto getPublicSurveyByToken(String responseToken) {
-        log.info("Getting survey by response token: {}", responseToken);
 
         SurveyResponse response = surveyResponseRepository.findByResponseTokenAndIsActiveTrue(responseToken)
                 .orElseThrow(() -> new ResourceNotFoundException("Survey response not found with token: " + responseToken));
@@ -832,7 +805,6 @@ public class SurveyService {
     }
 
     public List<SurveyRatingDto> getPublicSchoolRatings(Long schoolId, RatingCategory category, Pageable pageable) {
-        log.info("Getting public ratings for school: {} category: {}", schoolId, category);
 
         School school = schoolRepository.findByIdAndIsActiveTrueAndCampusIsSubscribedTrue(schoolId)
                 .orElseThrow(() -> new ResourceNotFoundException("School not found or not available"));
@@ -846,7 +818,6 @@ public class SurveyService {
     }
 
     public Map<RatingCategory, Double> getPublicSchoolAverageRatings(Long schoolId) {
-        log.info("Getting average ratings for school: {}", schoolId);
 
         School school = schoolRepository.findByIdAndIsActiveTrueAndCampusIsSubscribedTrue(schoolId)
                 .orElseThrow(() -> new ResourceNotFoundException("School not found or not available"));
@@ -858,7 +829,6 @@ public class SurveyService {
 
     @Transactional
     public void moderateRating(Long ratingId, Boolean isPublic, String moderatorNotes, HttpServletRequest request) {
-        log.info("Moderating rating: {}", ratingId);
 
         User user = jwtService.getUser(request);
         SurveyRating rating = surveyRatingRepository.findByIdAndIsActiveTrue(ratingId)
@@ -871,12 +841,10 @@ public class SurveyService {
         rating.setUpdatedBy(user.getId());
 
         surveyRatingRepository.save(rating);
-        log.info("Rating moderated successfully: {}", ratingId);
     }
 
     @Transactional
     public void flagRating(Long ratingId, String flagReason, HttpServletRequest request) {
-        log.info("Flagging rating: {} with reason: {}", ratingId, flagReason);
 
         User user = jwtService.getUser(request);
         SurveyRating rating = surveyRatingRepository.findByIdAndIsActiveTrue(ratingId)
@@ -888,11 +856,9 @@ public class SurveyService {
         rating.setFlaggedAt(LocalDateTime.now());
 
         surveyRatingRepository.save(rating);
-        log.info("Rating flagged successfully: {}", ratingId);
     }
 
     public SurveyReportDto generateSurveyReport(Long surveyId, String reportType, LocalDate periodStart, LocalDate periodEnd, HttpServletRequest request) {
-        log.info("Generating survey report for survey: {} type: {}", surveyId, reportType);
 
         User user = jwtService.getUser(request);
         Survey survey = surveyRepository.findByIdAndIsActiveTrue(surveyId)

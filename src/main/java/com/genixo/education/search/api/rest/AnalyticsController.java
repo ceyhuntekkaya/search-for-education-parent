@@ -50,10 +50,7 @@ public class AnalyticsController {
             @Parameter(description = "Brand ID filter") @RequestParam(required = false) Long brandId,
             HttpServletRequest request) {
 
-        log.info("Get analytics dashboard request for period: {} to {}", startDate, endDate);
-
         AnalyticsDashboardDto dashboard = analyticsService.getDashboard(startDate, endDate, schoolId, campusId, brandId, request);
-
         ApiResponse<AnalyticsDashboardDto> response = ApiResponse.success(dashboard, "Dashboard data retrieved successfully");
         response.setPath(request.getRequestURI());
         response.setTimestamp(java.time.LocalDateTime.now());
@@ -119,8 +116,6 @@ public class AnalyticsController {
     public ResponseEntity<ApiResponse<AnalyticsComparisonDto>> compareAnalytics(
             @Valid @RequestBody AnalyticsComparisonRequestDto comparisonRequest,
             HttpServletRequest request) {
-
-        log.info("Compare analytics request between periods");
 
         AnalyticsComparisonDto comparison = analyticsService.compareAnalytics(
                 comparisonRequest.getStartDate(),
@@ -363,8 +358,6 @@ public class AnalyticsController {
             @Valid @RequestBody AnalyticsExportDto exportRequest,
             HttpServletRequest request) {
 
-        log.info("Request analytics export: {}", exportRequest.getExportName());
-
         AnalyticsExportDto export = analyticsService.requestExport(exportRequest, request);
 
         ApiResponse<AnalyticsExportDto> response = ApiResponse.success(export, "Export request accepted");
@@ -415,8 +408,6 @@ public class AnalyticsController {
             @Valid @RequestBody AnalyticsAlertDto alertDto,
             HttpServletRequest request) {
 
-        log.info("Create analytics alert request: {}", alertDto.getAlertName());
-
         AnalyticsAlertDto createdAlert = analyticsService.createAlert(alertDto, request);
 
         ApiResponse<AnalyticsAlertDto> response = ApiResponse.success(createdAlert, "Alert created successfully");
@@ -459,7 +450,6 @@ public class AnalyticsController {
             @Valid @RequestBody AnalyticsQueryDto queryDto,
             HttpServletRequest request) {
 
-        log.info("Execute custom analytics query: {}", queryDto.getQueryName());
 
         AnalyticsResultDto result = analyticsService.executeCustomQuery(queryDto, request);
 
@@ -483,7 +473,6 @@ public class AnalyticsController {
             @Valid @RequestBody ReportGenerationRequestDto reportRequest,
             HttpServletRequest request) {
 
-        log.info("Generate analytics report request: {}", reportRequest.getReportType());
 
         AnalyticsReportDto report = analyticsService.generateReport(
                 reportRequest.getReportType(),
@@ -513,7 +502,6 @@ public class AnalyticsController {
     public ResponseEntity<ApiResponse<Void>> clearAnalyticsCache(
             HttpServletRequest request) {
 
-        log.info("Clear analytics cache request");
 
         analyticsService.clearAnalyticsCache();
 

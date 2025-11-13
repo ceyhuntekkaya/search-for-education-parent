@@ -43,7 +43,6 @@ public class LocationService {
 
     @Cacheable(value = "countries")
     public List<CountryDto> getAllCountries() {
-        log.info("Fetching all countries");
 
         List<Country> countries = countryRepository.findAllByIsActiveTrueOrderBySortOrderAscNameAsc();
         return countries.stream()
@@ -53,7 +52,6 @@ public class LocationService {
 
     @Cacheable(value = "supported_countries")
     public List<CountrySummaryDto> getSupportedCountries() {
-        log.info("Fetching supported countries");
 
         List<Country> countries = countryRepository.findBySupportedTrueAndIsActiveTrueOrderBySortOrderAscNameAsc();
         return countries.stream()
@@ -63,7 +61,6 @@ public class LocationService {
 
     @Cacheable(value = "countries", key = "#id")
     public CountryDto getCountryById(Long id) {
-        log.info("Fetching country with ID: {}", id);
 
         Country country = countryRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Country", id));
@@ -73,7 +70,6 @@ public class LocationService {
 
     @Cacheable(value = "countries", key = "#id")
     public Country getCountryClassById(Long id) {
-        log.info("Fetching country with ID: {}", id);
 
         Country country = countryRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Country", id));
@@ -83,7 +79,6 @@ public class LocationService {
 
     @Cacheable(value = "countries", key = "#isoCode2")
     public CountryDto getCountryByIsoCode(String isoCode2) {
-        log.info("Fetching country with ISO code: {}", isoCode2);
 
         Country country = countryRepository.findByIsoCode2AndIsActiveTrue(isoCode2.toUpperCase())
                 .orElseThrow(() -> new ResourceNotFoundException("Country not found with ISO code: " + isoCode2));
@@ -94,7 +89,6 @@ public class LocationService {
     @Transactional
     @CacheEvict(value = {"countries", "supported_countries"}, allEntries = true)
     public CountryDto createCountry(CountryDto countryDto, HttpServletRequest request) {
-        log.info("Creating new country: {}", countryDto.getName());
 
         User user = jwtService.getUser(request);
         validateSystemAdminAccess(user);
@@ -125,7 +119,6 @@ public class LocationService {
         country.setCreatedBy(user.getId());
 
         country = countryRepository.save(country);
-        log.info("Country created with ID: {}", country.getId());
 
         return converterService.mapToDto(country);
     }
@@ -133,7 +126,6 @@ public class LocationService {
     @Transactional
     @CacheEvict(value = {"countries", "supported_countries"}, allEntries = true)
     public CountryDto updateCountry(Long id, LocationUpdateDto updateDto, HttpServletRequest request) {
-        log.info("Updating country with ID: {}", id);
 
         User user = jwtService.getUser(request);
         validateSystemAdminAccess(user);
@@ -163,7 +155,6 @@ public class LocationService {
         country.setUpdatedBy(user.getId());
         country = countryRepository.save(country);
 
-        log.info("Country updated with ID: {}", id);
         return converterService.mapToDto(country);
     }
 
@@ -171,7 +162,6 @@ public class LocationService {
 
     @Cacheable(value = "provinces", key = "#countryId")
     public List<ProvinceSummaryDto> getProvincesByCountry(Long countryId) {
-        log.info("Fetching provinces for country: {}", countryId);
 
         List<Province> provinces = provinceRepository.findByCountryIdAndIsActiveTrueOrderBySortOrderAscNameAsc(countryId);
         return provinces.stream()
@@ -181,7 +171,6 @@ public class LocationService {
 
     @Cacheable(value = "provinces", key = "#id")
     public ProvinceDto getProvinceById(Long id) {
-        log.info("Fetching province with ID: {}", id);
 
         Province province = provinceRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Province", id));
@@ -192,7 +181,6 @@ public class LocationService {
 
     @Cacheable(value = "provinces", key = "#id")
     public Province getProvinceClassById(Long id) {
-        log.info("Fetching province with ID: {}", id);
 
         Province province = provinceRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Province", id));
@@ -202,7 +190,6 @@ public class LocationService {
 
     @Cacheable(value = "provinces", key = "#slug")
     public ProvinceDto getProvinceBySlug(String slug) {
-        log.info("Fetching province with slug: {}", slug);
 
         Province province = provinceRepository.findBySlugAndIsActiveTrue(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Province not found with slug: " + slug));
@@ -213,7 +200,6 @@ public class LocationService {
     @Transactional
     @CacheEvict(value = {"provinces", "province_summaries"}, allEntries = true)
     public ProvinceDto createProvince(LocationCreateDto createDto, HttpServletRequest request) {
-        log.info("Creating new province: {}", createDto.getName());
 
         User user = jwtService.getUser(request);
         validateSystemAdminAccess(user);
@@ -249,13 +235,11 @@ public class LocationService {
         province.setCreatedBy(user.getId());
 
         province = provinceRepository.save(province);
-        log.info("Province created with ID: {}", province.getId());
 
         return converterService.mapToDto(province);
     }
 
     public List<ProvinceSummaryDto> getMetropolitanProvinces() {
-        log.info("Fetching metropolitan provinces");
 
         List<Province> provinces = provinceRepository.findByIsMetropolitanTrueAndIsActiveTrueOrderByNameAsc();
         return provinces.stream()
@@ -267,7 +251,6 @@ public class LocationService {
 
     @Cacheable(value = "districts", key = "#provinceId")
     public List<DistrictSummaryDto> getDistrictsByProvince(Long provinceId) {
-        log.info("Fetching districts for province: {}", provinceId);
 
         List<District> districts = districtRepository.findByProvinceIdAndIsActiveTrueOrderBySortOrderAscNameAsc(provinceId);
         return districts.stream()
@@ -277,7 +260,6 @@ public class LocationService {
 
     @Cacheable(value = "districts", key = "#id")
     public DistrictDto getDistrictById(Long id) {
-        log.info("Fetching district with ID: {}", id);
 
         District district = districtRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("District", id));
@@ -288,7 +270,6 @@ public class LocationService {
 
     @Cacheable(value = "districts", key = "#id")
     public District getDistrictClassById(Long id) {
-        log.info("Fetching district with ID: {}", id);
 
         District district = districtRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("District", id));
@@ -298,7 +279,6 @@ public class LocationService {
 
     @Cacheable(value = "districts", key = "#slug")
     public DistrictDto getDistrictBySlug(String slug) {
-        log.info("Fetching district with slug: {}", slug);
 
         District district = districtRepository.findBySlugAndIsActiveTrue(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("District not found with slug: " + slug));
@@ -309,7 +289,6 @@ public class LocationService {
     @Transactional
     @CacheEvict(value = {"districts", "district_summaries"}, allEntries = true)
     public DistrictDto createDistrict(LocationCreateDto createDto, HttpServletRequest request) {
-        log.info("Creating new district: {}", createDto.getName());
 
         User user = jwtService.getUser(request);
         validateSystemAdminAccess(user);
@@ -340,13 +319,11 @@ public class LocationService {
         district.setCreatedBy(user.getId());
 
         district = districtRepository.save(district);
-        log.info("District created with ID: {}", district.getId());
 
         return converterService.mapToDto(district);
     }
 
     public List<DistrictSummaryDto> getCentralDistricts(Long provinceId) {
-        log.info("Fetching central districts for province: {}", provinceId);
 
         List<District> districts = districtRepository.findByProvinceIdAndIsCentralTrueAndIsActiveTrueOrderByNameAsc(provinceId);
         return districts.stream()
@@ -358,7 +335,6 @@ public class LocationService {
 
     @Cacheable(value = "neighborhoods", key = "#districtId")
     public List<NeighborhoodSummaryDto> getNeighborhoodsByDistrict(Long districtId) {
-        log.info("Fetching neighborhoods for district: {}", districtId);
 
         List<Neighborhood> neighborhoods = neighborhoodRepository.findByDistrictIdAndIsActiveTrueOrderBySortOrderAscNameAsc(districtId);
         return neighborhoods.stream()
@@ -368,7 +344,6 @@ public class LocationService {
 
     @Cacheable(value = "neighborhoods", key = "#id")
     public NeighborhoodDto getNeighborhoodById(Long id) {
-        log.info("Fetching neighborhood with ID: {}", id);
 
         Neighborhood neighborhood = neighborhoodRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Neighborhood", id));
@@ -378,7 +353,6 @@ public class LocationService {
 
     @Cacheable(value = "neighborhoods", key = "#slug")
     public NeighborhoodDto getNeighborhoodBySlug(String slug) {
-        log.info("Fetching neighborhood with slug: {}", slug);
 
         Neighborhood neighborhood = neighborhoodRepository.findBySlugAndIsActiveTrue(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Neighborhood not found with slug: " + slug));
@@ -389,7 +363,6 @@ public class LocationService {
     @Transactional
     @CacheEvict(value = {"neighborhoods", "neighborhood_summaries"}, allEntries = true)
     public NeighborhoodDto createNeighborhood(LocationCreateDto createDto, HttpServletRequest request) {
-        log.info("Creating new neighborhood: {}", createDto.getName());
 
         User user = jwtService.getUser(request);
         validateSystemAdminAccess(user);
@@ -420,7 +393,6 @@ public class LocationService {
         neighborhood.setCreatedBy(user.getId());
 
         neighborhood = neighborhoodRepository.save(neighborhood);
-        log.info("Neighborhood created with ID: {}", neighborhood.getId());
 
         return converterService.mapToDto(neighborhood);
     }
@@ -428,7 +400,6 @@ public class LocationService {
     // ================================ SEARCH OPERATIONS ================================
 
     public Page<LocationSuggestionDto> searchLocations(LocationSearchDto searchDto) {
-        log.info("Searching locations with term: {}", searchDto.getSearchTerm());
 
         Pageable pageable = PageRequest.of(
                 searchDto.getPage() != null ? searchDto.getPage() : 0,
@@ -480,7 +451,6 @@ public class LocationService {
 
     @Cacheable(value = "location_suggestions", key = "#query")
     public List<LocationSuggestionDto> getLocationSuggestions(String query, int limit) {
-        log.info("Getting location suggestions for: {}", query);
 
         List<LocationSuggestionDto> suggestions = List.of();
 
@@ -494,7 +464,6 @@ public class LocationService {
     // ================================ LOCATION HIERARCHY ================================
 
     public LocationHierarchyDto getLocationHierarchy(Long neighborhoodId) {
-        log.info("Getting location hierarchy for neighborhood: {}", neighborhoodId);
 
         Neighborhood neighborhood = neighborhoodRepository.findByIdAndIsActiveTrue(neighborhoodId)
                 .orElseThrow(() -> new ResourceNotFoundException("Neighborhood", neighborhoodId));
@@ -508,7 +477,6 @@ public class LocationService {
     }
 
     public LocationHierarchyDto getLocationHierarchyByDistrict(Long districtId) {
-        log.info("Getting location hierarchy for district: {}", districtId);
 
         District district = districtRepository.findByIdAndIsActiveTrue(districtId)
                 .orElseThrow(() -> new ResourceNotFoundException("District", districtId));
@@ -523,7 +491,6 @@ public class LocationService {
     // ================================ NEARBY LOCATIONS ================================
 
     public NearbyLocationsDto getNearbyLocations(Double latitude, Double longitude, Double radiusKm, Integer limit) {
-        log.info("Finding locations near coordinates: {}, {} within {} km", latitude, longitude, radiusKm);
 
         List<Neighborhood> nearbyNeighborhoods = neighborhoodRepository.findNearbyNeighborhoods(
                 latitude, longitude, radiusKm, Pageable.ofSize(limit != null ? limit : 50));
@@ -556,7 +523,6 @@ public class LocationService {
 
     @Cacheable(value = "location_statistics")
     public LocationStatisticsDto getLocationStatistics() {
-        log.info("Fetching location statistics");
 
         return LocationStatisticsDto.builder()
                 .totalCountries(countryRepository.countByIsActiveTrue())
@@ -577,7 +543,6 @@ public class LocationService {
     @Transactional
     @CacheEvict(value = {"countries", "provinces", "districts", "neighborhoods"}, allEntries = true)
     public LocationImportResultDto bulkImportLocations(BulkLocationImportDto importDto, HttpServletRequest request) {
-        log.info("Starting bulk location import from: {}", importDto.getFileUrl());
 
         User user = jwtService.getUser(request);
         validateSystemAdminAccess(user);
@@ -744,7 +709,6 @@ public class LocationService {
     @Transactional
     @CacheEvict(value = {"provinces", "province_summaries"}, allEntries = true)
     public ProvinceDto updateProvince(Long id, LocationUpdateDto updateDto, HttpServletRequest request) {
-        log.info("Updating province with ID: {}", id);
 
         User user = jwtService.getUser(request);
         validateSystemAdminAccess(user);
@@ -784,14 +748,12 @@ public class LocationService {
         province.setUpdatedBy(user.getId());
         province = provinceRepository.save(province);
 
-        log.info("Province updated with ID: {}", id);
         return converterService.mapToDto(province);
     }
 
     @Transactional
     @CacheEvict(value = {"districts", "district_summaries"}, allEntries = true)
     public DistrictDto updateDistrict(Long id, LocationUpdateDto updateDto, HttpServletRequest request) {
-        log.info("Updating district with ID: {}", id);
 
         User user = jwtService.getUser(request);
         validateSystemAdminAccess(user);
@@ -831,14 +793,12 @@ public class LocationService {
         district.setUpdatedBy(user.getId());
         district = districtRepository.save(district);
 
-        log.info("District updated with ID: {}", id);
         return converterService.mapToDto(district);
     }
 
     @Transactional
     @CacheEvict(value = {"neighborhoods", "neighborhood_summaries"}, allEntries = true)
     public NeighborhoodDto updateNeighborhood(Long id, LocationUpdateDto updateDto, HttpServletRequest request) {
-        log.info("Updating neighborhood with ID: {}", id);
 
         User user = jwtService.getUser(request);
         validateSystemAdminAccess(user);
@@ -878,7 +838,6 @@ public class LocationService {
         neighborhood.setUpdatedBy(user.getId());
         neighborhood = neighborhoodRepository.save(neighborhood);
 
-        log.info("Neighborhood updated with ID: {}", id);
         return converterService.mapToDto(neighborhood);
     }
 
@@ -887,7 +846,6 @@ public class LocationService {
     @Transactional
     @CacheEvict(value = {"countries", "supported_countries"}, allEntries = true)
     public void deleteCountry(Long id, HttpServletRequest request) {
-        log.info("Deleting country with ID: {}", id);
 
         User user = jwtService.getUser(request);
         validateSystemAdminAccess(user);
@@ -904,13 +862,11 @@ public class LocationService {
         country.setUpdatedBy(user.getId());
         countryRepository.save(country);
 
-        log.info("Country soft deleted with ID: {}", id);
     }
 
     @Transactional
     @CacheEvict(value = {"provinces", "province_summaries"}, allEntries = true)
     public void deleteProvince(Long id, HttpServletRequest request) {
-        log.info("Deleting province with ID: {}", id);
 
         User user = jwtService.getUser(request);
         validateSystemAdminAccess(user);
@@ -927,13 +883,11 @@ public class LocationService {
         province.setUpdatedBy(user.getId());
         provinceRepository.save(province);
 
-        log.info("Province soft deleted with ID: {}", id);
     }
 
     @Transactional
     @CacheEvict(value = {"districts", "district_summaries"}, allEntries = true)
     public void deleteDistrict(Long id, HttpServletRequest request) {
-        log.info("Deleting district with ID: {}", id);
 
         User user = jwtService.getUser(request);
         validateSystemAdminAccess(user);
@@ -950,13 +904,11 @@ public class LocationService {
         district.setUpdatedBy(user.getId());
         districtRepository.save(district);
 
-        log.info("District soft deleted with ID: {}", id);
     }
 
     @Transactional
     @CacheEvict(value = {"neighborhoods", "neighborhood_summaries"}, allEntries = true)
     public void deleteNeighborhood(Long id, HttpServletRequest request) {
-        log.info("Deleting neighborhood with ID: {}", id);
 
         User user = jwtService.getUser(request);
         validateSystemAdminAccess(user);
@@ -971,13 +923,11 @@ public class LocationService {
         neighborhood.setUpdatedBy(user.getId());
         neighborhoodRepository.save(neighborhood);
 
-        log.info("Neighborhood soft deleted with ID: {}", id);
     }
 
     // ================================ SPECIAL QUERIES ================================
 
     public List<NeighborhoodSummaryDto> getPopularNeighborhoodsForSchools() {
-        log.info("Fetching popular neighborhoods for schools");
 
         List<Neighborhood> neighborhoods = neighborhoodRepository.findTopNeighborhoodsBySchoolCount(Pageable.ofSize(20));
         return neighborhoods.stream()
@@ -986,7 +936,6 @@ public class LocationService {
     }
 
     public List<DistrictSummaryDto> getHighSocioeconomicDistricts() {
-        log.info("Fetching districts with high socioeconomic levels");
 
         List<District> districts = districtRepository.findByHighSocioeconomicLevels();
         return districts.stream()
@@ -995,7 +944,6 @@ public class LocationService {
     }
 
     public List<NeighborhoodSummaryDto> getNeighborhoodsWithMetroAccess(Long districtId) {
-        log.info("Fetching neighborhoods with metro access for district: {}", districtId);
 
         List<Neighborhood> neighborhoods = neighborhoodRepository.findByDistrictIdAndHasMetroStationTrueAndIsActiveTrueOrderByNameAsc(districtId);
         return neighborhoods.stream()
@@ -1004,7 +952,6 @@ public class LocationService {
     }
 
     public List<NeighborhoodSummaryDto> getFamilyFriendlyNeighborhoods(Long districtId, Integer minScore) {
-        log.info("Fetching family-friendly neighborhoods for district: {} with min score: {}", districtId, minScore);
 
         List<Neighborhood> neighborhoods = neighborhoodRepository.findFamilyFriendlyNeighborhoods(districtId, minScore);
         return neighborhoods.stream()
@@ -1015,7 +962,6 @@ public class LocationService {
     // ================================ VALIDATION METHODS ================================
 
     public boolean isValidLocationHierarchy(Long countryId, Long provinceId, Long districtId, Long neighborhoodId) {
-        log.info("Validating location hierarchy");
 
         if (neighborhoodId != null) {
             return neighborhoodRepository.existsByValidHierarchy(neighborhoodId, districtId, provinceId, countryId);
@@ -1029,7 +975,6 @@ public class LocationService {
     }
 
     public boolean hasSchoolsInLocation(String locationType, Long locationId) {
-        log.info("Checking if location has schools: {} - {}", locationType, locationId);
 
         return switch (locationType.toUpperCase()) {
             case "NEIGHBORHOOD" -> neighborhoodRepository.hasActiveSchools(locationId);

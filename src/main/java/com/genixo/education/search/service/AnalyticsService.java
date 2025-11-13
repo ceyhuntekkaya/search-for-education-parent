@@ -45,7 +45,6 @@ public class AnalyticsService {
     public AnalyticsDashboardDto getDashboard(LocalDate startDate, LocalDate endDate,
                                               Long schoolId, Long campusId, Long brandId,
                                               HttpServletRequest request) {
-        log.info("Generating analytics dashboard for period: {} to {}", startDate, endDate);
 
         User user = jwtService.getUser(request);
         validateUserAnalyticsAccess(user, schoolId, campusId, brandId);
@@ -152,7 +151,6 @@ public class AnalyticsService {
 
     public Page<VisitorLogDto> getVisitorLogs(AnalyticsFilterDto filter, int page, int size,
                                               HttpServletRequest request) {
-        log.info("Getting visitor logs with filter: {}", filter);
 
         User user = jwtService.getUser(request);
         validateUserAnalyticsAccess(user, filter.getSchoolId(), filter.getCampusId(), filter.getBrandId());
@@ -175,7 +173,6 @@ public class AnalyticsService {
     public List<VisitorLogSummaryDto> getVisitorSummary(LocalDate startDate, LocalDate endDate,
                                                         Long schoolId, Long campusId, Long brandId,
                                                         HttpServletRequest request) {
-        log.info("Getting visitor summary for period: {} to {}", startDate, endDate);
 
         User user = jwtService.getUser(request);
         validateUserAnalyticsAccess(user, schoolId, campusId, brandId);
@@ -225,7 +222,6 @@ public class AnalyticsService {
 
     public Page<SearchLogDto> getSearchLogs(AnalyticsFilterDto filter, int page, int size,
                                             HttpServletRequest request) {
-        log.info("Getting search logs with filter: {}", filter);
 
         User user = jwtService.getUser(request);
         validateUserAnalyticsAccess(user, filter.getSchoolId(), filter.getCampusId(), filter.getBrandId());
@@ -248,7 +244,6 @@ public class AnalyticsService {
     public List<SearchLogSummaryDto> getSearchSummary(LocalDate startDate, LocalDate endDate,
                                                       Long schoolId, Long campusId, Long brandId,
                                                       HttpServletRequest request) {
-        log.info("Getting search summary for period: {} to {}", startDate, endDate);
 
         User user = jwtService.getUser(request);
         validateUserAnalyticsAccess(user, schoolId, campusId, brandId);
@@ -323,7 +318,6 @@ public class AnalyticsService {
     public List<PerformanceSummaryDto> getPerformanceSummary(LocalDate startDate, LocalDate endDate,
                                                              PerformanceMetricCategory category,
                                                              HttpServletRequest request) {
-        log.info("Getting performance summary for period: {} to {}, category: {}", startDate, endDate, category);
 
         User user = jwtService.getUser(request);
         validateUserSystemAccess(user);
@@ -335,7 +329,6 @@ public class AnalyticsService {
 
     public Page<AnalyticsDto> getAnalyticsData(AnalyticsFilterDto filter, int page, int size,
                                                HttpServletRequest request) {
-        log.info("Getting analytics data with filter: {}", filter);
 
         User user = jwtService.getUser(request);
         validateUserAnalyticsAccess(user, filter.getSchoolId(), filter.getCampusId(), filter.getBrandId());
@@ -360,7 +353,6 @@ public class AnalyticsService {
     @Cacheable(value = "analytics_summary", key = "#startDate + '_' + #endDate + '_' + #schoolId + '_' + #campusId + '_' + #brandId")
     public AnalyticsSummaryDto getAnalyticsSummary(LocalDate startDate, LocalDate endDate,
                                                    Long schoolId, Long campusId, Long brandId) {
-        log.info("Getting analytics summary for period: {} to {}", startDate, endDate);
 
         return analyticsRepository.getAnalyticsSummary(startDate, endDate, schoolId, campusId, brandId);
     }
@@ -369,7 +361,6 @@ public class AnalyticsService {
                                                    LocalDate compareStartDate, LocalDate compareEndDate,
                                                    Long schoolId, Long campusId, Long brandId,
                                                    HttpServletRequest request) {
-        log.info("Comparing analytics between periods");
 
         User user = jwtService.getUser(request);
         validateUserAnalyticsAccess(user, schoolId, campusId, brandId);
@@ -396,7 +387,6 @@ public class AnalyticsService {
 
     @Cacheable(value = "realtime_analytics", key = "'current'", unless = "#result == null")
     public RealTimeAnalyticsDto getRealTimeAnalytics(HttpServletRequest request) {
-        log.info("Getting real-time analytics");
 
         User user = jwtService.getUser(request);
         validateUserSystemAccess(user);
@@ -425,7 +415,6 @@ public class AnalyticsService {
 
     @Transactional
     public AnalyticsExportDto requestExport(AnalyticsExportDto exportRequest, HttpServletRequest request) {
-        log.info("Requesting analytics export: {}", exportRequest.getExportName());
 
         User user = jwtService.getUser(request);
         validateUserAnalyticsAccess(user, null, null, null);
@@ -704,7 +693,6 @@ public class AnalyticsService {
     private void processExportAsync(AnalyticsExportDto exportRequest) {
         // This would typically be handled by an async processor
         // For now, just log the request
-        log.info("Processing export request: {}", exportRequest.getExportId());
 
         // In a real implementation, this would:
         // 1. Queue the export job
@@ -719,7 +707,6 @@ public class AnalyticsService {
 
     @Transactional
     public AnalyticsAlertDto createAlert(AnalyticsAlertDto alertDto, HttpServletRequest request) {
-        log.info("Creating analytics alert: {}", alertDto.getAlertName());
 
         User user = jwtService.getUser(request);
         validateUserAnalyticsAccess(user, alertDto.getSchoolId(), alertDto.getCampusId(), alertDto.getBrandId());
@@ -731,7 +718,6 @@ public class AnalyticsService {
     }
 
     public List<AnalyticsAlertDto> getActiveAlerts(HttpServletRequest request) {
-        log.info("Getting active analytics alerts");
 
         User user = jwtService.getUser(request);
         validateUserSystemAccess(user);
@@ -743,7 +729,6 @@ public class AnalyticsService {
     // ================================ CUSTOM ANALYTICS QUERIES ================================
 
     public AnalyticsResultDto executeCustomQuery(AnalyticsQueryDto queryDto, HttpServletRequest request) {
-        log.info("Executing custom analytics query: {}", queryDto.getQueryName());
 
         User user = jwtService.getUser(request);
         validateUserAnalyticsAccess(user, null, null, null);
@@ -833,7 +818,6 @@ public class AnalyticsService {
     public AnalyticsReportDto generateReport(String reportType, LocalDate startDate, LocalDate endDate,
                                              Long schoolId, Long campusId, Long brandId,
                                              HttpServletRequest request) {
-        log.info("Generating analytics report: {} for period {} to {}", reportType, startDate, endDate);
 
         User user = jwtService.getUser(request);
         validateUserAnalyticsAccess(user, schoolId, campusId, brandId);
@@ -940,7 +924,6 @@ public class AnalyticsService {
 
     @CacheEvict(value = {"analytics_dashboard", "analytics_summary", "visitor_summary", "search_summary", "realtime_analytics"}, allEntries = true)
     public void clearAnalyticsCache() {
-        log.info("Clearing analytics cache");
     }
 
     @CacheEvict(value = "realtime_analytics", key = "'current'")

@@ -40,7 +40,6 @@ public class UserController {
             @Valid @RequestBody UserRegistrationDto registrationDto,
             HttpServletRequest request) {
 
-        log.info("User registration request for email: {}", registrationDto.getEmail());
 
         try {
             UserDto user = userService.registerUser(registrationDto);
@@ -91,7 +90,6 @@ public class UserController {
             @Valid @RequestBody EmailVerificationDto verificationDto,
             HttpServletRequest request) {
 
-        log.info("Email verification request with token: {}", verificationDto.getToken());
 
         try {
             userService.verifyEmail(verificationDto);
@@ -121,7 +119,6 @@ public class UserController {
             @Valid @RequestBody PhoneVerificationDto verificationDto,
             HttpServletRequest request) {
 
-        log.info("Phone verification request for: {}", verificationDto.getPhone());
 
         try {
             userService.verifyPhone(verificationDto);
@@ -153,7 +150,6 @@ public class UserController {
             @Valid @RequestBody PasswordResetDto passwordResetDto,
             HttpServletRequest request) {
 
-        log.info("Password reset request for: {}", passwordResetDto.getEmailOrPhone());
 
         try {
             userService.requestPasswordReset(passwordResetDto);
@@ -184,7 +180,6 @@ public class UserController {
             @Valid @RequestBody PasswordResetConfirmDto confirmDto,
             HttpServletRequest request) {
 
-        log.info("Password reset confirmation with token: {}", confirmDto.getToken());
 
         try {
             userService.confirmPasswordReset(confirmDto);
@@ -217,7 +212,6 @@ public class UserController {
             @Valid @RequestBody PasswordChangeDto passwordChangeDto,
             HttpServletRequest request) {
 
-        log.info("Password change request for user: {}", userId);
 
         try {
             userService.changePassword(userId, passwordChangeDto);
@@ -321,7 +315,6 @@ public class UserController {
             @Valid @RequestBody UserUpdateDto updateDto,
             HttpServletRequest request) {
 
-        log.info("Update user profile request for user: {}", userId);
 
         try {
             UserProfileDto profile = userService.updateUserProfile(userId, updateDto);
@@ -403,8 +396,6 @@ public class UserController {
             @Valid @RequestBody InstitutionAccessRequest accessRequest,
             HttpServletRequest request) {
 
-        log.info("Grant institution access request for user: {} to entity: {}",
-                userId, accessRequest.getEntityId());
 
         UserInstitutionAccessGrantDto grantDto = UserInstitutionAccessGrantDto.builder()
                 .userId(userId)
@@ -445,7 +436,6 @@ public class UserController {
             @Parameter(description = "Entity ID") @RequestParam Long entityId,
             HttpServletRequest request) {
 
-        log.info("Revoke institution access request for user: {} from entity: {}", userId, entityId);
 
         try {
             userService.revokeInstitutionAccess(userId, accessType, entityId);

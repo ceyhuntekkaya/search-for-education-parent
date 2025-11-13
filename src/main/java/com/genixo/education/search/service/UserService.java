@@ -56,7 +56,6 @@ public class UserService {
 
 
     public UserDto registerUser(UserRegistrationDto registrationDto) throws ValidationException {
-        log.info("Registering new user with email: {}", registrationDto.getEmail());
 
         // Validate registration data
         validateRegistrationData(registrationDto);
@@ -103,7 +102,6 @@ public class UserService {
         //     smsService.sendPhoneVerification(savedUser.getPhone(), savedUser.getPhoneVerificationCode());
         // }
 
-        log.info("User registered successfully with ID: {}", savedUser.getId());
         return converterService.mapToDto(savedUser);
     }
 
@@ -111,7 +109,6 @@ public class UserService {
      * Verify user email with token
      */
     public void verifyEmail(EmailVerificationDto verificationDto) throws ValidationException {
-        log.info("Verifying email with token: {}", verificationDto.getToken());
 
         User user = userRepository.findByEmailVerificationToken(verificationDto.getToken())
                 .orElseThrow(() -> new ValidationException("Invalid or expired verification token"));
@@ -120,14 +117,12 @@ public class UserService {
         user.setEmailVerificationToken(null);
         userRepository.save(user);
 
-        log.info("Email verified successfully for user ID: {}", user.getId());
     }
 
     /**
      * Verify user phone with code
      */
     public void verifyPhone(PhoneVerificationDto verificationDto) throws ValidationException {
-        log.info("Verifying phone: {}", verificationDto.getPhone());
 
         User user = userRepository.findByPhoneAndPhoneVerificationCode(
                         verificationDto.getPhone(), verificationDto.getVerificationCode())
@@ -137,7 +132,6 @@ public class UserService {
         user.setPhoneVerificationCode(null);
         userRepository.save(user);
 
-        log.info("Phone verified successfully for user ID: {}", user.getId());
     }
 
     /**
@@ -145,7 +139,6 @@ public class UserService {
      */
     @Transactional(readOnly = true)
     public UserDto authenticateUser(UserLoginDto loginDto) throws AuthenticationException {
-        log.info("Authenticating user: {}", loginDto.getEmailOrPhone());
 
         User user = userRepository.findByEmailOrPhone(loginDto.getEmailOrPhone(), loginDto.getEmailOrPhone())
                 .orElseThrow(() -> new AuthenticationException("Invalid email/phone or password"));
@@ -162,7 +155,6 @@ public class UserService {
         user.setLastLoginAt(LocalDateTime.now());
         userRepository.save(user);
 
-        log.info("User authenticated successfully: {}", user.getId());
         return converterService.mapToDto(user);
     }
 
@@ -197,7 +189,6 @@ public class UserService {
      * Update user profile
      */
     public UserProfileDto updateUserProfile(Long userId, UserUpdateDto updateDto) throws ValidationException {
-        log.info("Updating user profile for ID: {}", userId);
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
@@ -232,7 +223,6 @@ public class UserService {
 
         User updatedUser = userRepository.save(user);
 
-        log.info("User profile updated successfully for ID: {}", userId);
         return converterService.mapToProfileDto(updatedUser);
     }
 
@@ -240,7 +230,6 @@ public class UserService {
      * Change user password
      */
     public void changePassword(Long userId, PasswordChangeDto passwordChangeDto) throws ValidationException {
-        log.info("Changing password for user ID: {}", userId);
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
@@ -259,14 +248,12 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
         userRepository.save(user);
 
-        log.info("Password changed successfully for user ID: {}", userId);
     }
 
     /**
      * Reset password request
      */
     public void requestPasswordReset(PasswordResetDto passwordResetDto) {
-        log.info("Password reset requested for: {}", passwordResetDto.getEmailOrPhone());
 
         User user = userRepository.findByEmailOrPhone(passwordResetDto.getEmailOrPhone(), passwordResetDto.getEmailOrPhone())
                 .orElseThrow(() -> new EntityNotFoundException("User not found with provided email/phone"));
@@ -285,14 +272,12 @@ public class UserService {
         //     smsService.sendPasswordReset(user.getPhone(), resetToken);
         // }
 
-        log.info("Password reset token generated for user ID: {}", user.getId());
     }
 
     /**
      * Confirm password reset
      */
     public void confirmPasswordReset(PasswordResetConfirmDto confirmDto) throws ValidationException {
-        log.info("Confirming password reset with token: {}", confirmDto.getToken());
 
         User user = userRepository.findByPasswordResetToken(confirmDto.getToken())
                 .orElseThrow(() -> new ValidationException("Invalid or expired reset token"));
@@ -314,7 +299,6 @@ public class UserService {
 
         userRepository.save(user);
 
-        log.info("Password reset confirmed for user ID: {}", user.getId());
     }
 
     // ========================= USER SEARCH & LISTING =========================
@@ -324,7 +308,6 @@ public class UserService {
      */
     @Transactional(readOnly = true)
     public PaginatedResponseDto<UserListDto> searchUsers(UserSearchDto searchDto) {
-        log.info("Searching users with criteria: {}", searchDto.getSearchTerm());
 
         // Build sort
         Sort sort = buildUserSort(searchDto.getSortBy(), searchDto.getSortDirection());
@@ -381,7 +364,6 @@ public class UserService {
      */
     @Transactional(readOnly = true)
     public UserStatisticsDto getUserStatistics() {
-        log.info("Calculating user statistics");
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime todayStart = now.toLocalDate().atStartOfDay();
@@ -416,8 +398,6 @@ public class UserService {
      * Grant institution access to user
      */
     public UserInstitutionAccessDto grantInstitutionAccess(UserInstitutionAccessGrantDto grantDto) throws ValidationException {
-        log.info("Granting {} access to entity {} for user {}",
-                grantDto.getAccessType(), grantDto.getEntityId(), grantDto.getUserId());
 
         User user = userRepository.findById(grantDto.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
@@ -437,7 +417,6 @@ public class UserService {
 
         UserInstitutionAccess savedAccess = userInstitutionAccessRepository.save(access);
 
-        log.info("Institution access granted successfully");
         return converterService.mapToDto(savedAccess);
     }
 
@@ -445,7 +424,6 @@ public class UserService {
      * Revoke institution access from user
      */
     public void revokeInstitutionAccess(Long userId, AccessType accessType, Long entityId) {
-        log.info("Revoking {} access to entity {} from user {}", accessType, entityId, userId);
 
         UserInstitutionAccess access = userInstitutionAccessRepository
                 .findByUserIdAndAccessTypeAndEntityIdAndIsActiveTrue(userId, accessType, entityId)
@@ -454,7 +432,6 @@ public class UserService {
         access.setIsActive(false);
         userInstitutionAccessRepository.save(access);
 
-        log.info("Institution access revoked successfully");
     }
 
     /**

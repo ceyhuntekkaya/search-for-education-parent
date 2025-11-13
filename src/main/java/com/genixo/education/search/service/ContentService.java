@@ -63,7 +63,6 @@ public class ContentService {
     @Transactional
     @CacheEvict(value = {"posts", "post_summaries"}, allEntries = true)
     public PostDto createPost(PostCreateDto createDto, HttpServletRequest request) {
-        log.info("Creating new post for school ID: {}", createDto.getSchoolId());
 
         User user = jwtService.getUser(request);
         School school = schoolRepository.findByIdAndIsActiveTrue(createDto.getSchoolId())
@@ -117,7 +116,6 @@ public class ContentService {
         }
 
         post = postRepository.saveAndFlush(post);
-        log.info("Post created successfully with ID: {}", post.getId());
 
         Set<PostItem> baseItemSet = new HashSet<>();
         post.setItems(baseItemSet);
@@ -134,7 +132,6 @@ public class ContentService {
 
     @Cacheable(value = "posts", key = "#id")
     public PostDto getPostById(Long id, HttpServletRequest request) {
-        log.info("Fetching post with ID: {}", id);
 
         User user = jwtService.getUser(request);
         Post post = postRepository.findByIdAndIsActiveTrue(id)
@@ -146,7 +143,6 @@ public class ContentService {
     }
 
     public PostDto getPublicPostBySlug(String slug) {
-        log.info("Fetching public post with slug: {}", slug);
 
         Post post = postRepository.findBySlugAndStatusAndIsActiveTrue(slug, PostStatus.PUBLISHED)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found or not published"));
@@ -165,7 +161,6 @@ public class ContentService {
     @Transactional
     @CacheEvict(value = {"posts", "post_summaries"}, allEntries = true)
     public PostDto updatePost(Long id, PostUpdateDto updateDto, HttpServletRequest request) {
-        log.info("Updating post with ID: {}", id);
 
         User user = jwtService.getUser(request);
         Post post = postRepository.findByIdAndIsActiveTrue(id)
@@ -233,13 +228,11 @@ public class ContentService {
         }
 
        post = postRepository.saveAndFlush(post);
-        log.info("Post updated successfully with ID: {}", post.getId());
 
         return converterService.mapPostToDto(post);
     }
 
     public Page<PostSummaryDto> searchPosts(PostSearchDto searchDto, HttpServletRequest request) {
-        log.info("Searching posts with criteria: {}", searchDto.getSearchTerm());
 
         User user = jwtService.getUser(request);
 
@@ -275,7 +268,6 @@ public class ContentService {
 
     @Transactional
     public PostLikeDto togglePostLike(Long postId, ReactionType reactionType, HttpServletRequest request) {
-        log.info("Toggling like for post ID: {} with reaction: {}", postId, reactionType);
 
         User user = jwtService.getUser(request);
         Post post = postRepository.findByIdAndStatusAndIsActiveTrue(postId, PostStatus.PUBLISHED)
@@ -293,7 +285,6 @@ public class ContentService {
             // Unlike - remove existing like
             postLikeRepository.delete(existingLike);
             postRepository.decrementLikeCount(postId);
-            log.info("Post unliked by user: {}", user.getId());
             return null;
         } else {
             // Like - create new like
@@ -307,14 +298,12 @@ public class ContentService {
             postLike = postLikeRepository.save(postLike);
             postRepository.incrementLikeCount(postId);
 
-            log.info("Post liked by user: {}", user.getId());
             return converterService.mapPostLikeToDto(postLike);
         }
     }
 
     @Transactional
     public PostCommentDto createPostComment(PostCommentCreateDto createDto, HttpServletRequest request) {
-        log.info("Creating comment for post ID: {}", createDto.getPostId());
 
         User user = jwtService.getUser(request);
         Post post = postRepository.findByIdAndStatusAndIsActiveTrue(createDto.getPostId(), PostStatus.PUBLISHED)
@@ -346,12 +335,10 @@ public class ContentService {
             postCommentRepository.incrementReplyCount(parentComment.getId());
         }
 
-        log.info("Comment created successfully with ID: {}", comment.getId());
         return converterService.mapPostCommentToDto(comment);
     }
 
     public Page<PostCommentDto> getPostComments(Long postId, Integer page, Integer size) {
-        log.info("Fetching comments for post ID: {}", postId);
 
         // Verify post exists and is published
         postRepository.findByIdAndStatusAndIsActiveTrue(postId, PostStatus.PUBLISHED)
@@ -374,7 +361,6 @@ public class ContentService {
     @Transactional
     @CacheEvict(value = {"galleries", "gallery_summaries"}, allEntries = true)
     public GalleryDto createGallery(GalleryCreateDto createDto, HttpServletRequest request) {
-        log.info("Creating new gallery: {}", createDto.getTitle());
 
         User user = jwtService.getUser(request);
 
@@ -427,7 +413,6 @@ public class ContentService {
         gallery.setCreatedBy(user.getId());
 
         gallery = galleryRepository.saveAndFlush(gallery);
-        log.info("Gallery created successfully with ID: {}", gallery.getId());
         Set<GalleryItem> baseItemSet = new HashSet<>();
         gallery.setItems(baseItemSet);
 
@@ -447,7 +432,6 @@ public class ContentService {
 
     @Cacheable(value = "galleries", key = "#id")
     public GalleryDto getGalleryById(Long id, HttpServletRequest request) {
-        log.info("Fetching gallery with ID: {}", id);
 
         User user = jwtService.getUser(request);
         Gallery gallery = galleryRepository.findByIdAndIsActiveTrue(id)
@@ -459,7 +443,6 @@ public class ContentService {
     }
 
     public Page<GallerySummaryDto> searchGalleries(GallerySearchDto searchDto, HttpServletRequest request) {
-        log.info("Searching galleries with criteria: {}", searchDto.getSearchTerm());
 
         User user = jwtService.getUser(request);
 
@@ -496,7 +479,6 @@ public class ContentService {
 
     @Transactional
     public GalleryItem createGalleryItem(Gallery gallery, GalleryItemCreateDto createDto, HttpServletRequest request) {
-        log.info("Adding item to gallery ID: {}", createDto.getGalleryId());
 
         User user = jwtService.getUser(request);
 
@@ -539,7 +521,6 @@ public class ContentService {
         }
 
         item = galleryItemRepository.saveAndFlush(item);
-        log.info("Gallery item created successfully with ID: {}", item.getId());
         return item;
     }
 
@@ -551,7 +532,6 @@ public class ContentService {
 
     @Transactional
     public PostItem createPostItem(Post post, PostItemCreateDto createDto, HttpServletRequest request) {
-        log.info("Adding item to post ID: {}", createDto.getPostId());
 
         User user = jwtService.getUser(request);
 
@@ -593,7 +573,6 @@ public class ContentService {
         }
 
         item = postItemRepository.saveAndFlush(item);
-        log.info("Gallery item created successfully with ID: {}", item.getId());
         return item;
     }
 
@@ -601,7 +580,6 @@ public class ContentService {
 
     @Transactional
     public MessageDto createMessage(MessageCreateDto createDto, HttpServletRequest request) {
-        log.info("Creating message for school ID: {}", createDto.getSchoolId());
 
         School school = schoolRepository.findByIdAndIsActiveTrue(createDto.getSchoolId())
                 .orElseThrow(() -> new ResourceNotFoundException("School not found"));
@@ -648,13 +626,11 @@ public class ContentService {
         }
 
         message = messageRepository.save(message);
-        log.info("Message created successfully with reference: {}", referenceNumber);
 
         return converterService.mapMessageToDto(message);
     }
 
     public MessageDto getMessageById(Long id, HttpServletRequest request) {
-        log.info("Fetching message with ID: {}", id);
 
         User user = jwtService.getUser(request);
         Message message = messageRepository.findByIdAndIsActiveTrue(id)
@@ -673,7 +649,6 @@ public class ContentService {
 
     @Transactional
     public void markMessageAsRead(Message message, User user) {
-        log.info("Message mark as read with ID: {}", message.getId());
         message.setReadBy(user.getId());
         message.setReadAt(LocalDateTime.now());
         messageRepository.save(message);
@@ -681,7 +656,6 @@ public class ContentService {
 
     @Transactional
     public MessageDto updateMessage(Long id, MessageUpdateDto updateDto, HttpServletRequest request) {
-        log.info("Updating message with ID: {}", id);
 
         User user = jwtService.getUser(request);
         Message message = messageRepository.findByIdAndIsActiveTrue(id)
@@ -763,7 +737,6 @@ public class ContentService {
     }
 
     public List<PostSummaryDto> getPostBySchoolId(Long id) {
-        log.info("Fetching post with ID: {}", id);
         List<Post> posts = postRepository.findBySchoolIdAndIsActiveTrue(id);
         return posts.stream().map(converterService::mapPostToSummaryDto).toList();
     }
@@ -777,7 +750,6 @@ public class ContentService {
 
     public List<GalleryDto> getGalleryBySchoolId(Long id) {
 
-        log.info("Fetching gallery with ID: {}", id);
         List<Gallery> gallery = galleryRepository.findBySchoolIdAndIsActiveTrue(id);
         return converterService.mapGalleriesToDto(gallery);
 
@@ -791,7 +763,6 @@ public class ContentService {
             throw new ResourceNotFoundException("Gallery not found with ID: " + id);
         }
 
-        log.info("Updatinggallery: {}", updateDto.getTitle());
 
         User user = jwtService.getUser(request);
 
@@ -810,7 +781,6 @@ public class ContentService {
         gallery.setCreatedBy(user.getId());
 
 
-        log.info("Gallery updated successfully with ID: {}", gallery.getId());
 
         List<GalleryItemDto> items = updateDto.getItems();
 

@@ -91,7 +91,6 @@ public class ParentListService {
                 .build();
 
         ParentSchoolList savedList = parentSchoolListRepository.save(list);
-        log.info("Created new school list: {} for parent: {}", savedList.getId(), parentUserId);
 
         return converterService.mapToDto(savedList);
     }
@@ -140,7 +139,6 @@ public class ParentListService {
         list.setLastAccessedAt(LocalDateTime.now());
 
         ParentSchoolList updatedList = parentSchoolListRepository.save(list);
-        log.info("Updated school list: {}", listId);
 
         return converterService.mapToDto(updatedList);
     }
@@ -179,7 +177,6 @@ public class ParentListService {
         list.setStatus(ListStatus.DELETED);
         parentSchoolListRepository.save(list);
 
-        log.info("Deleted school list: {}", listId);
     }
 
     /**
@@ -273,7 +270,6 @@ public class ParentListService {
         list.setSchoolCount(list.getSchoolCount() + 1);
         parentSchoolListRepository.save(list);
 
-        log.info("Added school {} to list {} for parent: {}", school.getId(), list.getId(), parentUserId);
 
         return converterService.mapToDto(savedItem);
     }
@@ -307,7 +303,6 @@ public class ParentListService {
         item.setLastUpdatedAt(LocalDateTime.now());
 
         ParentSchoolListItem updatedItem = parentSchoolListItemRepository.save(item);
-        log.info("Updated school item: {}", itemId);
 
         return converterService.mapToDto(updatedItem);
     }
@@ -336,7 +331,6 @@ public class ParentListService {
         list.setSchoolCount(Math.max(0, list.getSchoolCount() - 1));
         parentSchoolListRepository.save(list);
 
-        log.info("Removed school item: {}", itemId);
     }
 
     /**
@@ -483,7 +477,6 @@ public class ParentListService {
         items.forEach(item -> item.setLastUpdatedAt(LocalDateTime.now()));
         parentSchoolListItemRepository.saveAll(items);
 
-        log.info("Bulk operation completed: {} for {} items", request.getOperation(), items.size());
     }
 
     /**
@@ -532,7 +525,6 @@ public class ParentListService {
         targetList.setSchoolCount(targetList.getSchoolCount() + savedItems.size());
         parentSchoolListRepository.save(targetList);
 
-        log.info("Quick added {} schools to list: {}", savedItems.size(), targetList.getId());
 
         return converterService.mapToListItemDto(savedItems);
     }
@@ -575,7 +567,6 @@ public class ParentListService {
                 .build();
 
         ParentSchoolNote savedNote = parentSchoolNoteRepository.save(note);
-        log.info("Created school note: {} for school: {}", savedNote.getId(), school.getId());
 
         return converterService.mapToDto(savedNote);
     }
@@ -604,7 +595,6 @@ public class ParentListService {
         if (request.getSource() != null) note.setSource(request.getSource());
 
         ParentSchoolNote updatedNote = parentSchoolNoteRepository.save(note);
-        log.info("Updated school note: {}", noteId);
 
         return converterService.mapToDto(updatedNote);
     }
@@ -631,7 +621,6 @@ public class ParentListService {
                 .build();
 
         ParentListNote savedNote = parentListNoteRepository.save(note);
-        log.info("Created list note: {} for list: {}", savedNote.getId(), list.getId());
 
         return converterService.mapToDto(savedNote);
     }
@@ -864,7 +853,6 @@ public class ParentListService {
         }
 
         parentSchoolNoteRepository.delete(note);
-        log.info("Deleted school note: {}", noteId);
     }
 
     /**
@@ -882,7 +870,6 @@ public class ParentListService {
         }
 
         parentListNoteRepository.delete(note);
-        log.info("Deleted list note: {}", noteId);
     }
 
 

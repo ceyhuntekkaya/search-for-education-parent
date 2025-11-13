@@ -259,7 +259,6 @@ public class FileUploadController {
             // MIME type'ı belirle
             String contentType = determineContentType(filePath.toString());
 
-            log.info("Serving file: {} (size: {} bytes)", requestPath, resource.contentLength());
 
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))

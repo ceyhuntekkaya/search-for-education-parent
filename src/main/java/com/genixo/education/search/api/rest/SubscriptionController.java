@@ -86,9 +86,6 @@ public class SubscriptionController {
             @Valid @RequestBody SubscriptionCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Create subscription request for campus: {}, plan: {}",
-                createDto.getCampusId(), createDto.getSubscriptionPlanId());
-
         SubscriptionDto subscription = subscriptionService.createSubscription(createDto, request);
 
         ApiResponse<SubscriptionDto> response = ApiResponse.success(subscription, "Subscription created successfully");
@@ -133,7 +130,6 @@ public class SubscriptionController {
             @Valid @RequestBody SubscriptionUpdateDto updateDto,
             HttpServletRequest request) {
 
-        log.info("Update subscription request: {}", subscriptionId);
 
         SubscriptionDto subscription = subscriptionService.updateSubscription(subscriptionId, updateDto, request);
 
@@ -157,7 +153,6 @@ public class SubscriptionController {
             @Valid @RequestBody SubscriptionCancellationDto cancelDto,
             HttpServletRequest request) {
 
-        log.info("Cancel subscription request: {}", subscriptionId);
 
         subscriptionService.cancelSubscription(subscriptionId, cancelDto, request);
 
@@ -181,7 +176,6 @@ public class SubscriptionController {
             @Valid @RequestBody ChangeSubscriptionPlanDto changeDto,
             HttpServletRequest request) {
 
-        log.info("Change subscription plan request: {} to plan: {}", subscriptionId, changeDto.getNewPlanId());
 
         SubscriptionDto subscription = subscriptionService.changeSubscriptionPlan(subscriptionId, changeDto, request);
 
@@ -208,7 +202,6 @@ public class SubscriptionController {
             @Valid @RequestBody PaymentCreateDto paymentDto,
             HttpServletRequest request) {
 
-        log.info("Process payment request for subscription: {}", subscriptionId);
 
         PaymentDto payment = subscriptionService.processPayment(subscriptionId, paymentDto, request);
 
@@ -284,7 +277,6 @@ public class SubscriptionController {
             @Parameter(description = "Invoice ID") @PathVariable Long invoiceId,
             HttpServletRequest request) {
 
-        log.info("Download invoice request: {}", invoiceId);
 
         byte[] pdfData = subscriptionService.downloadInvoice(invoiceId, request);
 
@@ -378,7 +370,6 @@ public class SubscriptionController {
             @Valid @RequestBody PaymentWebhookDto webhookDto,
             HttpServletRequest request) {
 
-        log.info("Handle payment webhook: {}", webhookDto.getEventType());
 
         subscriptionService.handlePaymentWebhook(webhookDto);
 
@@ -402,7 +393,6 @@ public class SubscriptionController {
             @Valid @RequestBody SubscriptionPlanCreateDto createDto,
             HttpServletRequest request) {
 
-        log.info("Create subscription plan request: {}", createDto.getName());
 
         SubscriptionPlanDto plan = subscriptionService.createSubscriptionPlan(createDto, request);
 
