@@ -79,8 +79,6 @@ public class SlugGeneratorService {
             return "item-" + System.currentTimeMillis();
         }
 
-        log.debug("Creating slug from input: {}", input);
-
         // Step 1: Convert to lowercase and handle Turkish characters
         String slug = input.toLowerCase();
 
@@ -107,7 +105,6 @@ public class SlugGeneratorService {
             slug = "item-" + System.currentTimeMillis();
         }
 
-        log.debug("Generated base slug: {}", slug);
         return slug;
     }
 
@@ -165,16 +162,10 @@ public class SlugGeneratorService {
                     baseSlug, candidateSlug);
         }
 
-        log.debug("Generated unique slug: {} (attempts: {})", candidateSlug, attempt);
         return candidateSlug;
     }
 
-    /**
-     * Check if slug already exists for the given entity type
-     * @param slug The slug to check
-     * @param entityType The entity type
-     * @return true if slug exists, false otherwise
-     */
+
     private boolean isSlugExists(String slug, String entityType) {
         return switch (entityType.toLowerCase()) {
             case "brand" -> brandRepository.existsBySlug(slug);
@@ -189,11 +180,7 @@ public class SlugGeneratorService {
         };
     }
 
-    /**
-     * Validate if a slug is properly formatted
-     * @param slug The slug to validate
-     * @return true if valid, false otherwise
-     */
+
     public boolean isValidSlug(String slug) {
         if (!StringUtils.hasText(slug)) {
             return false;
@@ -210,13 +197,7 @@ public class SlugGeneratorService {
         return slug.matches(pattern);
     }
 
-    /**
-     * Generate slug suggestions based on input
-     * @param input The input text
-     * @param entityType The entity type
-     * @param count Number of suggestions to generate
-     * @return List of slug suggestions
-     */
+
     public java.util.List<String> generateSlugSuggestions(String input, String entityType, int count) {
         java.util.List<String> suggestions = new java.util.ArrayList<>();
         String baseSlug = createSlugFromText(input);

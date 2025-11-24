@@ -41,4 +41,11 @@ public class SchoolCreateDto {
     private String metaTitle;
     private String metaDescription;
     private String metaKeywords;
+
+
+    private String facebookUrl;
+    private String twitterUrl;
+    private String instagramUrl;
+    private String linkedinUrl;
+    private String youtubeUrl;
 }

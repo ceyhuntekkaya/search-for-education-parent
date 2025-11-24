@@ -22,6 +22,7 @@ public class CampaignSchoolDto {
     private Long schoolId;
     private String schoolName;
     private String campusName;
+    private String thumbnailImageUrl;
     private String assignedByUserName;
     private LocalDateTime assignedAt;
     private CampaignSchoolStatus status;

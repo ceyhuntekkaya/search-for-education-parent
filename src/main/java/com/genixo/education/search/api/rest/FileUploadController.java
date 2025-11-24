@@ -181,13 +181,9 @@ public class FileUploadController {
                         .body("Access denied");
             }
 
-
-
             FileUploadDto dto = new FileUploadDto();
             dto.setFileName(file.getFileName());
             dto.setFileUrl(file.getFileUrl());
-
-
             return ResponseEntity.ok(dto);
 
         } catch (RuntimeException e) {
@@ -199,25 +195,6 @@ public class FileUploadController {
                     .body("Failed to fetch file");
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     @GetMapping("/serve/**")
     public ResponseEntity<Resource> serveFile(HttpServletRequest request) {
@@ -246,8 +223,6 @@ public class FileUploadController {
                 return ResponseEntity.badRequest().build();
             }
 
-            log.debug("Base path: {}", basePath.toAbsolutePath());
-            log.debug("Resolved file path: {}", filePath.toAbsolutePath());
 
             Resource resource = new UrlResource(filePath.toUri());
 

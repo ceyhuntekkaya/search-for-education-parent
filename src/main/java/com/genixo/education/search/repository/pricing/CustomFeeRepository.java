@@ -28,7 +28,7 @@ public interface CustomFeeRepository extends JpaRepository<CustomFee, Long> {
 
     @Query("SELECT CASE WHEN COUNT(cf) > 0 THEN true ELSE false END " +
             "FROM CustomFee cf WHERE LOWER(cf.feeName) = LOWER(:feeName) " +
-            "AND cf.school.id = :pricingId AND cf.id != :id AND cf.isActive = true")
+            "AND cf.school.id = :schoolId AND cf.id != :id AND cf.isActive = true")
     boolean existsByFeeNameIgnoreCaseAndSchoolIdAndIdNotAndIsActiveTrue(
             @Param("feeName") String feeName,
             @Param("schoolId") Long schoolId,

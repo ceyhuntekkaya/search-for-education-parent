@@ -153,10 +153,6 @@ public class PricingService {
 
 
     public List<PricingSummaryDto> getAllSchoolPricingSummaries(Long schoolId, HttpServletRequest request) {
-
-        //User user = jwtService.getUser(request);
-        //validateUserCanAccessSchoolPricing(user, schoolId);
-
         List<SchoolPricing> pricings = schoolPricingRepository.findBySchoolIdAndIsActiveTrueOrderByCreatedAtDesc(schoolId);
         return pricings.stream()
                 .map(converterService::mapToSummaryDto)
@@ -168,30 +164,77 @@ public class PricingService {
     public SchoolPricingDto updateSchoolPricing(Long id, SchoolPricingUpdateDto updateDto, HttpServletRequest request) {
 
         User user = jwtService.getUser(request);
-        SchoolPricing existingPricing = schoolPricingRepository.findByIdAndIsActiveTrue(id)
+        /*SchoolPricing existingPricing = schoolPricingRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("SchoolPricing", id));
 
+
+         */
+
+
+        SchoolPricing existingPricing = schoolPricingRepository.findBySchoolId(id);
+
+
+        if(existingPricing == null) {
+
+            School school = schoolRepository.findByIdAndIsActiveTrue(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("School", id));
+
+
+            SchoolPricing pricing = new SchoolPricing();
+            pricing.setSchool(school);
+            pricing.setCreatedByUser(user);
+            pricing.setGradeLevel(updateDto.getGradeLevel());
+            pricing.setClassLevel(updateDto.getClassLevel());
+            pricing.setCurrency(updateDto.getCurrency() != null ? updateDto.getCurrency() : Currency.TRY);
+
+            // Set all fees
+            //setAllFees(pricing, updateDto);
+
+            // Calculate totals
+            //calculateTotals(pricing);
+
+            pricing.setValidFrom(updateDto.getValidFrom());
+            pricing.setValidUntil(updateDto.getValidUntil());
+            pricing.setStatus(PricingStatus.DRAFT);
+            pricing.setPaymentFrequency(updateDto.getPaymentFrequency() != null ?
+                    updateDto.getPaymentFrequency() : PaymentFrequency.MONTHLY);
+            pricing.setInstallmentCount(updateDto.getInstallmentCount());
+            pricing.setDownPaymentPercentage(updateDto.getDownPaymentPercentage());
+            pricing.setEarlyPaymentDiscountPercentage(updateDto.getEarlyPaymentDiscountPercentage());
+            pricing.setSiblingDiscountPercentage(updateDto.getSiblingDiscountPercentage());
+            pricing.setMultiYearDiscountPercentage(updateDto.getMultiYearDiscountPercentage());
+            pricing.setRefundPolicy(updateDto.getRefundPolicy());
+            pricing.setPaymentTerms(updateDto.getPaymentTerms());
+            pricing.setLatePaymentPenaltyPercentage(updateDto.getLatePaymentPenaltyPercentage());
+            pricing.setPublicDescription(updateDto.getPublicDescription());
+            pricing.setShowDetailedBreakdown(updateDto.getShowDetailedBreakdown() != null ?
+                    updateDto.getShowDetailedBreakdown() : true);
+            pricing.setShowPaymentOptions(updateDto.getShowPaymentOptions() != null ?
+                    updateDto.getShowPaymentOptions() : true);
+            pricing.setVersion(1);
+            pricing.setIsCurrent(true);
+            pricing.setAcademicYear("-");
+
+            if(pricing.getGradeLevel() == null){
+                pricing.setGradeLevel("");
+            }
+
+            existingPricing = schoolPricingRepository.save(pricing);
+            return converterService.mapToDto(existingPricing);
+        }
+
+
+
+
         validateUserCanManageSchoolPricing(user, existingPricing.getSchool().getId());
-
-        // Create price history for significant changes
         createPriceHistoryIfNeeded(existingPricing, updateDto, user);
-
-        // Validate updated pricing data
         validatePricingUpdateData(updateDto);
-
-        // Update pricing
         updatePricingFields(existingPricing, updateDto, user);
-
-        // Recalculate totals
         calculateTotals(existingPricing);
-
-        // Increment version if major changes
         if (hasMajorPriceChanges(existingPricing, updateDto)) {
             existingPricing.setVersion(existingPricing.getVersion() + 1);
         }
-
         existingPricing = schoolPricingRepository.save(existingPricing);
-
         return converterService.mapToDto(existingPricing);
     }
 
@@ -210,7 +253,6 @@ public class PricingService {
                     .withErrorCode("INVALID_STATUS");
         }
 
-        // Deactivate previous current pricing
         schoolPricingRepository.deactivateCurrentPricingForSchoolAndGrade(
                 pricing.getSchool().getId(), pricing.getGradeLevel(), pricing.getAcademicYear(), pricing.getId(), user.getId());
 
@@ -245,13 +287,7 @@ public class PricingService {
                 .orElseThrow(() -> new ResourceNotFoundException("SchoolPricing", createDto.getSchoolId()));
 
         validateUserCanManageSchoolPricing(user, school.getId());
-
-        // Validate fee data
         validateCustomFeeData(createDto);
-
-
-
-        // Check if fee name already exists for this pricing
         if (customFeeRepository.existsByFeeNameIgnoreCaseAndSchoolIdAndIsActiveTrue(
                 createDto.getFeeName(), createDto.getSchoolId())) {
             throw new BusinessException("Custom fee with this name already exists for this pricing")

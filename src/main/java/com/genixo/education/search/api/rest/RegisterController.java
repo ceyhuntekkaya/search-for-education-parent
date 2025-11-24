@@ -159,8 +159,6 @@ public class RegisterController {
     public ResponseEntity<ApiResponse<String>> getPostById(
             HttpServletRequest request) throws Exception {
 
-        log.debug("Send email");
-
         emailService.sendCode("1234", "ceyhun.tekkaya@gmail.com", "Ceyhun", "Tekkaya");
 
         ApiResponse<String> response = ApiResponse.success("ok.", "Email retrieved successfully");

@@ -67,8 +67,6 @@ public class SurveyController {
             @Parameter(description = "Survey ID") @PathVariable Long id,
             HttpServletRequest request) {
 
-        log.debug("Get survey request: {}", id);
-
         SurveyDto survey = surveyService.getSurveyById(id, request);
 
         ApiResponse<SurveyDto> response = ApiResponse.success(survey, "Survey retrieved successfully");
@@ -150,8 +148,6 @@ public class SurveyController {
     public ResponseEntity<ApiResponse<Page<SurveyDto>>> searchSurveys(
             @Valid @RequestBody SurveySearchDto searchDto,
             HttpServletRequest request) {
-
-        log.debug("Search surveys request");
 
         Page<SurveyDto> surveys = surveyService.searchSurveys(searchDto, request);
 
@@ -348,8 +344,6 @@ public class SurveyController {
             @Parameter(description = "Response token") @PathVariable String responseToken,
             HttpServletRequest request) {
 
-        log.debug("Get survey response by token: {}", responseToken);
-
         SurveyResponseDto response = surveyService.getSurveyResponseByToken(responseToken);
 
         ApiResponse<SurveyResponseDto> apiResponse = ApiResponse.success(response, "Survey response retrieved successfully");
@@ -373,8 +367,6 @@ public class SurveyController {
             @Parameter(description = "Sort field") @RequestParam(defaultValue = "createdAt") String sortBy,
             @Parameter(description = "Sort direction") @RequestParam(defaultValue = "desc") String sortDirection,
             HttpServletRequest request) {
-
-        log.debug("Get responses for survey: {}", surveyId);
 
         Pageable pageable = PageRequest.of(page, size,
                 Sort.by("desc".equalsIgnoreCase(sortDirection) ? Sort.Direction.DESC : Sort.Direction.ASC, sortBy));
@@ -402,8 +394,6 @@ public class SurveyController {
             @Parameter(description = "Survey ID") @PathVariable Long surveyId,
             HttpServletRequest request) {
 
-        log.debug("Get analytics for survey: {}", surveyId);
-
         SurveyAnalyticsDto analytics = surveyService.getSurveyAnalytics(surveyId, request);
 
         ApiResponse<SurveyAnalyticsDto> response = ApiResponse.success(analytics, "Analytics retrieved successfully");
@@ -426,10 +416,7 @@ public class SurveyController {
             @Parameter(description = "To date") @RequestParam LocalDateTime toDate,
             HttpServletRequest request) {
 
-        log.debug("Get satisfaction trends for school: {} from {} to {}", schoolId, fromDate, toDate);
-
         List<SatisfactionTrendDto> trends = surveyService.getSatisfactionTrends(schoolId, fromDate, toDate, request);
-
         ApiResponse<List<SatisfactionTrendDto>> response = ApiResponse.success(trends,
                 "Satisfaction trends retrieved successfully");
         response.setPath(request.getRequestURI());
@@ -528,10 +515,7 @@ public class SurveyController {
             @Parameter(description = "Survey ID") @PathVariable Long surveyId,
             HttpServletRequest request) {
 
-        log.debug("Get public survey: {}", surveyId);
-
         SurveyDto survey = surveyService.getPublicSurvey(surveyId);
-
         ApiResponse<SurveyDto> response = ApiResponse.success(survey, "Public survey retrieved successfully");
         response.setPath(request.getRequestURI());
         response.setTimestamp(LocalDateTime.now());
@@ -549,10 +533,7 @@ public class SurveyController {
             @Parameter(description = "Response token") @PathVariable String responseToken,
             HttpServletRequest request) {
 
-        log.debug("Get survey by token: {}", responseToken);
-
         SurveyDto survey = surveyService.getPublicSurveyByToken(responseToken);
-
         ApiResponse<SurveyDto> response = ApiResponse.success(survey, "Survey retrieved successfully");
         response.setPath(request.getRequestURI());
         response.setTimestamp(LocalDateTime.now());
@@ -575,8 +556,6 @@ public class SurveyController {
             @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size,
             HttpServletRequest request) {
 
-        log.debug("Get public ratings for school: {}, category: {}", schoolId, category);
-
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         List<SurveyRatingDto> ratings = surveyService.getPublicSchoolRatings(schoolId, category, pageable);
 
@@ -597,8 +576,6 @@ public class SurveyController {
     public ResponseEntity<ApiResponse<Map<RatingCategory, Double>>> getPublicSchoolAverageRatings(
             @Parameter(description = "School ID") @PathVariable Long schoolId,
             HttpServletRequest request) {
-
-        log.debug("Get average ratings for school: {}", schoolId);
 
         Map<RatingCategory, Double> averageRatings = surveyService.getPublicSchoolAverageRatings(schoolId);
 

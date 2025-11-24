@@ -92,7 +92,6 @@ public class AnalyticsService {
 
     @Transactional
     public VisitorLogDto logVisitor(VisitorLogDto visitorLogDto) {
-        log.debug("Logging visitor: {} on page: {}", visitorLogDto.getVisitorId(), visitorLogDto.getPageUrl());
 
         VisitorLog visitorLog = new VisitorLog();
         visitorLog.setSessionId(visitorLogDto.getSessionId());
@@ -184,7 +183,6 @@ public class AnalyticsService {
 
     @Transactional
     public SearchLogDto logSearch(SearchLogDto searchLogDto) {
-        log.debug("Logging search: {} with {} results", searchLogDto.getSearchQuery(), searchLogDto.getResultsCount());
 
         SearchLog searchLog = new SearchLog();
         searchLog.setSessionId(searchLogDto.getSessionId());
@@ -255,7 +253,6 @@ public class AnalyticsService {
 
     @Transactional
     public PerformanceMetricsDto logPerformanceMetric(PerformanceMetricsDto metricsDto) {
-        log.debug("Logging performance metric: {} - {}ms", metricsDto.getEndpointUrl(), metricsDto.getResponseTimeMs());
 
         PerformanceMetrics metrics = new PerformanceMetrics();
         metrics.setTimestamp(metricsDto.getTimestamp() != null ? metricsDto.getTimestamp() : LocalDateTime.now());
@@ -928,6 +925,5 @@ public class AnalyticsService {
 
     @CacheEvict(value = "realtime_analytics", key = "'current'")
     public void refreshRealTimeCache() {
-        log.debug("Refreshing real-time analytics cache");
     }
 }

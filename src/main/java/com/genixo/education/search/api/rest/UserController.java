@@ -251,8 +251,6 @@ public class UserController {
             @Parameter(description = "User ID") @PathVariable Long userId,
             HttpServletRequest request) {
 
-        log.debug("Get user request: {}", userId);
-
         try {
             UserDto user = userService.getUserById(userId);
 
@@ -281,8 +279,6 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserProfileDto>> getUserProfile(
             @Parameter(description = "User ID") @PathVariable Long userId,
             HttpServletRequest request) {
-
-        log.debug("Get user profile request: {}", userId);
 
         try {
             UserProfileDto profile = userService.getUserProfile(userId);
@@ -348,8 +344,6 @@ public class UserController {
             @Valid @RequestBody UserSearchDto searchDto,
             HttpServletRequest request) {
 
-        log.debug("User search request");
-
         PaginatedResponseDto<UserListDto> users = userService.searchUsers(searchDto);
 
         ApiResponse<PaginatedResponseDto<UserListDto>> response = ApiResponse.success(users,
@@ -369,10 +363,7 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserStatisticsDto>> getUserStatistics(
             HttpServletRequest request) {
 
-        log.debug("Get user statistics request");
-
         UserStatisticsDto statistics = userService.getUserStatistics();
-
         ApiResponse<UserStatisticsDto> response = ApiResponse.success(statistics,
                 "User statistics retrieved successfully");
         response.setPath(request.getRequestURI());
@@ -465,7 +456,6 @@ public class UserController {
             @Parameter(description = "User ID") @PathVariable Long userId,
             HttpServletRequest request) {
 
-        log.debug("Get institution access for user: {}", userId);
 
         List<UserInstitutionAccessDto> accessList = userService.getUserInstitutionAccess(userId);
 

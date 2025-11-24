@@ -38,8 +38,6 @@ public class SubscriptionController {
     public ResponseEntity<ApiResponse<List<SubscriptionPlanDto>>> getAllSubscriptionPlans(
             HttpServletRequest request) {
 
-        log.debug("Get all subscription plans request");
-
         List<SubscriptionPlanDto> plans = subscriptionService.getAllSubscriptionPlans();
 
         ApiResponse<List<SubscriptionPlanDto>> response = ApiResponse.success(plans,
@@ -59,8 +57,6 @@ public class SubscriptionController {
     public ResponseEntity<ApiResponse<SubscriptionPlanDto>> getSubscriptionPlanById(
             @Parameter(description = "Subscription plan ID") @PathVariable Long id,
             HttpServletRequest request) {
-
-        log.debug("Get subscription plan request: {}", id);
 
         SubscriptionPlanDto plan = subscriptionService.getSubscriptionPlanById(id);
 
@@ -105,8 +101,6 @@ public class SubscriptionController {
     public ResponseEntity<ApiResponse<SubscriptionDto>> getSubscriptionByCampusId(
             @Parameter(description = "Campus ID") @PathVariable Long campusId,
             HttpServletRequest request) {
-
-        log.debug("Get subscription for campus: {}", campusId);
 
         SubscriptionDto subscription = subscriptionService.getSubscriptionByCampusId(campusId, request);
 
@@ -228,8 +222,6 @@ public class SubscriptionController {
             @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size,
             HttpServletRequest request) {
 
-        log.debug("Get payment history for subscription: {}", subscriptionId);
-
         Page<PaymentDto> payments = subscriptionService.getPaymentHistory(subscriptionId, page, size, request);
 
         ApiResponse<Page<PaymentDto>> response = ApiResponse.success(payments,
@@ -254,8 +246,6 @@ public class SubscriptionController {
             @Parameter(description = "Page number") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size,
             HttpServletRequest request) {
-
-        log.debug("Get invoices for subscription: {}", subscriptionId);
 
         Page<InvoiceDto> invoices = subscriptionService.getInvoices(subscriptionId, page, size, request);
 
@@ -299,8 +289,6 @@ public class SubscriptionController {
             @Parameter(description = "Campus ID") @PathVariable Long campusId,
             HttpServletRequest request) {
 
-        log.debug("Check usage limits for campus: {}", campusId);
-
         UsageLimitsDto usageLimits = subscriptionService.checkUsageLimits(campusId, request);
 
         ApiResponse<UsageLimitsDto> response = ApiResponse.success(usageLimits,
@@ -321,8 +309,6 @@ public class SubscriptionController {
             @Parameter(description = "Campus ID") @PathVariable Long campusId,
             @Valid @RequestBody UsageUpdateDto usageUpdate,
             HttpServletRequest request) {
-
-        log.debug("Update usage counters for campus: {}", campusId);
 
         subscriptionService.updateUsageCounters(campusId, usageUpdate);
 
@@ -345,8 +331,6 @@ public class SubscriptionController {
     public ResponseEntity<ApiResponse<SubscriptionAnalyticsDto>> getSubscriptionAnalytics(
             @Parameter(description = "Subscription ID") @PathVariable Long subscriptionId,
             HttpServletRequest request) {
-
-        log.debug("Get analytics for subscription: {}", subscriptionId);
 
         SubscriptionAnalyticsDto analytics = subscriptionService.getSubscriptionAnalytics(subscriptionId, request);
 
@@ -419,8 +403,6 @@ public class SubscriptionController {
             @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size,
             HttpServletRequest request) {
 
-        log.debug("Admin get all subscriptions request");
-
         SubscriptionFilterDto filter = SubscriptionFilterDto.builder()
                 .status(status)
                 .campusName(campusName)
@@ -447,8 +429,6 @@ public class SubscriptionController {
     public ResponseEntity<ApiResponse<SubscriptionStatisticsDto>> getSubscriptionStatistics(
             HttpServletRequest request) {
 
-        log.debug("Get subscription statistics request");
-
         SubscriptionStatisticsDto statistics = subscriptionService.getSubscriptionStatistics(request);
 
         ApiResponse<SubscriptionStatisticsDto> response = ApiResponse.success(statistics,
@@ -470,9 +450,6 @@ public class SubscriptionController {
     public ResponseEntity<ApiResponse<BillingHealthDto>> checkBillingHealth(
             HttpServletRequest request) {
 
-        log.debug("Billing health check request");
-
-        // Simple health check implementation
         BillingHealthDto health = BillingHealthDto.builder()
                 .isHealthy(true)
                 .lastBillingRun(LocalDateTime.now().minusHours(2))

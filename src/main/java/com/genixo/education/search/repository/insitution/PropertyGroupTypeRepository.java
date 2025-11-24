@@ -2,6 +2,7 @@ package com.genixo.education.search.repository.insitution;
 
 import com.genixo.education.search.entity.institution.InstitutionPropertyValue;
 import com.genixo.education.search.entity.institution.PropertyGroupType;
+import com.genixo.education.search.entity.institution.PropertyType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface PropertyGroupTypeRepository extends JpaRepository<InstitutionPropertyValue, Long> {
+public interface PropertyGroupTypeRepository extends JpaRepository<PropertyGroupType, Long> {
 
     /**
      * Belirli InstitutionType ID'lerine ait aktif PropertyGroupType'ları getirir
@@ -46,4 +47,12 @@ public interface PropertyGroupTypeRepository extends JpaRepository<InstitutionPr
      * ID'ye göre aktif PropertyGroupType getirir
      */
     Optional<PropertyGroupType> findByIdAndIsActiveTrue(Long id);
+
+
+
+
+    @Query("SELECT g FROM PropertyGroupType g where g.name= :name and  g.institutionType.id = :id")
+    List<PropertyGroupType> checkIfExist(@Param("name") String name, @Param("id") Long id );
+
+
 }

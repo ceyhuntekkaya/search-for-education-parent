@@ -54,7 +54,6 @@ public class ParentListService {
      * Yeni liste oluştur
      */
     public ParentSchoolListResponse createList(Long parentUserId, CreateParentSchoolListRequest request) {
-        log.debug("Creating new school list for parent: {}", parentUserId);
 
         // Veli var mı kontrol et
         User parent = userRepository.findById(parentUserId)
@@ -99,7 +98,6 @@ public class ParentListService {
      * Liste güncelle
      */
     public ParentSchoolListResponse updateList(Long parentUserId, Long listId, UpdateParentSchoolListRequest request) {
-        log.debug("Updating school list: {} for parent: {}", listId, parentUserId);
 
         ParentSchoolList list = parentSchoolListRepository.findById(listId)
                 .orElseThrow(() -> new RuntimeException("Liste bulunamadı"));
@@ -147,7 +145,6 @@ public class ParentListService {
      * Liste sil (soft delete)
      */
     public void deleteList(Long parentUserId, Long listId) {
-        log.debug("Deleting school list: {} for parent: {}", listId, parentUserId);
 
         ParentSchoolList list = parentSchoolListRepository.findById(listId)
                 .orElseThrow(() -> new RuntimeException("Liste bulunamadı"));
@@ -184,7 +181,6 @@ public class ParentListService {
      */
     @Transactional(readOnly = true)
     public List<ParentSchoolListResponse> getParentLists(Long parentUserId) {
-        log.debug("Getting all lists for parent: {}", parentUserId);
 
         List<ParentSchoolList> lists = parentSchoolListRepository
                 .findByParentUserIdAndStatusOrderByIsDefaultDescCreatedAtDesc(parentUserId, ListStatus.ACTIVE);
@@ -197,7 +193,6 @@ public class ParentListService {
      */
     @Transactional(readOnly = true)
     public ParentSchoolListResponse getListById(Long parentUserId, Long listId) {
-        log.debug("Getting list details: {} for parent: {}", listId, parentUserId);
 
         ParentSchoolList list = parentSchoolListRepository.findById(listId)
                 .orElseThrow(() -> new RuntimeException("Liste bulunamadı"));
@@ -220,8 +215,6 @@ public class ParentListService {
      * Okulu listeye ekle
      */
     public ParentSchoolListItemResponse addSchoolToList(Long parentUserId, AddSchoolToListRequest request) {
-        log.debug("Adding school {} to list {} for parent: {}", request.getSchoolId(), request.getParentSchoolListId(), parentUserId);
-
         // Okul var mı kontrol et
         School school = schoolRepository.findById(request.getSchoolId())
                 .orElseThrow(() -> new RuntimeException("Okul bulunamadı"));
@@ -278,8 +271,6 @@ public class ParentListService {
      * Listedeki okulu güncelle
      */
     public ParentSchoolListItemResponse updateSchoolInList(Long parentUserId, Long itemId, UpdateSchoolInListRequest request) {
-        log.debug("Updating school item: {} for parent: {}", itemId, parentUserId);
-
         ParentSchoolListItem item = parentSchoolListItemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("Liste öğesi bulunamadı"));
 
@@ -311,8 +302,6 @@ public class ParentListService {
      * Okulu listeden kaldır
      */
     public void removeSchoolFromList(Long parentUserId, Long itemId) {
-        log.debug("Removing school item: {} for parent: {}", itemId, parentUserId);
-
         ParentSchoolListItem item = parentSchoolListItemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("Liste öğesi bulunamadı"));
 
@@ -338,7 +327,6 @@ public class ParentListService {
      */
     @Transactional(readOnly = true)
     public Page<ParentSchoolListItemResponse> getListItems(Long parentUserId, Long listId, ParentSchoolListSearchRequest request) {
-        log.debug("Getting list items for list: {} parent: {}", listId, parentUserId);
 
         // Liste yetki kontrol
         ParentSchoolList list = parentSchoolListRepository.findById(listId)
@@ -424,7 +412,6 @@ public class ParentListService {
      * Toplu işlemler (favori, blok, kaldır vb.)
      */
     public void performBulkOperation(Long parentUserId, BulkSchoolListOperationRequest request) {
-        log.debug("Performing bulk operation: {} for parent: {}", request.getOperation(), parentUserId);
 
         List<ParentSchoolListItem> items = parentSchoolListItemRepository
                 .findByParentSchoolList_ParentUserIdAndSchoolIdIn(parentUserId, request.getSchoolIds());
@@ -483,7 +470,6 @@ public class ParentListService {
      * Hızlı ekleme (arama sonuçlarından)
      */
     public List<ParentSchoolListItemResponse> quickAddSchools(Long parentUserId, QuickAddSchoolRequest request) {
-        log.debug("Quick adding {} schools for parent: {}", request.getSchoolIds().size(), parentUserId);
 
         // Hedef listeyi belirle
         ParentSchoolList targetList;
@@ -535,7 +521,6 @@ public class ParentListService {
      * Okul notu oluştur
      */
     public ParentSchoolNoteResponse createSchoolNote(Long parentUserId, CreateParentSchoolNoteRequest request) {
-        log.debug("Creating school note for school: {} parent: {}", request.getSchoolId(), parentUserId);
 
         // Okul var mı kontrol et
         School school = schoolRepository.findById(request.getSchoolId())
@@ -575,7 +560,6 @@ public class ParentListService {
      * Okul notunu güncelle
      */
     public ParentSchoolNoteResponse updateSchoolNote(Long parentUserId, Long noteId, UpdateParentSchoolNoteRequest request) {
-        log.debug("Updating school note: {} for parent: {}", noteId, parentUserId);
 
         ParentSchoolNote note = parentSchoolNoteRepository.findById(noteId)
                 .orElseThrow(() -> new RuntimeException("Not bulunamadı"));
@@ -603,7 +587,6 @@ public class ParentListService {
      * Liste notu oluştur
      */
     public ParentListNoteResponse createListNote(Long parentUserId, CreateParentListNoteRequest request) {
-        log.debug("Creating list note for list: {} parent: {}", request.getParentSchoolListId(), parentUserId);
 
         ParentSchoolList list = parentSchoolListRepository.findById(request.getParentSchoolListId())
                 .orElseThrow(() -> new RuntimeException("Liste bulunamadı"));
@@ -632,7 +615,6 @@ public class ParentListService {
      */
     @Transactional(readOnly = true)
     public ParentSchoolListDashboardResponse getDashboard(Long parentUserId) {
-        log.debug("Getting dashboard for parent: {}", parentUserId);
 
         // Temel istatistikler
         Integer totalLists = parentSchoolListRepository.countByParentUserIdAndStatus(parentUserId, ListStatus.ACTIVE);
@@ -716,7 +698,6 @@ public class ParentListService {
      */
     @Transactional(readOnly = true)
     public Page<ParentSchoolListItemResponse> searchAllSchools(Long parentUserId, ParentSchoolListSearchRequest request) {
-        log.debug("Searching schools for parent: {} with filters", parentUserId);
 
         Sort sort = createSort(request.getSortBy(), request.getSortDirection());
         Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), sort);
@@ -744,7 +725,6 @@ public class ParentListService {
      */
     @Transactional(readOnly = true)
     public List<ParentSchoolNoteResponse> getSchoolNotes(Long parentUserId, Long schoolId) {
-        log.debug("Getting notes for school: {} parent: {}", schoolId, parentUserId);
 
         List<ParentSchoolNote> notes = parentSchoolNoteRepository
                 .findBySchoolIdAndParentSchoolListItem_ParentSchoolList_ParentUserIdOrderByCreatedAtDesc(
@@ -758,7 +738,6 @@ public class ParentListService {
      */
     @Transactional(readOnly = true)
     public List<ParentListNoteResponse> getListNotes(Long parentUserId, Long listId) {
-        log.debug("Getting notes for list: {} parent: {}", listId, parentUserId);
 
         // Liste yetki kontrol
         ParentSchoolList list = parentSchoolListRepository.findById(listId)
@@ -779,7 +758,6 @@ public class ParentListService {
      */
     @Transactional(readOnly = true)
     public List<ParentSchoolNoteResponse> getUpcomingReminders(Long parentUserId, Integer days) {
-        log.debug("Getting upcoming reminders for parent: {} within {} days", parentUserId, days);
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime futureLimit = now.plusDays(days != null ? days : 7);
@@ -796,7 +774,6 @@ public class ParentListService {
      * Default liste oluştur (ilk kullanım için)
      */
     public ParentSchoolListResponse createDefaultList(Long parentUserId) {
-        log.debug("Creating default list for parent: {}", parentUserId);
 
         CreateParentSchoolListRequest request = CreateParentSchoolListRequest.builder()
                 .listName("Favorilerim")
@@ -841,7 +818,6 @@ public class ParentListService {
      * Not silme işlemi
      */
     public void deleteSchoolNote(Long parentUserId, Long noteId) {
-        log.debug("Deleting school note: {} for parent: {}", noteId, parentUserId);
 
         ParentSchoolNote note = parentSchoolNoteRepository.findById(noteId)
                 .orElseThrow(() -> new RuntimeException("Not bulunamadı"));
@@ -859,7 +835,6 @@ public class ParentListService {
      * Liste notunu silme işlemi
      */
     public void deleteListNote(Long parentUserId, Long noteId) {
-        log.debug("Deleting list note: {} for parent: {}", noteId, parentUserId);
 
         ParentListNote note = parentListNoteRepository.findById(noteId)
                 .orElseThrow(() -> new RuntimeException("Not bulunamadı"));
@@ -875,7 +850,6 @@ public class ParentListService {
 
     @Transactional(readOnly = true)
     public List<ParentSchoolListSummaryResponse> getParentListsSummary(Long parentUserId) {
-        log.debug("Getting list summaries for parent: {}", parentUserId);
 
         List<ParentSchoolList> lists = parentSchoolListRepository
                 .findByParentUserIdAndStatusOrderByIsDefaultDescCreatedAtDesc(parentUserId, ListStatus.ACTIVE);

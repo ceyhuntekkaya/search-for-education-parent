@@ -48,6 +48,8 @@ public class InstitutionConverterService {
                 .properties(mapInstitutionPropertiesToDto(entity.getProperties()))
                 .isActive(entity.getIsActive())
                 .createdAt(entity.getCreatedAt())
+                .groupName(entity.getGroup().getName())
+                .groupId(entity.getGroup().getId())
                 .build();
     }
 
@@ -643,6 +645,11 @@ public class InstitutionConverterService {
                 .slug(entity.getSlug())
                 .description(entity.getDescription())
                 .logoUrl(entity.getLogoUrl())
+                .facebookUrl(entity.getFacebookUrl())
+                .twitterUrl(entity.getTwitterUrl())
+                .instagramUrl(entity.getInstagramUrl())
+                .linkedinUrl(entity.getLinkedinUrl())
+                .youtubeUrl(entity.getYoutubeUrl())
                 .coverImageUrl(entity.getCoverImageUrl())
                 .email(entity.getEmail())
                 .phone(ConversionUtils.formatPhoneNumber(entity.getPhone()))
@@ -706,6 +713,11 @@ public class InstitutionConverterService {
                         entity.getInstitutionType().getDisplayName() : null)
                 .minAge(entity.getMinAge())
                 .maxAge(entity.getMaxAge())
+                .facebookUrl(entity.getFacebookUrl())
+                .twitterUrl(entity.getTwitterUrl())
+                .instagramUrl(entity.getInstagramUrl())
+                .linkedinUrl(entity.getLinkedinUrl())
+                .youtubeUrl(entity.getYoutubeUrl())
                 .monthlyFee(entity.getMonthlyFee())
                 .ratingAverage(entity.getRatingAverage())
                 .ratingCount(entity.getRatingCount())
@@ -783,6 +795,11 @@ public class InstitutionConverterService {
                 .institutionTypeIcon(institutionTypeIcon)
                 .institutionTypeColor(institutionTypeColor)
                 .minAge(entity.getMinAge())
+                .facebookUrl(entity.getFacebookUrl())
+                .twitterUrl(entity.getTwitterUrl())
+                .instagramUrl(entity.getInstagramUrl())
+                .linkedinUrl(entity.getLinkedinUrl())
+                .youtubeUrl(entity.getYoutubeUrl())
                 .maxAge(entity.getMaxAge())
                 .ageRange(ageRange)
                 .monthlyFee(entity.getMonthlyFee())
@@ -899,6 +916,17 @@ public class InstitutionConverterService {
         entity.setCoverImageUrl(dto.getCoverImageUrl());
         entity.setEmail(dto.getEmail());
         entity.setPhone(dto.getPhone());
+
+
+
+        entity.setFacebookUrl(dto.getFacebookUrl());
+        entity.setTwitterUrl(dto.getTwitterUrl());
+        entity.setInstagramUrl(dto.getInstagramUrl());
+        entity.setLinkedinUrl(dto.getLinkedinUrl());
+        entity.setYoutubeUrl(dto.getYoutubeUrl());
+
+
+
         entity.setExtension(dto.getExtension());
         entity.setMinAge(dto.getMinAge());
         entity.setMaxAge(dto.getMaxAge());
@@ -1013,6 +1041,25 @@ public class InstitutionConverterService {
 
         if (dto.getMetaKeywords() != null) {
             entity.setMetaKeywords(dto.getMetaKeywords());
+        }
+
+
+
+
+        if (dto.getFacebookUrl() != null) {
+            entity.setFacebookUrl(dto.getFacebookUrl());
+        }
+        if (dto.getTwitterUrl() != null) {
+            entity.setTwitterUrl(dto.getTwitterUrl());
+        }
+        if (dto.getInstagramUrl() != null) {
+            entity.setInstagramUrl(dto.getInstagramUrl());
+        }
+        if (dto.getLinkedinUrl() != null) {
+            entity.setLinkedinUrl(dto.getLinkedinUrl());
+        }
+        if (dto.getYoutubeUrl() != null) {
+            entity.setYoutubeUrl(dto.getYoutubeUrl());
         }
     }
 
@@ -1225,6 +1272,15 @@ public class InstitutionConverterService {
         return SchoolSummaryDto.builder()
                 .id(entity.getId())
                 .name(entity.getName())
+
+
+                .facebookUrl(entity.getFacebookUrl())
+                .twitterUrl(entity.getTwitterUrl())
+                .instagramUrl(entity.getInstagramUrl())
+                .linkedinUrl(entity.getLinkedinUrl())
+                .youtubeUrl(entity.getYoutubeUrl())
+
+
                 .slug(entity.getSlug())
                 .logoUrl(entity.getLogoUrl())
                 .monthlyFee(entity.getMonthlyFee())

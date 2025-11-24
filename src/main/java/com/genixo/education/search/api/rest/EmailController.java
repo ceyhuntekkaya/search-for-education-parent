@@ -35,8 +35,6 @@ public class EmailController {
     public ResponseEntity<ApiResponse<String>> getPostById(
             HttpServletRequest request) throws Exception {
 
-        log.debug("Send email");
-
         emailService.sendMail();
 
         ApiResponse<String> response = ApiResponse.success("ok.", "Email retrieved successfully");

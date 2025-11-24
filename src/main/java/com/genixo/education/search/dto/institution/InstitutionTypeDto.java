@@ -24,4 +24,7 @@ public class InstitutionTypeDto {
     private List<InstitutionPropertyDto> properties;
     private Boolean isActive;
     private LocalDateTime createdAt;
+    private String groupName;
+    private Long groupId;
+
 }

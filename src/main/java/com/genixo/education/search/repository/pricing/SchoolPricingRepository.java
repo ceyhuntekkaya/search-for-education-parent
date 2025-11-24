@@ -262,4 +262,7 @@ public interface SchoolPricingRepository extends JpaRepository<SchoolPricing, Lo
             @Param("startDate") java.time.LocalDateTime startDate,
             @Param("endDate") java.time.LocalDateTime endDate);
 
+    @Query("SELECT sp FROM SchoolPricing sp " +
+            "WHERE sp.school.id = :id")
+    SchoolPricing findBySchoolId(@Param("id") Long id);
 }

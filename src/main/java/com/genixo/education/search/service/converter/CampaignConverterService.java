@@ -447,6 +447,7 @@ public class CampaignConverterService {
         return CampaignSchoolDto.builder()
                 .id(entity.getId())
                 .campaignId(entity.getCampaign() != null ? entity.getCampaign().getId() : null)
+                .thumbnailImageUrl(entity.getCampaign() != null ? entity.getCampaign().getThumbnailImageUrl() : null)
                 .campaignTitle(entity.getCampaign() != null ? entity.getCampaign().getTitle() : null)
                 .schoolId(entity.getSchool() != null ? entity.getSchool().getId() : null)
                 .schoolName(entity.getSchool() != null ? entity.getSchool().getName() : null)

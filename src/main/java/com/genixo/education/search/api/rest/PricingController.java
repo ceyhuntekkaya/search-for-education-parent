@@ -60,7 +60,6 @@ public class PricingController {
             @Parameter(description = "School pricing ID") @PathVariable Long id,
             HttpServletRequest request) {
 
-        log.debug("Get school pricing request: {}", id);
 
         SchoolPricingDto pricing = pricingService.getSchoolPricingById(id, request);
 
@@ -84,9 +83,6 @@ public class PricingController {
             @Parameter(description = "Academic year") @RequestParam String academicYear,
             HttpServletRequest request) {
 
-        log.debug("Get current pricing request - School: {}, Grade: {}, Year: {}",
-                schoolId, gradeLevel, academicYear);
-
         SchoolPricingDto pricing = pricingService.getCurrentSchoolPricing(schoolId, gradeLevel, academicYear, request);
 
         ApiResponse<SchoolPricingDto> response = ApiResponse.success(pricing, "Current pricing retrieved successfully");
@@ -106,8 +102,6 @@ public class PricingController {
     public ResponseEntity<ApiResponse<List<SchoolPricingDto>>> getAllSchoolPricings(
             @Parameter(description = "School ID") @PathVariable Long schoolId,
             HttpServletRequest request) {
-
-        log.debug("Get all pricings for school: {}", schoolId);
 
         List<SchoolPricingDto> pricings = pricingService.getAllSchoolPricings(schoolId, request);
 
@@ -225,8 +219,6 @@ public class PricingController {
             @Parameter(description = "School ID") @PathVariable Long schoolId,
             HttpServletRequest request) {
 
-        log.debug("Get custom fees for school: {}", schoolId);
-
         List<CustomFeeDto> customFees = pricingService.getCustomFeesBySchool(schoolId, request);
 
         ApiResponse<List<CustomFeeDto>> response = ApiResponse.success(customFees,
@@ -236,12 +228,6 @@ public class PricingController {
 
         return ResponseEntity.ok(response);
     }
-
-
-
-
-
-
 
     @GetMapping("/custom-fees/{feeId}")
     @Operation(summary = "Get custom fees by pricing", description = "Get all custom fees for a pricing structure")
@@ -254,7 +240,6 @@ public class PricingController {
             @Parameter(description = "School ID") @PathVariable Long feeId,
             HttpServletRequest request) {
 
-        log.debug("Get custom fees for school: {}", feeId);
 
         CustomFeeDto customFees = pricingService.getCustomFeesById(feeId, request);
 
@@ -324,7 +309,6 @@ public class PricingController {
             @Parameter(description = "School pricing ID") @PathVariable Long pricingId,
             HttpServletRequest request) {
 
-        log.debug("Get price history for pricing: {}", pricingId);
 
         List<PriceHistoryDto> history = pricingService.getPriceHistory(pricingId, request);
 
@@ -350,8 +334,6 @@ public class PricingController {
             @Parameter(description = "End date") @RequestParam LocalDateTime endDate,
             HttpServletRequest request) {
 
-        log.debug("Get price trends for school: {}, grade: {} between {} and {}",
-                schoolId, gradeLevel, startDate, endDate);
 
         PriceTrendsDto trends = pricingService.getSchoolPriceTrends(schoolId, gradeLevel, startDate, endDate, request);
 
@@ -375,7 +357,6 @@ public class PricingController {
             @Parameter(description = "School ID") @PathVariable Long schoolId,
             HttpServletRequest request) {
 
-        log.debug("Get pricing analytics for school: {}", schoolId);
 
         PricingAnalyticsDto analytics = pricingService.getPricingAnalytics(schoolId, request);
 
@@ -400,8 +381,6 @@ public class PricingController {
             @Parameter(description = "Academic year") @RequestParam String academicYear,
             HttpServletRequest request) {
 
-        log.debug("Get market comparison for school: {}, grade: {}, year: {}",
-                schoolId, gradeLevel, academicYear);
 
         MarketComparisonDto comparison = pricingService.getMarketComparison(schoolId, gradeLevel, academicYear, request);
 
@@ -524,7 +503,6 @@ public class PricingController {
             @Parameter(description = "Academic year") @RequestParam String academicYear,
             HttpServletRequest request) {
 
-        log.debug("Get public pricing for school: {}, grade: {}", schoolSlug, gradeLevel);
 
         SchoolPricingDto pricing = pricingService.getPublicSchoolPricing(schoolSlug, gradeLevel, academicYear);
 
@@ -546,7 +524,6 @@ public class PricingController {
             @Parameter(description = "School slug") @PathVariable String schoolSlug,
             HttpServletRequest request) {
 
-        log.debug("Get public pricing summary for school: {}", schoolSlug);
 
         List<PricingSummaryDto> summary = pricingService.getPublicPricingSummary(schoolSlug);
 
@@ -572,7 +549,6 @@ public class PricingController {
             @Parameter(description = "Period (1year, 2years, 3years, 5years)") @RequestParam(defaultValue = "3years") String period,
             HttpServletRequest request) {
 
-        log.debug("Get pricing trends for school: {}, period: {}", schoolId, period);
 
         PriceTrendsDto trends = pricingService.getPricingTrends(schoolId, period, request);
 

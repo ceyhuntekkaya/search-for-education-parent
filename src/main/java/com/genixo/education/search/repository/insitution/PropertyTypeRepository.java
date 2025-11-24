@@ -1,6 +1,7 @@
 package com.genixo.education.search.repository.insitution;
 
 import com.genixo.education.search.entity.institution.InstitutionPropertyValue;
+import com.genixo.education.search.entity.institution.InstitutionType;
 import com.genixo.education.search.entity.institution.PropertyType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -51,4 +52,11 @@ public interface PropertyTypeRepository extends JpaRepository<PropertyType, Long
 
     @Query("SELECT pt FROM PropertyType pt WHERE pt.id IN :propertyIds")
     List<PropertyType> findBtIds(@Param("propertyIds") List<Long> propertyIds);
+
+
+
+
+
+    @Query("SELECT g FROM PropertyType g where g.name= :name and  g.propertyGroupType.id = :id")
+    List<PropertyType> checkIfExist(@Param("name") String name, @Param("id") Long id );
 }

@@ -2,6 +2,7 @@ package com.genixo.education.search.repository.insitution;
 
 import com.genixo.education.search.dto.institution.InstitutionTypeSummaryDto;
 import com.genixo.education.search.entity.institution.InstitutionType;
+import com.genixo.education.search.entity.institution.InstitutionTypeGroup;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -43,4 +44,13 @@ public interface InstitutionTypeRepository extends JpaRepository<InstitutionType
     List<InstitutionType> findAllActiveOrderBySortOrder();
 
     List<InstitutionType> findByIdInAndIsActiveTrue(List<Long> ids);
+
+
+
+
+    @Query("SELECT g FROM InstitutionType g where g.name= :name and  g.group.id = :id")
+    List<InstitutionType> checkIfExist(@Param("name") String name, @Param("id") Long id );
+
+
+
 }

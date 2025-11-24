@@ -37,11 +37,9 @@ public class UserAccessValidator {
             throw new BusinessException("Invalid user or school ID provided");
         }
 
-        log.debug("Validating user access for user: {} to school: {}", user.getId(), schoolId);
 
         // System administrators have access to everything
         if (hasSystemRole(user)) {
-            log.debug("User {} has system role, access granted", user.getId());
             return;
         }
 
@@ -54,7 +52,6 @@ public class UserAccessValidator {
                     .addDetail("User ID: " + user.getId());
         }
 
-        log.debug("User {} granted access to school {}", user.getId(), schoolId);
     }
 
     /**
@@ -68,10 +65,8 @@ public class UserAccessValidator {
             throw new BusinessException("Invalid user or campus ID provided");
         }
 
-        log.debug("Validating user access for user: {} to campus: {}", user.getId(), campusId);
 
         if (hasSystemRole(user)) {
-            log.debug("User {} has system role, access granted", user.getId());
             return;
         }
 
@@ -83,7 +78,6 @@ public class UserAccessValidator {
                     .addDetail("User ID: " + user.getId());
         }
 
-        log.debug("User {} granted access to campus {}", user.getId(), campusId);
     }
 
     /**
@@ -97,10 +91,8 @@ public class UserAccessValidator {
             throw new BusinessException("Invalid user or brand ID provided");
         }
 
-        log.debug("Validating user access for user: {} to brand: {}", user.getId(), brandId);
 
         if (hasSystemRole(user)) {
-            log.debug("User {} has system role, access granted", user.getId());
             return;
         }
 
@@ -112,7 +104,6 @@ public class UserAccessValidator {
                     .addDetail("User ID: " + user.getId());
         }
 
-        log.debug("User {} granted access to brand {}", user.getId(), brandId);
     }
 
     /**
@@ -134,7 +125,6 @@ public class UserAccessValidator {
                     .addDetail("User ID: " + user.getId());
         }
 
-        log.debug("User {} granted manage access to school {}", user.getId(), schoolId);
     }
 
     /**

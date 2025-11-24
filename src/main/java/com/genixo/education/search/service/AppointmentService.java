@@ -1440,9 +1440,6 @@ public class AppointmentService {
     public List<AppointmentAvailabilityDto> getAvailabilityBetweenDates(
             Long schoolId, String schoolName, LocalDate startDate, LocalDate endDate) {
 
-        log.debug("Getting optimized availability for school {} between {} and {}",
-                schoolId, startDate, endDate);
-
         // 1. Tüm aktif slot'ları al
         Map<DayOfWeek, List<SlotInfo>> slotsByDay = getAllSlotsGroupedByDay(schoolId);
 
@@ -1471,7 +1468,6 @@ public class AppointmentService {
             currentDate = currentDate.plusDays(1);
         }
 
-        log.debug("Found {} available days for school {}", availabilityList.size(), schoolId);
         return availabilityList;
     }
 

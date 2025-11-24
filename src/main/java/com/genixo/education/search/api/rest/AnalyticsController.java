@@ -72,8 +72,6 @@ public class AnalyticsController {
             @Parameter(description = "Brand ID filter") @RequestParam(required = false) Long brandId,
             HttpServletRequest request) {
 
-        log.debug("Get analytics summary request for period: {} to {}", startDate, endDate);
-
         AnalyticsSummaryDto summary = analyticsService.getAnalyticsSummary(startDate, endDate, schoolId, campusId, brandId);
 
         ApiResponse<AnalyticsSummaryDto> response = ApiResponse.success(summary, "Summary retrieved successfully");
@@ -94,8 +92,6 @@ public class AnalyticsController {
             @Parameter(description = "Page number") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size,
             HttpServletRequest request) {
-
-        log.debug("Get analytics data request with filter");
 
         Page<AnalyticsDto> analyticsPage = analyticsService.getAnalyticsData(filter, page, size, request);
 
@@ -147,8 +143,6 @@ public class AnalyticsController {
             @Valid @RequestBody VisitorLogDto visitorLogDto,
             HttpServletRequest request) {
 
-        log.debug("Log visitor request for page: {}", visitorLogDto.getPageUrl());
-
         VisitorLogDto loggedVisitor = analyticsService.logVisitor(visitorLogDto);
 
         ApiResponse<VisitorLogDto> response = ApiResponse.success(loggedVisitor, "Visitor log created successfully");
@@ -169,8 +163,6 @@ public class AnalyticsController {
             @Parameter(description = "Page number") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size,
             HttpServletRequest request) {
-
-        log.debug("Get visitor logs request");
 
         Page<VisitorLogDto> visitorLogs = analyticsService.getVisitorLogs(filter, page, size, request);
 
@@ -195,8 +187,6 @@ public class AnalyticsController {
             @Parameter(description = "Brand ID filter") @RequestParam(required = false) Long brandId,
             HttpServletRequest request) {
 
-        log.debug("Get visitor summary request for period: {} to {}", startDate, endDate);
-
         List<VisitorLogSummaryDto> summary = analyticsService.getVisitorSummary(startDate, endDate, schoolId, campusId, brandId, request);
 
         ApiResponse<List<VisitorLogSummaryDto>> response = ApiResponse.success(summary, "Visitor summary retrieved successfully");
@@ -218,8 +208,6 @@ public class AnalyticsController {
             @Valid @RequestBody SearchLogDto searchLogDto,
             HttpServletRequest request) {
 
-        log.debug("Log search request: {}", searchLogDto.getSearchQuery());
-
         SearchLogDto loggedSearch = analyticsService.logSearch(searchLogDto);
 
         ApiResponse<SearchLogDto> response = ApiResponse.success(loggedSearch, "Search log created successfully");
@@ -240,8 +228,6 @@ public class AnalyticsController {
             @Parameter(description = "Page number") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size,
             HttpServletRequest request) {
-
-        log.debug("Get search logs request");
 
         Page<SearchLogDto> searchLogs = analyticsService.getSearchLogs(filter, page, size, request);
 
@@ -266,8 +252,6 @@ public class AnalyticsController {
             @Parameter(description = "Brand ID filter") @RequestParam(required = false) Long brandId,
             HttpServletRequest request) {
 
-        log.debug("Get search summary request for period: {} to {}", startDate, endDate);
-
         List<SearchLogSummaryDto> summary = analyticsService.getSearchSummary(startDate, endDate, schoolId, campusId, brandId, request);
 
         ApiResponse<List<SearchLogSummaryDto>> response = ApiResponse.success(summary, "Search summary retrieved successfully");
@@ -288,8 +272,6 @@ public class AnalyticsController {
     public ResponseEntity<ApiResponse<PerformanceMetricsDto>> logPerformanceMetric(
             @Valid @RequestBody PerformanceMetricsDto metricsDto,
             HttpServletRequest request) {
-
-        log.debug("Log performance metric request: {}", metricsDto.getEndpointUrl());
 
         PerformanceMetricsDto loggedMetrics = analyticsService.logPerformanceMetric(metricsDto);
 
@@ -312,8 +294,6 @@ public class AnalyticsController {
             @Parameter(description = "Performance metric category") @RequestParam(required = false) PerformanceMetricCategory category,
             HttpServletRequest request) {
 
-        log.debug("Get performance summary request for period: {} to {}", startDate, endDate);
-
         List<PerformanceSummaryDto> summary = analyticsService.getPerformanceSummary(startDate, endDate, category, request);
 
         ApiResponse<List<PerformanceSummaryDto>> response = ApiResponse.success(summary, "Performance summary retrieved successfully");
@@ -333,8 +313,6 @@ public class AnalyticsController {
     })
     public ResponseEntity<ApiResponse<RealTimeAnalyticsDto>> getRealTimeAnalytics(
             HttpServletRequest request) {
-
-        log.debug("Get real-time analytics request");
 
         RealTimeAnalyticsDto realTimeData = analyticsService.getRealTimeAnalytics(request);
 
@@ -376,8 +354,6 @@ public class AnalyticsController {
     public ResponseEntity<ApiResponse<ExportStatusDto>> getExportStatus(
             @Parameter(description = "Export ID") @PathVariable String exportId,
             HttpServletRequest request) {
-
-        log.debug("Get export status request: {}", exportId);
 
         // This would be implemented in the service
         ExportStatusDto status = ExportStatusDto.builder()
@@ -425,8 +401,6 @@ public class AnalyticsController {
     })
     public ResponseEntity<ApiResponse<List<AnalyticsAlertDto>>> getActiveAlerts(
             HttpServletRequest request) {
-
-        log.debug("Get active alerts request");
 
         List<AnalyticsAlertDto> alerts = analyticsService.getActiveAlerts(request);
 
@@ -521,7 +495,6 @@ public class AnalyticsController {
     public ResponseEntity<ApiResponse<Void>> refreshRealTimeCache(
             HttpServletRequest request) {
 
-        log.debug("Refresh real-time cache request");
 
         analyticsService.refreshRealTimeCache();
 

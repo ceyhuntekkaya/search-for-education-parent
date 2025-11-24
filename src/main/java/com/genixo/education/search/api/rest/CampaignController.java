@@ -69,8 +69,6 @@ public class CampaignController {
             @Parameter(description = "Campaign ID") @PathVariable Long id,
             HttpServletRequest request) {
 
-        log.debug("Get campaign request: {}", id);
-
         CampaignDto campaignDto = campaignService.getCampaignById(id, request);
 
         ApiResponse<CampaignDto> response = ApiResponse.success(campaignDto, "Campaign retrieved successfully");
@@ -89,8 +87,6 @@ public class CampaignController {
     public ResponseEntity<ApiResponse<CampaignDto>> getCampaignBySlug(
             @Parameter(description = "Campaign slug") @PathVariable String slug,
             HttpServletRequest request) {
-
-        log.debug("Get campaign by slug request: {}", slug);
 
         CampaignDto campaignDto = campaignService.getCampaignBySlug(slug);
 
@@ -158,8 +154,6 @@ public class CampaignController {
             @Valid @RequestBody CampaignSearchDto searchDto,
             HttpServletRequest request) {
 
-        log.debug("Search campaigns request");
-
         Page<CampaignDto> campaigns = campaignService.searchCampaigns(searchDto, request);
 
         ApiResponse<Page<CampaignDto>> response = ApiResponse.success(campaigns, "Search completed successfully");
@@ -176,8 +170,6 @@ public class CampaignController {
     })
     public ResponseEntity<ApiResponse<List<CampaignSummaryDto>>> getActiveCampaigns(
             HttpServletRequest request) {
-
-        log.debug("Get active campaigns request");
 
         List<CampaignSummaryDto> campaigns = campaignService.getActiveCampaigns();
 
@@ -198,8 +190,6 @@ public class CampaignController {
     public ResponseEntity<ApiResponse<List<CampaignDto>>> getCampaignsBySchool(
             @Parameter(description = "School ID") @PathVariable Long schoolId,
             HttpServletRequest request) {
-
-        log.debug("Get campaigns by school request: {}", schoolId);
 
         List<CampaignDto> campaigns = campaignService.getCampaignsBySchool(schoolId, request);
 
@@ -318,7 +308,6 @@ public class CampaignController {
             Pageable pageable,
             HttpServletRequest request) {
 
-        log.debug("Get campaign usages request: {}", campaignId);
 
         Page<CampaignUsageDto> usages = campaignService.getCampaignUsages(campaignId, pageable, request);
 
@@ -342,7 +331,6 @@ public class CampaignController {
             @Parameter(description = "Campaign ID") @PathVariable Long campaignId,
             HttpServletRequest request) {
 
-        log.debug("Get campaign analytics request: {}", campaignId);
 
         CampaignAnalyticsDto analytics = campaignService.getCampaignAnalytics(campaignId, request);
 
@@ -413,7 +401,6 @@ public class CampaignController {
     public ResponseEntity<ApiResponse<List<CampaignSummaryDto>>> getPublicActiveCampaigns(
             HttpServletRequest request) {
 
-        log.debug("Get public active campaigns request");
 
         List<CampaignSummaryDto> campaigns = campaignService.getPublicActiveCampaigns();
 
@@ -434,7 +421,6 @@ public class CampaignController {
             @Parameter(description = "School ID") @PathVariable Long schoolId,
             HttpServletRequest request) {
 
-        log.debug("Get public campaigns by school request: {}", schoolId);
 
         List<CampaignSummaryDto> campaigns = campaignService.getPublicCampaignsBySchool(schoolId);
 
@@ -617,7 +603,6 @@ public class CampaignController {
             @Parameter(description = "Campaign ID") @PathVariable Long campaignId,
             HttpServletRequest request) {
 
-        log.debug("Get campaign content request: {}", campaignId);
 
         // This would be implemented in the service
         List<CampaignContentDto> content = List.of(); // Placeholder
@@ -682,8 +667,6 @@ public class CampaignController {
             @Parameter(description = "Start date (YYYY-MM-DD)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @Parameter(description = "End date (YYYY-MM-DD)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             HttpServletRequest request) {
-
-        log.debug("Get campaign statistics request: {}", campaignId);
 
         // This would be implemented in the service  ceyhun
         CampaignAnalyticsDto statistics = new CampaignAnalyticsDto();

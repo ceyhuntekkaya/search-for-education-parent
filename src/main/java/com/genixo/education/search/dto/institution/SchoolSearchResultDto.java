@@ -1,5 +1,6 @@
 package com.genixo.education.search.dto.institution;
 
+import jakarta.persistence.Column;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -49,5 +50,13 @@ public class SchoolSearchResultDto {
     private Boolean isFavorite;
 
     private InstitutionTypeListDto properties;
+
+
+    private String facebookUrl;
+    private String twitterUrl;
+    private String instagramUrl;
+    private String linkedinUrl;
+    private String youtubeUrl;
+
 
 }

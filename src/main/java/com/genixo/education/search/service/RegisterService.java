@@ -1,15 +1,11 @@
 package com.genixo.education.search.service;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.genixo.education.search.dto.register.*;
 import com.genixo.education.search.dto.user.UserDto;
 import com.genixo.education.search.entity.institution.Brand;
 import com.genixo.education.search.entity.institution.Campus;
-import com.genixo.education.search.entity.institution.InstitutionPropertyValue;
-import com.genixo.education.search.entity.institution.School;
 import com.genixo.education.search.entity.location.Country;
 import com.genixo.education.search.entity.location.District;
-import com.genixo.education.search.entity.location.Neighborhood;
 import com.genixo.education.search.entity.location.Province;
 import com.genixo.education.search.entity.user.Role;
 import com.genixo.education.search.entity.user.User;
@@ -24,9 +20,7 @@ import com.genixo.education.search.repository.user.UserRoleRepository;
 import com.genixo.education.search.service.converter.UserConverterService;
 import com.genixo.education.search.util.ConversionUtils;
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

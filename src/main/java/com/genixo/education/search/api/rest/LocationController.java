@@ -41,8 +41,6 @@ public class LocationController {
     public ResponseEntity<ApiResponse<List<CountryDto>>> getAllCountries(
             HttpServletRequest request) {
 
-        log.debug("Get all countries request");
-
         List<CountryDto> countries = locationService.getAllCountries();
 
         ApiResponse<List<CountryDto>> response = ApiResponse.success(countries, "Countries retrieved successfully");
@@ -59,8 +57,6 @@ public class LocationController {
     })
     public ResponseEntity<ApiResponse<List<CountrySummaryDto>>> getSupportedCountries(
             HttpServletRequest request) {
-
-        log.debug("Get supported countries request");
 
         List<CountrySummaryDto> countries = locationService.getSupportedCountries();
 
@@ -81,8 +77,6 @@ public class LocationController {
             @Parameter(description = "Country ID") @PathVariable Long id,
             HttpServletRequest request) {
 
-        log.debug("Get country request: {}", id);
-
         CountryDto countryDto = locationService.getCountryById(id);
 
         ApiResponse<CountryDto> response = ApiResponse.success(countryDto, "Country retrieved successfully");
@@ -101,8 +95,6 @@ public class LocationController {
     public ResponseEntity<ApiResponse<CountryDto>> getCountryByIsoCode(
             @Parameter(description = "ISO 2-letter country code") @PathVariable String isoCode,
             HttpServletRequest request) {
-
-        log.debug("Get country by ISO code request: {}", isoCode);
 
         CountryDto countryDto = locationService.getCountryByIsoCode(isoCode);
 
@@ -187,8 +179,6 @@ public class LocationController {
             @Parameter(description = "Country ID") @PathVariable Long countryId,
             HttpServletRequest request) {
 
-        log.debug("Get provinces by country request: {}", countryId);
-
         List<ProvinceSummaryDto> provinces = locationService.getProvincesByCountry(countryId);
 
         ApiResponse<List<ProvinceSummaryDto>> response = ApiResponse.success(provinces, "Provinces retrieved successfully");
@@ -207,8 +197,6 @@ public class LocationController {
     public ResponseEntity<ApiResponse<ProvinceDto>> getProvinceById(
             @Parameter(description = "Province ID") @PathVariable Long id,
             HttpServletRequest request) {
-
-        log.debug("Get province request: {}", id);
 
         ProvinceDto provinceDto = locationService.getProvinceById(id);
 
@@ -229,8 +217,6 @@ public class LocationController {
             @Parameter(description = "Province slug") @PathVariable String slug,
             HttpServletRequest request) {
 
-        log.debug("Get province by slug request: {}", slug);
-
         ProvinceDto provinceDto = locationService.getProvinceBySlug(slug);
 
         ApiResponse<ProvinceDto> response = ApiResponse.success(provinceDto, "Province retrieved successfully");
@@ -247,8 +233,6 @@ public class LocationController {
     })
     public ResponseEntity<ApiResponse<List<ProvinceSummaryDto>>> getMetropolitanProvinces(
             HttpServletRequest request) {
-
-        log.debug("Get metropolitan provinces request");
 
         List<ProvinceSummaryDto> provinces = locationService.getMetropolitanProvinces();
 
@@ -335,8 +319,6 @@ public class LocationController {
             @Parameter(description = "Province ID") @PathVariable Long provinceId,
             HttpServletRequest request) {
 
-        log.debug("Get districts by province request: {}", provinceId);
-
         List<DistrictSummaryDto> districts = locationService.getDistrictsByProvince(provinceId);
 
         ApiResponse<List<DistrictSummaryDto>> response = ApiResponse.success(districts, "Districts retrieved successfully");
@@ -355,8 +337,6 @@ public class LocationController {
     public ResponseEntity<ApiResponse<DistrictDto>> getDistrictById(
             @Parameter(description = "District ID") @PathVariable Long id,
             HttpServletRequest request) {
-
-        log.debug("Get district request: {}", id);
 
         DistrictDto districtDto = locationService.getDistrictById(id);
 
@@ -377,8 +357,6 @@ public class LocationController {
             @Parameter(description = "District slug") @PathVariable String slug,
             HttpServletRequest request) {
 
-        log.debug("Get district by slug request: {}", slug);
-
         DistrictDto districtDto = locationService.getDistrictBySlug(slug);
 
         ApiResponse<DistrictDto> response = ApiResponse.success(districtDto, "District retrieved successfully");
@@ -398,8 +376,6 @@ public class LocationController {
             @Parameter(description = "Province ID") @PathVariable Long provinceId,
             HttpServletRequest request) {
 
-        log.debug("Get central districts request for province: {}", provinceId);
-
         List<DistrictSummaryDto> districts = locationService.getCentralDistricts(provinceId);
 
         ApiResponse<List<DistrictSummaryDto>> response = ApiResponse.success(districts, "Central districts retrieved successfully");
@@ -416,8 +392,6 @@ public class LocationController {
     })
     public ResponseEntity<ApiResponse<List<DistrictSummaryDto>>> getHighSocioeconomicDistricts(
             HttpServletRequest request) {
-
-        log.debug("Get high socioeconomic districts request");
 
         List<DistrictSummaryDto> districts = locationService.getHighSocioeconomicDistricts();
 
@@ -504,8 +478,6 @@ public class LocationController {
             @Parameter(description = "District ID") @PathVariable Long districtId,
             HttpServletRequest request) {
 
-        log.debug("Get neighborhoods by district request: {}", districtId);
-
         List<NeighborhoodSummaryDto> neighborhoods = locationService.getNeighborhoodsWithMetroAccess(districtId);
 
         ApiResponse<List<NeighborhoodSummaryDto>> response = ApiResponse.success(neighborhoods, "Metro neighborhoods retrieved successfully");
@@ -525,8 +497,6 @@ public class LocationController {
             @Parameter(description = "District ID") @PathVariable Long districtId,
             @Parameter(description = "Minimum family score (1-10)") @RequestParam(defaultValue = "7") Integer minScore,
             HttpServletRequest request) {
-
-        log.debug("Get family-friendly neighborhoods request for district: {} with min score: {}", districtId, minScore);
 
         List<NeighborhoodSummaryDto> neighborhoods = locationService.getFamilyFriendlyNeighborhoods(districtId, minScore);
 
@@ -611,8 +581,6 @@ public class LocationController {
             @Valid @RequestBody LocationSearchDto searchDto,
             HttpServletRequest request) {
 
-        log.debug("Search locations request");
-
         Page<LocationSuggestionDto> locations = locationService.searchLocations(searchDto);
 
         ApiResponse<Page<LocationSuggestionDto>> response = ApiResponse.success(locations, "Search completed successfully");
@@ -631,8 +599,6 @@ public class LocationController {
             @Parameter(description = "Search query") @RequestParam String query,
             @Parameter(description = "Maximum results") @RequestParam(defaultValue = "10") Integer limit,
             HttpServletRequest request) {
-
-        log.debug("Get location suggestions request: {}", query);
 
         List<LocationSuggestionDto> suggestions = locationService.getLocationSuggestions(query, limit);
 
@@ -655,7 +621,6 @@ public class LocationController {
             @Parameter(description = "Neighborhood ID") @PathVariable Long neighborhoodId,
             HttpServletRequest request) {
 
-        log.debug("Get location hierarchy request for neighborhood: {}", neighborhoodId);
 
         LocationHierarchyDto hierarchy = locationService.getLocationHierarchy(neighborhoodId);
 
@@ -676,7 +641,6 @@ public class LocationController {
             @Parameter(description = "District ID") @PathVariable Long districtId,
             HttpServletRequest request) {
 
-        log.debug("Get location hierarchy request for district: {}", districtId);
 
         LocationHierarchyDto hierarchy = locationService.getLocationHierarchyByDistrict(districtId);
 
@@ -702,7 +666,6 @@ public class LocationController {
             @Parameter(description = "Maximum results") @RequestParam(defaultValue = "50") Integer limit,
             HttpServletRequest request) {
 
-        log.debug("Get nearby locations request: {}, {} within {} km", latitude, longitude, radiusKm);
 
         NearbyLocationsDto nearbyLocations = locationService.getNearbyLocations(latitude, longitude, radiusKm, limit);
 
@@ -723,7 +686,6 @@ public class LocationController {
     public ResponseEntity<ApiResponse<LocationStatisticsDto>> getLocationStatistics(
             HttpServletRequest request) {
 
-        log.debug("Get location statistics request");
 
         LocationStatisticsDto statistics = locationService.getLocationStatistics();
 
@@ -748,7 +710,6 @@ public class LocationController {
             @Parameter(description = "Neighborhood ID") @RequestParam(required = false) Long neighborhoodId,
             HttpServletRequest request) {
 
-        log.debug("Validate location hierarchy request");
 
         boolean isValid = locationService.isValidLocationHierarchy(countryId, provinceId, districtId, neighborhoodId);
 
@@ -777,8 +738,6 @@ public class LocationController {
             @Parameter(description = "Location type (NEIGHBORHOOD, DISTRICT, PROVINCE)") @RequestParam String locationType,
             @Parameter(description = "Location ID") @RequestParam Long locationId,
             HttpServletRequest request) {
-
-        log.debug("Check location has schools: {} - {}", locationType, locationId);
 
         boolean hasSchools = locationService.hasSchoolsInLocation(locationType, locationId);
 
@@ -945,8 +904,6 @@ public class LocationController {
             @Parameter(description = "Neighborhood ID") @PathVariable Long id,
             HttpServletRequest request) {
 
-        log.debug("Get neighborhood request: {}", id);
-
         NeighborhoodDto neighborhoodDto = locationService.getNeighborhoodById(id);
 
         ApiResponse<NeighborhoodDto> response = ApiResponse.success(neighborhoodDto, "Neighborhood retrieved successfully");
@@ -966,8 +923,6 @@ public class LocationController {
             @Parameter(description = "Neighborhood slug") @PathVariable String slug,
             HttpServletRequest request) {
 
-        log.debug("Get neighborhood by slug request: {}", slug);
-
         NeighborhoodDto neighborhoodDto = locationService.getNeighborhoodBySlug(slug);
 
         ApiResponse<NeighborhoodDto> response = ApiResponse.success(neighborhoodDto, "Neighborhood retrieved successfully");
@@ -984,8 +939,6 @@ public class LocationController {
     })
     public ResponseEntity<ApiResponse<List<NeighborhoodSummaryDto>>> getPopularNeighborhoodsForSchools(
             HttpServletRequest request) {
-
-        log.debug("Get popular neighborhoods request");
 
         List<NeighborhoodSummaryDto> neighborhoods = locationService.getPopularNeighborhoodsForSchools();
 
@@ -1006,7 +959,6 @@ public class LocationController {
             @Parameter(description = "District ID") @PathVariable Long districtId,
             HttpServletRequest request) {
 
-        log.debug("Get neighborhoods with metro access request for district: {}", districtId);
 
         List<NeighborhoodSummaryDto> neighborhoods = locationService.getNeighborhoodsByDistrict(districtId);
 

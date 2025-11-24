@@ -67,4 +67,10 @@ public class SchoolDto {
     private List<CampaignSchoolDto> activeCampaigns;
     private Boolean isActive;
     private LocalDateTime createdAt;
+
+    private String facebookUrl;
+    private String twitterUrl;
+    private String instagramUrl;
+    private String linkedinUrl;
+    private String youtubeUrl;
 }

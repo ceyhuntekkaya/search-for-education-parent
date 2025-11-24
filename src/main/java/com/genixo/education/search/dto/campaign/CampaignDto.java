@@ -123,4 +123,5 @@ public class CampaignDto {
     // Relationships
     private List<CampaignSchoolDto> campaignSchools;
     private List<CampaignContentDto> campaignContents;
+
 }

@@ -65,8 +65,6 @@ public class ContentController {
             @Parameter(description = "Post ID") @PathVariable Long id,
             HttpServletRequest request) {
 
-        log.debug("Get post request: {}", id);
-
         PostDto postDto = contentService.getPostById(id, request);
 
         ApiResponse<PostDto> response = ApiResponse.success(postDto, "Post retrieved successfully");
@@ -87,8 +85,6 @@ public class ContentController {
             @Parameter(description = "Post ID") @PathVariable Long id,
             HttpServletRequest request) {
 
-        log.debug("Get post request by school id: {}", id);
-
         List<PostSummaryDto> postDto = contentService.getPostBySchoolId(id);
 
         ApiResponse<List<PostSummaryDto>> response = ApiResponse.success(postDto, "Post retrieved successfully");
@@ -106,8 +102,6 @@ public class ContentController {
     public ResponseEntity<ApiResponse<PostDto>> getPublicPostBySlug(
             @Parameter(description = "Post slug") @PathVariable String slug,
             HttpServletRequest request) {
-
-        log.debug("Get public post by slug request: {}", slug);
 
         PostDto postDto = contentService.getPublicPostBySlug(slug);
 
@@ -149,8 +143,6 @@ public class ContentController {
     public ResponseEntity<ApiResponse<Page<PostSummaryDto>>> searchPosts(
             @Valid @RequestBody PostSearchDto searchDto,
             HttpServletRequest request) {
-
-        log.debug("Search posts request");
 
         Page<PostSummaryDto> posts = contentService.searchPosts(searchDto, request);
 
@@ -218,8 +210,6 @@ public class ContentController {
             @Parameter(description = "Page number") @RequestParam(defaultValue = "0") Integer page,
             @Parameter(description = "Page size") @RequestParam(defaultValue = "20") Integer size,
             HttpServletRequest request) {
-
-        log.debug("Get comments for post: {}", postId);
 
         Page<PostCommentDto> comments = contentService.getPostComments(postId, page, size);
 
@@ -291,8 +281,6 @@ public class ContentController {
             @Parameter(description = "Gallery ID") @PathVariable Long id,
             HttpServletRequest request) {
 
-        log.debug("Get gallery request: {}", id);
-
         GalleryDto galleryDto = contentService.getGalleryById(id, request);
 
         ApiResponse<GalleryDto> response = ApiResponse.success(galleryDto, "Gallery retrieved successfully");
@@ -313,8 +301,6 @@ public class ContentController {
             @Parameter(description = "School ID") @PathVariable Long id,
             HttpServletRequest request) {
 
-        log.debug("Get gallery request: {}", id);
-
         List<GalleryDto> galleryDto = contentService.getGalleryBySchoolId(id);
 
         ApiResponse<List<GalleryDto>> response = ApiResponse.success(galleryDto, "Gallery retrieved successfully");
@@ -333,8 +319,6 @@ public class ContentController {
     public ResponseEntity<ApiResponse<Page<GallerySummaryDto>>> searchGalleries(
             @Valid @RequestBody GallerySearchDto searchDto,
             HttpServletRequest request) {
-
-        log.debug("Search galleries request");
 
         Page<GallerySummaryDto> galleries = contentService.searchGalleries(searchDto, request);
 
@@ -404,8 +388,6 @@ public class ContentController {
             @Parameter(description = "Message ID") @PathVariable Long id,
             HttpServletRequest request) {
 
-        log.debug("Get message request: {}", id);
-
         MessageDto messageDto = contentService.getMessageById(id, request);
 
         ApiResponse<MessageDto> response = ApiResponse.success(messageDto, "Message retrieved successfully");
@@ -426,8 +408,6 @@ public class ContentController {
             @Parameter(description = "Message ID") @PathVariable Long id,
             HttpServletRequest request) {
 
-        log.debug("Get message request: {}", id);
-
         contentService.makeReadMessage(id);
 
         ApiResponse<String> response = ApiResponse.success("SUCCESS", "Message retrieved successfully");
@@ -447,8 +427,6 @@ public class ContentController {
     public ResponseEntity<ApiResponse<List<MessageDto>>> getMessageBySchoolId(
             @Parameter(description = "Message ID") @PathVariable Long id,
             HttpServletRequest request) {
-
-        log.debug("Get message request: {}", id);
 
         List<MessageDto> messageDto = contentService.getMessageBySchoolId(id, request);
 

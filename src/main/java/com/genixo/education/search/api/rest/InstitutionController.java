@@ -5,9 +5,7 @@ import com.genixo.education.search.dto.institution.*;
 import com.genixo.education.search.dto.pricing.CustomFeeDto;
 import com.genixo.education.search.dto.pricing.PricingSummaryDto;
 import com.genixo.education.search.entity.institution.School;
-import com.genixo.education.search.service.CampaignService;
-import com.genixo.education.search.service.InstitutionService;
-import com.genixo.education.search.service.PricingService;
+import com.genixo.education.search.service.*;
 import com.genixo.education.search.service.auth.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -35,6 +33,7 @@ public class InstitutionController {
     private final InstitutionService institutionService;
     private final PricingService pricingService;
     private final CampaignService campaignService;
+    private final LocationAddService locationAddService;
     private final JwtService jwtService;
 
     // ================================ BRAND OPERATIONS ================================
@@ -68,8 +67,6 @@ public class InstitutionController {
             @Parameter(description = "Brand ID") @PathVariable Long id,
             HttpServletRequest request) {
 
-        log.debug("Get brand request: {}", id);
-
         BrandDto brandDto = institutionService.getBrandById(id, request);
 
         ApiResponse<BrandDto> response = ApiResponse.success(brandDto, "Brand retrieved successfully");
@@ -88,8 +85,6 @@ public class InstitutionController {
     public ResponseEntity<ApiResponse<BrandDto>> getBrandBySlug(
             @Parameter(description = "Brand slug") @PathVariable String slug,
             HttpServletRequest request) {
-
-        log.debug("Get brand by slug request: {}", slug);
 
         BrandDto brandDto = institutionService.getBrandBySlug(slug);
 
@@ -152,8 +147,6 @@ public class InstitutionController {
     })
     public ResponseEntity<ApiResponse<List<BrandSummaryDto>>> getAllBrandSummaries() {
 
-        log.debug("Get brand summaries request");
-
         List<BrandSummaryDto> summaries = institutionService.getAllBrandSummaries();
 
         ApiResponse<List<BrandSummaryDto>> response = ApiResponse.success(summaries, "Brand summaries retrieved successfully");
@@ -175,10 +168,7 @@ public class InstitutionController {
     public ResponseEntity<ApiResponse<CampusDto>> createCampus(
             @Valid @RequestBody CampusCreateDto createDto,
             HttpServletRequest request) {
-
-
         CampusDto campusDto = institutionService.createCampus(createDto, request);
-
         ApiResponse<CampusDto> response = ApiResponse.success(campusDto, "Campus created successfully");
         response.setPath(request.getRequestURI());
         response.setTimestamp(LocalDateTime.now());
@@ -197,19 +187,13 @@ public class InstitutionController {
             @Parameter(description = "Campus ID") @PathVariable Long id,
             HttpServletRequest request) {
 
-        log.debug("Get campus request: {}", id);
-
         CampusDto campusDto = institutionService.getCampusById(id, request);
-
         ApiResponse<CampusDto> response = ApiResponse.success(campusDto, "Campus retrieved successfully");
         response.setPath(request.getRequestURI());
         response.setTimestamp(LocalDateTime.now());
 
         return ResponseEntity.ok(response);
     }
-
-
-
 
     @PutMapping("/campuses/{id}")
     @Operation(summary = "Update brand", description = "Update an existing campus")
@@ -244,8 +228,6 @@ public class InstitutionController {
             @Parameter(description = "Campus slug") @PathVariable String slug,
             HttpServletRequest request) {
 
-        log.debug("Get campus by slug request: {}", slug);
-
         CampusDto campusDto = institutionService.getCampusBySlug(slug);
 
         ApiResponse<CampusDto> response = ApiResponse.success(campusDto, "Campus retrieved successfully");
@@ -265,8 +247,6 @@ public class InstitutionController {
     public ResponseEntity<ApiResponse<List<CampusSummaryDto>>> getCampusesByBrand(
             @Parameter(description = "Brand ID") @PathVariable Long brandId,
             HttpServletRequest request) {
-
-        log.debug("Get campuses by brand request: {}", brandId);
 
         List<CampusSummaryDto> campuses = institutionService.getCampusesByBrand(brandId, request);
 
@@ -386,10 +366,7 @@ public class InstitutionController {
             @Parameter(description = "School ID") @PathVariable Long id,
             HttpServletRequest request) {
 
-        log.debug("Get school request: {}", id);
-
         SchoolDto schoolDto = institutionService.getSchoolById(id);
-
 
         List<PricingSummaryDto> pricings = pricingService.getAllSchoolPricingSummaries(schoolDto.getId(), request);
         List<CampaignSchoolDto> campaigns = campaignService.getCampaignSummariesBySchool(schoolDto.getId(), request);
@@ -440,8 +417,6 @@ public class InstitutionController {
             @Parameter(description = "School slug") @PathVariable String slug,
             HttpServletRequest request) {
 
-        log.debug("Get school by slug request: {}", slug);
-
         SchoolDto schoolDto = institutionService.getSchoolBySlug(slug);
 
         ApiResponse<SchoolDto> response = ApiResponse.success(schoolDto, "School retrieved successfully");
@@ -450,9 +425,6 @@ public class InstitutionController {
 
         return ResponseEntity.ok(response);
     }
-
-
-
 
     @GetMapping("/schools/campus/{campusId}")
     @Operation(summary = "Get school by slug", description = "Get school details by slug")
@@ -483,8 +455,6 @@ public class InstitutionController {
     public ResponseEntity<ApiResponse<SchoolDetailDto>> getSchoolDetailById(
             @Parameter(description = "School ID") @PathVariable Long id,
             HttpServletRequest request) {
-
-        log.debug("Get school detail request: {}", id);
 
         SchoolDetailDto schoolDetailDto = institutionService.getSchoolDetailById(id, request);
 
@@ -528,8 +498,6 @@ public class InstitutionController {
             @Parameter(description = "School ID") @PathVariable Long id,
             HttpServletRequest request) {
 
-        log.debug("Get school statistics request: {}", id);
-
         SchoolStatisticsDto statistics = institutionService.getSchoolStatistics(id, request);
 
         ApiResponse<SchoolStatisticsDto> response = ApiResponse.success(statistics, "Statistics retrieved successfully");
@@ -551,8 +519,6 @@ public class InstitutionController {
             @Parameter(description = "School ID") @PathVariable Long schoolId,
             HttpServletRequest request) {
 
-        log.debug("Get school statistics request: {}", schoolId);
-
         List<InstitutionPropertyValueDto> institutionPropertyValueList = institutionService.getSchoolInstitutionPropertyValueList(schoolId);
         ApiResponse<List<InstitutionPropertyValueDto>> response = ApiResponse.success(institutionPropertyValueList, "Statistics retrieved successfully");
         response.setPath(request.getRequestURI());
@@ -571,7 +537,6 @@ public class InstitutionController {
             @Parameter(description = "Property ID") @PathVariable Long propertyValueId,
             HttpServletRequest request) {
 
-        log.debug("Get school statistics request: {}", schoolId);
         institutionService.addSchoolInstitutionProperty(schoolId, propertyValueId);
         ApiResponse<String> response = ApiResponse.success("SUCCESS", "Statistics retrieved successfully");
         response.setPath(request.getRequestURI());
@@ -591,7 +556,6 @@ public class InstitutionController {
             @Parameter(description = "Property ID") @PathVariable Long propertyValueId,
             HttpServletRequest request) {
 
-        log.debug("Get school statistics request: {}", schoolId);
         institutionService.removeSchoolInstitutionProperty(schoolId, propertyValueId);
         ApiResponse<String> response = ApiResponse.success("SUCCESS", "Statistics retrieved successfully");
         response.setPath(request.getRequestURI());
@@ -630,8 +594,6 @@ public class InstitutionController {
             @Valid @RequestBody SchoolSearchDto searchDto,
             HttpServletRequest request) {
 
-        log.debug("Public search schools request");
-
         Page<SchoolSearchResultDto> results = institutionService.publicSearchSchools(searchDto);
 
         ApiResponse<Page<SchoolSearchResultDto>> response = ApiResponse.success(results, "Public search completed successfully");
@@ -651,10 +613,7 @@ public class InstitutionController {
     public ResponseEntity<ApiResponse<List<InstitutionTypeListDto>>> getAllInstitutionTypes(
             HttpServletRequest request) {
 
-        log.debug("Get institution types request");
-
         List<InstitutionTypeListDto> types = institutionService.getAllInstitutionTypesWithProperties();
-
         ApiResponse<List<InstitutionTypeListDto>> response = ApiResponse.success(types, "Institution types retrieved successfully");
         response.setPath(request.getRequestURI());
         response.setTimestamp(LocalDateTime.now());
@@ -671,7 +630,6 @@ public class InstitutionController {
     public ResponseEntity<ApiResponse<List<InstitutionTypeListDto>>> getAllInstitutionTypesWithProperties(
             HttpServletRequest request) {
 
-        log.debug("Get institution types request");
 
         List<InstitutionTypeListDto> types = institutionService.getAllInstitutionTypesWithProperties();
 
@@ -691,7 +649,6 @@ public class InstitutionController {
     public ResponseEntity<ApiResponse<List<InstitutionTypeSummaryDto>>> getInstitutionTypeSummaries(
             HttpServletRequest request) {
 
-        log.debug("Get institution type summaries request");
 
         List<InstitutionTypeSummaryDto> summaries = institutionService.getInstitutionTypeSummaries();
 
@@ -758,7 +715,6 @@ public class InstitutionController {
             @Parameter(description = "Institution type ID") @PathVariable Long institutionTypeId,
             HttpServletRequest request) {
 
-        log.debug("Get properties by institution type request: {}", institutionTypeId);
 
         List<InstitutionPropertyDto> properties = institutionService.getPropertiesByInstitutionType(institutionTypeId);
 
@@ -802,7 +758,6 @@ public class InstitutionController {
     public ResponseEntity<ApiResponse<InstitutionFavoritesDto>> getUserFavorites(
             HttpServletRequest request) {
 
-        log.debug("Get user favorites request");
 
         InstitutionFavoritesDto favorites = institutionService.getUserFavorites(request);
 
@@ -846,7 +801,6 @@ public class InstitutionController {
             @Parameter(description = "Brand slug") @PathVariable String slug,
             HttpServletRequest request) {
 
-        log.debug("Get public brand by slug request: {}", slug);
 
         BrandDto brandDto = institutionService.getPublicBrandBySlug(slug);
 
@@ -867,14 +821,12 @@ public class InstitutionController {
             @Parameter(description = "Campus slug") @PathVariable String slug,
             HttpServletRequest request) {
 
-        log.debug("Get public campus by slug request: {}", slug);
 
         CampusDto campusDto = institutionService.getPublicCampusBySlug(slug);
 
         ApiResponse<CampusDto> response = ApiResponse.success(campusDto, "Campus retrieved successfully");
         response.setPath(request.getRequestURI());
         response.setTimestamp(LocalDateTime.now());
-
         return ResponseEntity.ok(response);
     }
 
@@ -888,16 +840,40 @@ public class InstitutionController {
             @Parameter(description = "School slug") @PathVariable String slug,
             HttpServletRequest request) {
 
-        log.debug("Get public school by slug request: {}", slug);
-
         SchoolDto schoolDto = institutionService.getPublicSchoolBySlug(slug);
-
         ApiResponse<SchoolDto> response = ApiResponse.success(schoolDto, "School retrieved successfully");
         response.setPath(request.getRequestURI());
         response.setTimestamp(LocalDateTime.now());
 
         return ResponseEntity.ok(response);
     }
+
+
+    @GetMapping("/admin/course/add")
+    @Operation(summary = "Get public school by slug", description = "Get school details by slug (public access)")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "School retrieved successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "School not found or not available")
+    })
+    public ResponseEntity<String> addCourseProperty(
+            HttpServletRequest request) {
+        return ResponseEntity.ok("OK");
+    }
+
+
+    @GetMapping("/admin/brand/add")
+    @Operation(summary = "Get public school by slug", description = "Get school details by slug (public access)")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "School retrieved successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "School not found or not available")
+    })
+    public ResponseEntity<String> addLocation(
+            HttpServletRequest request) {
+        return ResponseEntity.ok("OK");
+    }
+
+
+
 
     // ================================ VALIDATION ENDPOINTS ================================
 
@@ -910,7 +886,6 @@ public class InstitutionController {
             @Valid @RequestBody NameValidationDto validationDto,
             HttpServletRequest request) {
 
-        log.debug("Validate brand name request: {}", validationDto.getName());
 
         ValidationResultDto result = ValidationResultDto.builder()
                 .isValid(true) // This would be implemented in the service
@@ -934,8 +909,6 @@ public class InstitutionController {
             @Valid @RequestBody CampusNameValidationDto validationDto,
             HttpServletRequest request) {
 
-        log.debug("Validate campus name request: {} for brand {}", validationDto.getName(), validationDto.getBrandId());
-
         ValidationResultDto result = ValidationResultDto.builder()
                 .isValid(true) // This would be implemented in the service
                 .message("Campus name is available in this brand")
@@ -957,8 +930,6 @@ public class InstitutionController {
     public ResponseEntity<ApiResponse<ValidationResultDto>> validateSchoolName(
             @Valid @RequestBody SchoolNameValidationDto validationDto,
             HttpServletRequest request) {
-
-        log.debug("Validate school name request: {} for campus {}", validationDto.getName(), validationDto.getCampusId());
 
         ValidationResultDto result = ValidationResultDto.builder()
                 .isValid(true) // This would be implemented in the service

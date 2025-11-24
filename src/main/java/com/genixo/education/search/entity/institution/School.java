@@ -140,4 +140,24 @@ public class School extends BaseEntity {
     @JsonIgnore
     private Set<CampaignSchool> campaignSchools = new HashSet<>();
 
+
+
+
+
+    @Column(name = "facebook_url")
+    private String facebookUrl;
+
+    @Column(name = "twitter_url")
+    private String twitterUrl;
+
+    @Column(name = "instagram_url")
+    private String instagramUrl;
+
+    @Column(name = "linkedin_url")
+    private String linkedinUrl;
+
+    @Column(name = "youtube_url")
+    private String youtubeUrl;
+
+
 }

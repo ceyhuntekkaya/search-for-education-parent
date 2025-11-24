@@ -1,6 +1,7 @@
 package com.genixo.education.search.repository.location;
 
 import com.genixo.education.search.entity.location.District;
+import com.genixo.education.search.entity.location.Neighborhood;
 import com.genixo.education.search.entity.location.Province;
 import com.genixo.education.search.enumaration.SocioeconomicLevel;
 import org.springframework.data.domain.Page;
@@ -113,6 +114,11 @@ public interface DistrictRepository extends JpaRepository<District, Long> {
             "d.universityCount > 0 ORDER BY d.universityCount DESC, d.name ASC")
     List<District> findDistrictsWithUniversities();
 
+
+
+
+    @Query("SELECT n FROM District n WHERE n.name = :name and n.province.id = :id ")
+    List<District> checkIfExist(@Param("name") String name, @Param("id") Long id);
 
 
 }

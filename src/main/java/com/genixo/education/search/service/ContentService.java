@@ -622,7 +622,6 @@ public class ContentService {
             message.setCreatedBy(user.getId());
         } catch (Exception e) {
             // Anonymous message - no user associated
-            log.debug("Anonymous message created");
         }
 
         message = messageRepository.save(message);

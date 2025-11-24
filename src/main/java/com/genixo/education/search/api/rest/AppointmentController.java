@@ -140,8 +140,6 @@ public class AppointmentController {
             @Parameter(description = "Appointment slot ID") @PathVariable Long id,
             HttpServletRequest request) {
 
-        log.debug("Get appointment slot request: {}", id);
-
         AppointmentSlotDto slotDto = appointmentService.getAppointmentSlotById(id, request);
 
         ApiResponse<AppointmentSlotDto> response = ApiResponse.success(slotDto, "Appointment slot retrieved successfully");
@@ -161,8 +159,6 @@ public class AppointmentController {
     public ResponseEntity<ApiResponse<List<AppointmentSlotDto>>> getSchoolAppointmentSlots(
             @Parameter(description = "School ID") @PathVariable Long schoolId,
             HttpServletRequest request) {
-
-        log.debug("Get school appointment slots request: {}", schoolId);
 
         List<AppointmentSlotDto> slots = appointmentService.getSchoolAppointmentSlots(schoolId, request);
 
@@ -258,8 +254,6 @@ public class AppointmentController {
             @Parameter(description = "Appointment ID") @PathVariable Long id,
             HttpServletRequest request) {
 
-        log.debug("Get appointment request: {}", id);
-
         AppointmentDto appointmentDto = appointmentService.getAppointmentById(id, request);
 
         ApiResponse<AppointmentDto> response = ApiResponse.success(appointmentDto, "Appointment retrieved successfully");
@@ -278,8 +272,6 @@ public class AppointmentController {
     public ResponseEntity<ApiResponse<AppointmentDto>> getAppointmentByNumber(
             @Parameter(description = "Appointment number") @PathVariable String appointmentNumber,
             HttpServletRequest request) {
-
-        log.debug("Get appointment by number request: {}", appointmentNumber);
 
         AppointmentDto appointmentDto = appointmentService.getAppointmentByNumber(appointmentNumber);
 
@@ -347,7 +339,6 @@ public class AppointmentController {
             @Valid @RequestBody AppointmentSearchDto searchDto,
             HttpServletRequest request) {
 
-        log.debug("Search appointments request");
 
         Page<AppointmentSummaryDto> appointments = appointmentService.searchAppointments(searchDto, request);
 
@@ -371,7 +362,6 @@ public class AppointmentController {
             @Parameter(description = "End date (YYYY-MM-DD)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             HttpServletRequest request) {
 
-        log.debug("Get appointment calendar request for school: {} from {} to {}", schoolId, startDate, endDate);
 
         List<AppointmentCalendarDto> calendar = appointmentService.getAppointmentCalendar(schoolId, startDate, endDate, request);
 
@@ -396,7 +386,6 @@ public class AppointmentController {
             @Parameter(description = "School name") @RequestParam(required = false) String schoolName,
             HttpServletRequest request) {
 
-        log.debug("Get school availability request: {} for date: {}", schoolId, date);
 
         AppointmentAvailabilityDto availability = appointmentService.getAvailabilityForDate(schoolId, schoolName, date);
 
@@ -420,7 +409,6 @@ public class AppointmentController {
             @Parameter(description = "School name") @RequestParam(required = false) String schoolName,
             HttpServletRequest request) {
 
-        log.debug("Get school availability range request: {} from {} to {}", schoolId, startDate, endDate);
 
         List<AppointmentAvailabilityDto> availability = appointmentService.getAvailabilityBetweenDates(schoolId, schoolName, startDate, endDate);
 
@@ -469,7 +457,6 @@ public class AppointmentController {
             @Parameter(description = "Appointment ID") @PathVariable Long appointmentId,
             HttpServletRequest request) {
 
-        log.debug("Get appointment notes request: {}", appointmentId);
 
         List<AppointmentNoteDto> notes = appointmentService.getAppointmentNotes(appointmentId, request);
 
@@ -495,7 +482,6 @@ public class AppointmentController {
             @Parameter(description = "Period end date (YYYY-MM-DD)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate periodEnd,
             HttpServletRequest request) {
 
-        log.debug("Get appointment statistics request for school: {}", schoolId);
 
         AppointmentStatisticsDto statistics = appointmentService.getAppointmentStatistics(schoolId, periodStart, periodEnd, request);
 
@@ -519,7 +505,6 @@ public class AppointmentController {
             @Parameter(description = "Period end date (YYYY-MM-DD)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate periodEnd,
             HttpServletRequest request) {
 
-        log.debug("Get staff performance request for school: {}", schoolId);
 
         List<StaffPerformanceDto> performance = appointmentService.getStaffPerformance(schoolId, periodStart, periodEnd, request);
 
@@ -617,7 +602,6 @@ public class AppointmentController {
             @Parameter(description = "Metric type") @RequestParam(defaultValue = "SUMMARY") String metricType,
             HttpServletRequest request) {
 
-        log.debug("Get appointment metrics request for school: {}", schoolId);
 
         List<AppointmentMetricsDto> metrics = appointmentService.getAppointmentMetrics(schoolId, periodStart, periodEnd, metricType, request);
 
@@ -640,7 +624,6 @@ public class AppointmentController {
             @Parameter(description = "Period end date (YYYY-MM-DD)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate periodEnd,
             HttpServletRequest request) {
 
-        log.debug("Get time slot analysis request for school: {}", schoolId);
 
         List<TimeSlotAnalysisDto> analysis = appointmentService.getTimeSlotAnalysis(schoolId, periodStart, periodEnd, request);
 
@@ -663,7 +646,6 @@ public class AppointmentController {
             @Parameter(description = "Period end date (YYYY-MM-DD)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate periodEnd,
             HttpServletRequest request) {
 
-        log.debug("Get appointment trends request for school: {}", schoolId);
 
         Map<String, Object> trends = appointmentService.getAppointmentTrends(schoolId, periodStart, periodEnd, request);
 
@@ -794,7 +776,6 @@ public class AppointmentController {
             @Parameter(description = "Date (YYYY-MM-DD)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             HttpServletRequest request) {
 
-        log.debug("Get public school availability request: {} for date: {}", schoolId, date);
 
         List<AppointmentAvailabilityDto> availability = appointmentService.getPublicSchoolAvailability(schoolId, date);
 
@@ -836,7 +817,6 @@ public class AppointmentController {
             @Parameter(description = "Appointment number") @PathVariable String appointmentNumber,
             HttpServletRequest request) {
 
-        log.debug("Get public appointment by number request: {}", appointmentNumber);
 
         AppointmentDto appointmentDto = appointmentService.getPublicAppointmentByNumber(appointmentNumber);
 

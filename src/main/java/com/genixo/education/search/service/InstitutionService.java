@@ -3,12 +3,24 @@ package com.genixo.education.search.service;
 import com.genixo.education.search.common.exception.BusinessException;
 import com.genixo.education.search.common.exception.ResourceNotFoundException;
 import com.genixo.education.search.dto.institution.*;
+import com.genixo.education.search.dto.location.CountrySummaryDto;
+import com.genixo.education.search.dto.location.DistrictSummaryDto;
+import com.genixo.education.search.dto.location.NeighborhoodSummaryDto;
+import com.genixo.education.search.dto.location.ProvinceSummaryDto;
 import com.genixo.education.search.entity.institution.*;
+import com.genixo.education.search.entity.location.Country;
+import com.genixo.education.search.entity.location.District;
+import com.genixo.education.search.entity.location.Neighborhood;
+import com.genixo.education.search.entity.location.Province;
 import com.genixo.education.search.entity.user.User;
 import com.genixo.education.search.entity.user.UserInstitutionAccess;
 import com.genixo.education.search.enumaration.*;
 import com.genixo.education.search.enumaration.AccessType;
 import com.genixo.education.search.repository.insitution.*;
+import com.genixo.education.search.repository.location.CountryRepository;
+import com.genixo.education.search.repository.location.DistrictRepository;
+import com.genixo.education.search.repository.location.NeighborhoodRepository;
+import com.genixo.education.search.repository.location.ProvinceRepository;
 import com.genixo.education.search.service.auth.JwtService;
 import com.genixo.education.search.service.converter.InstitutionConverterService;
 import jakarta.persistence.*;
@@ -48,6 +60,12 @@ public class InstitutionService {
     private final InstitutionPropertyValueRepository institutionPropertyValueRepository;
     private final InstitutionConverterService converterService;
     private final JwtService jwtService;
+    private final NeighborhoodRepository neighborhoodRepository;
+    private final CountryRepository countryRepository;
+    private final ProvinceRepository provinceRepository;
+    private final DistrictRepository districtRepository;
+
+
 
 
     @Transactional
@@ -248,6 +266,9 @@ public class InstitutionService {
         campus.setMetaDescription(createDto.getMetaDescription());
         campus.setMetaKeywords(createDto.getMetaKeywords());
         campus.setCreatedBy(user.getId());
+
+        Neighborhood neighborhood = neighborhoodRepository.findById(createDto.getNeighborhood().getId()).orElse(null);
+        campus.setNeighborhood(neighborhood);
 
         // Set brand if provided
         if (createDto.getBrandId() != null) {
@@ -1281,6 +1302,27 @@ public class InstitutionService {
         campus.setMetaKeywords(updateDto.getMetaKeywords());
         campus.setUpdatedBy(user.getId());
 
+
+
+        campus.setAddressLine1(updateDto.getAddressLine1());
+        campus.setAddressLine2(updateDto.getAddressLine2());
+        campus.setPostalCode(updateDto.getPostalCode());
+        campus.setFax(updateDto.getFax());
+        campus.setLatitude(updateDto.getLatitude());
+        campus.setLongitude(updateDto.getLongitude());
+        campus.setEstablishedYear(updateDto.getEstablishedYear());
+
+
+        Country country = countryRepository.findById(updateDto.getCountry().getId()).orElse(null);
+        Province province = provinceRepository.findById(updateDto.getProvince().getId()).orElse(null);
+        District district = districtRepository.findById(updateDto.getDistrict().getId()).orElse(null);
+        Neighborhood neighborhood = neighborhoodRepository.findById(updateDto.getNeighborhood().getId()).orElse(null);
+
+        campus.setDistrict(district);
+        campus.setProvince(province);
+        campus.setCountry(country);
+        campus.setNeighborhood(neighborhood);
+
         campus = campusRepository.save(campus);
 
         return converterService.mapToDto(campus);
@@ -1338,6 +1380,17 @@ public class InstitutionService {
         school.setCampus(campus);
         school.setInstitutionType(institutionType);
         school.setUpdatedBy(user.getId());
+
+
+
+        school.setFacebookUrl(updateDto.getFacebookUrl());
+        school.setTwitterUrl(updateDto.getTwitterUrl());
+        school.setInstagramUrl(updateDto.getInstagramUrl());
+        school.setLinkedinUrl(updateDto.getLinkedinUrl());
+        school.setYoutubeUrl(updateDto.getYoutubeUrl());
+
+
+
 
         school = schoolRepository.save(school);
 

@@ -1,5 +1,6 @@
 package com.genixo.education.search.repository.location;
 
+import com.genixo.education.search.entity.location.District;
 import com.genixo.education.search.entity.location.Province;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -89,4 +90,9 @@ public interface ProvinceRepository extends JpaRepository<Province, Long> {
     @Query("SELECT p FROM Province p WHERE p.isActive = true AND " +
             "p.educationIndex IS NOT NULL ORDER BY p.educationIndex DESC")
     List<Province> findByOrderByEducationIndexDesc(Pageable pageable);
+
+    @Query("SELECT n FROM Province n WHERE n.name = :name and n.country.id = :id ")
+    List<Province> checkIfExist(@Param("name") String name, @Param("id") Long id);
+
+
 }

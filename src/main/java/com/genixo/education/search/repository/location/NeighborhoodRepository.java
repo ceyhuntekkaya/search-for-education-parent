@@ -40,7 +40,7 @@ public interface NeighborhoodRepository extends JpaRepository<Neighborhood, Long
             "FROM Neighborhood n WHERE n.district.id = :districtId AND n.isActive = true")
     boolean existsByDistrictIdAndIsActiveTrue(@Param("districtId") Long districtId);
 
-    @Query("SELECT n FROM Neighborhood n WHERE n.district.id = :districtId AND n.hasMetroStation = true AND n.isActive = true ORDER BY n.name ASC")
+    @Query("SELECT n FROM Neighborhood n WHERE n.district.id = :districtId AND n.isActive = true ORDER BY n.name ASC")
     List<Neighborhood> findByDistrictIdAndHasMetroStationTrueAndIsActiveTrueOrderByNameAsc(@Param("districtId") Long districtId);
 
     @Query("SELECT COUNT(n) FROM Neighborhood n WHERE n.isActive = true")
@@ -210,4 +210,7 @@ public interface NeighborhoodRepository extends JpaRepository<Neighborhood, Long
 
     @Query("SELECT n.district.province.name, COUNT(n) FROM Neighborhood n WHERE n.isActive = true GROUP BY n.district.province.name ORDER BY COUNT(n) DESC")
     List<Object[]> getNeighborhoodCountByProvince();
+
+    @Query("SELECT n FROM Neighborhood n WHERE n.name = :name and n.district.id = :id ")
+    List<Neighborhood> checkIfExist(@Param("name") String name, @Param("id") Long id);
 }

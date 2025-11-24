@@ -21,4 +21,10 @@ public class SchoolSummaryDto {
     private Double ratingAverage;
     private Long ratingCount;
     private Boolean hasActiveCampaigns;
+
+    private String facebookUrl;
+    private String twitterUrl;
+    private String instagramUrl;
+    private String linkedinUrl;
+    private String youtubeUrl;
 }
