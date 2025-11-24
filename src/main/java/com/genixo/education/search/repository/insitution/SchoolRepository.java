@@ -67,8 +67,13 @@ public interface SchoolRepository extends JpaRepository<School, Long> {
     @Query("SELECT new com.genixo.education.search.dto.institution.SchoolSummaryDto(" +
             "s.id, s.name, s.slug, s.logoUrl, s.institutionType.displayName, " +
             "s.minAge, s.maxAge, s.monthlyFee, s.ratingAverage, s.ratingCount, " +
+            "s.facebookUrl, s.twitterUrl, s.instagramUrl, s.linkedinUrl, s.instagramUrl,  " +
             "CASE WHEN EXISTS(SELECT 1 FROM CampaignSchool cs WHERE cs.school.id = s.id AND cs.status = 'ACTIVE') " +
-            "THEN true ELSE false END) " +
+            "THEN true ELSE false END)" +
+
+
+
+
             "FROM School s WHERE s.isActive = true ORDER BY s.name ASC")
     List<SchoolSummaryDto> findSchoolSummaries();
 

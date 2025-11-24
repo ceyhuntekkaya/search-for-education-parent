@@ -68,8 +68,10 @@ public interface AnalyticsRepository extends JpaRepository<Analytics, Long> {
     @Query("SELECT new com.genixo.education.search.dto.institution.SchoolSummaryDto(" +
             "s.id, s.name, s.slug, s.logoUrl, s.institutionType.displayName, " +
             "s.minAge, s.maxAge, s.monthlyFee, s.ratingAverage, s.ratingCount, " +
+            "s.facebookUrl, s.twitterUrl, s.instagramUrl, s.linkedinUrl, s.instagramUrl,  " +
             "CASE WHEN EXISTS(SELECT 1 FROM CampaignSchool cs WHERE cs.school.id = s.id AND cs.status = 'ACTIVE') " +
-            "THEN true ELSE false END) " +
+            "THEN true ELSE false END)" +
+
             "FROM Analytics a " +
             "JOIN a.school s " +
             "WHERE a.isActive = true AND s.isActive = true " +
@@ -85,8 +87,10 @@ public interface AnalyticsRepository extends JpaRepository<Analytics, Long> {
     @Query("SELECT new com.genixo.education.search.dto.institution.SchoolSummaryDto(" +
             "s.id, s.name, s.slug, s.logoUrl, s.institutionType.displayName, " +
             "s.minAge, s.maxAge, s.monthlyFee, s.ratingAverage, s.ratingCount, " +
+            "s.facebookUrl, s.twitterUrl, s.instagramUrl, s.linkedinUrl, s.instagramUrl,  " +
             "CASE WHEN EXISTS(SELECT 1 FROM CampaignSchool cs WHERE cs.school.id = s.id AND cs.status = 'ACTIVE') " +
-            "THEN true ELSE false END) " +
+            "THEN true ELSE false END)" +
+
             "FROM Analytics a " +
             "JOIN a.school s " +
             "WHERE a.isActive = true AND s.isActive = true " +
