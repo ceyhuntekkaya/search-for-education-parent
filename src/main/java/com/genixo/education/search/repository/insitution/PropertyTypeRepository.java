@@ -9,12 +9,17 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
 public interface PropertyTypeRepository extends JpaRepository<PropertyType, Long> {
     @Query("SELECT pt FROM PropertyType pt WHERE pt.propertyGroupType.id IN :propertyGroupTypeIds AND pt.isActive = true")
     List<PropertyType> findByPropertyGroupTypeIdInAndIsActiveTrue(@Param("propertyGroupTypeIds") List<Long> propertyGroupTypeIds);
+
+
+    @Query("SELECT pt FROM PropertyType pt WHERE pt.id IN (SELECT s.property.propertyType.id FROM InstitutionPropertyValue s) AND pt.propertyGroupType.id IN :propertyGroupTypeIds AND pt.isActive = true")
+    List<PropertyType> findByPropertyGroupTypeIdInAndIsActiveTrueWithHas(@Param("propertyGroupTypeIds") List<Long> propertyGroupTypeIds);
 
     /**
      * Belirli bir PropertyGroupType'a ait aktif PropertyType'ları getirir
@@ -59,4 +64,7 @@ public interface PropertyTypeRepository extends JpaRepository<PropertyType, Long
 
     @Query("SELECT g FROM PropertyType g where g.name= :name and  g.propertyGroupType.id = :id")
     List<PropertyType> checkIfExist(@Param("name") String name, @Param("id") Long id );
+
+    @Query("SELECT g.id, g.name FROM PropertyType g where g.propertyGroupType.name= :name order by g.name")
+    Map<Long, String> getSchoolProperties(@Param("schoolPropertyGroupName") String schoolPropertyGroupName);
 }

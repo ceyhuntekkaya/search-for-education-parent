@@ -20,7 +20,7 @@ spring:
     #dbUrl: jdbc:postgresql://localhost:5432/ #3
     dbUrl: jdbc:postgresql://postgres:5432/
     #dbUrl: jdbc:postgresql://185.123.156.110:5432/ #3
-    #dbUrl: jdbc:postgresql://46.62.141.0:5432/ #3
+    #################dbUrl: jdbc:postgresql://46.62.141.0:5432/ #3
 
     url: ${spring.datasource.dbUrl}${spring.datasource.dbName}
     username: genixo
@@ -114,3 +114,12 @@ springdoc:
   default-consumes-media-type: application/json
   # Hata durumlarında daha detaylı log için
   show-actuator: false
+
+# Ollama Configuration
+ollama:
+  api:
+    url: https://chat.studyscore.ai/ollama/api/chat
+  model: qwen2.5:7b
+  context:
+    max-tokens: 28000  # qwen2.5 için güvenli limit
+    history-messages: 20  # Son 20 mesajı tut

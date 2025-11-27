@@ -1,5 +1,7 @@
 package com.genixo.education.search.repository.pricing;
 
+import com.genixo.education.search.dto.ai.PriceRangeInfo;
+import com.genixo.education.search.dto.ai.RAGContextDTO;
 import com.genixo.education.search.dto.pricing.MarketAveragesDto;
 import com.genixo.education.search.dto.pricing.PricingAnalyticsDto;
 import com.genixo.education.search.entity.pricing.SchoolPricing;
@@ -265,4 +267,8 @@ public interface SchoolPricingRepository extends JpaRepository<SchoolPricing, Lo
     @Query("SELECT sp FROM SchoolPricing sp " +
             "WHERE sp.school.id = :id")
     SchoolPricing findBySchoolId(@Param("id") Long id);
+
+
+    @Query("SELECT new com.genixo.education.search.dto.ai.PriceRangeInfo(min(sp.annualTuition), max(sp.annualTuition), avg(sp.annualTuition)) FROM SchoolPricing sp where sp.school.campus.province.name = :city and sp.school.institutionType.name = :institutionType")
+    PriceRangeInfo getPriceStats(@Param("city") String city, @Param("institutionType") String institutionType);
 }

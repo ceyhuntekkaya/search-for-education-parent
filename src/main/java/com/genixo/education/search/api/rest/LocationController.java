@@ -188,6 +188,30 @@ public class LocationController {
         return ResponseEntity.ok(response);
     }
 
+
+
+    @GetMapping("/countries/{countryId}/provinces/search")
+    @Operation(summary = "Get provinces by country", description = "Get all provinces for a specific country")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Provinces retrieved successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Country not found")
+    })
+    public ResponseEntity<ApiResponse<List<ProvinceSummaryDto>>> getProvincesByCountryForSearch(
+            @Parameter(description = "Country ID") @PathVariable Long countryId,
+            HttpServletRequest request) {
+
+        List<ProvinceSummaryDto> provinces = locationService.getProvincesByCountryForSearch(countryId);
+
+        ApiResponse<List<ProvinceSummaryDto>> response = ApiResponse.success(provinces, "Provinces retrieved successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+
+        return ResponseEntity.ok(response);
+    }
+
+
+
+
     @GetMapping("/provinces/{id}")
     @Operation(summary = "Get province by ID", description = "Get province details by ID")
     @ApiResponses(value = {
@@ -327,6 +351,28 @@ public class LocationController {
 
         return ResponseEntity.ok(response);
     }
+
+
+    @GetMapping("/provinces/{provinceId}/districts/search")
+    @Operation(summary = "Get districts by province", description = "Get all districts for a specific province")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Districts retrieved successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Province not found")
+    })
+    public ResponseEntity<ApiResponse<List<DistrictSummaryDto>>> getDistrictsByProvinceForSearch(
+            @Parameter(description = "Province ID") @PathVariable Long provinceId,
+            HttpServletRequest request) {
+
+        List<DistrictSummaryDto> districts = locationService.getDistrictsByProvinceForSearch(provinceId);
+
+        ApiResponse<List<DistrictSummaryDto>> response = ApiResponse.success(districts, "Districts retrieved successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+
+        return ResponseEntity.ok(response);
+    }
+
+
 
     @GetMapping("/districts/{id}")
     @Operation(summary = "Get district by ID", description = "Get district details by ID")
@@ -479,6 +525,25 @@ public class LocationController {
             HttpServletRequest request) {
 
         List<NeighborhoodSummaryDto> neighborhoods = locationService.getNeighborhoodsWithMetroAccess(districtId);
+
+        ApiResponse<List<NeighborhoodSummaryDto>> response = ApiResponse.success(neighborhoods, "Metro neighborhoods retrieved successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/districts/{districtId}/neighborhoods/search")
+    @Operation(summary = "Get neighborhoods by district", description = "Get all neighborhoods for a specific district")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Neighborhoods retrieved successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "District not found")
+    })
+    public ResponseEntity<ApiResponse<List<NeighborhoodSummaryDto>>> getNeighborhoodsByDistrictForSearch(
+            @Parameter(description = "District ID") @PathVariable Long districtId,
+            HttpServletRequest request) {
+
+        List<NeighborhoodSummaryDto> neighborhoods = locationService.getNeighborhoodsWithMetroAccessForSearch(districtId);
 
         ApiResponse<List<NeighborhoodSummaryDto>> response = ApiResponse.success(neighborhoods, "Metro neighborhoods retrieved successfully");
         response.setPath(request.getRequestURI());

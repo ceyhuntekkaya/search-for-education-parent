@@ -613,6 +613,22 @@ public class InstitutionController {
     public ResponseEntity<ApiResponse<List<InstitutionTypeListDto>>> getAllInstitutionTypes(
             HttpServletRequest request) {
 
+        List<InstitutionTypeListDto> types = institutionService.getAllInstitutionTypesWithPropertiesWithHas();
+        ApiResponse<List<InstitutionTypeListDto>> response = ApiResponse.success(types, "Institution types retrieved successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/institution-types/admin")
+    @Operation(summary = "Get all institution types", description = "Get all available institution types")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Institution types retrieved successfully")
+    })
+    public ResponseEntity<ApiResponse<List<InstitutionTypeListDto>>> getAllInstitutionTypesForAdmin(
+            HttpServletRequest request) {
+
         List<InstitutionTypeListDto> types = institutionService.getAllInstitutionTypesWithProperties();
         ApiResponse<List<InstitutionTypeListDto>> response = ApiResponse.success(types, "Institution types retrieved successfully");
         response.setPath(request.getRequestURI());

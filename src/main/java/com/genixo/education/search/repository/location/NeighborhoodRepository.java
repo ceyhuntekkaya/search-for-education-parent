@@ -43,6 +43,12 @@ public interface NeighborhoodRepository extends JpaRepository<Neighborhood, Long
     @Query("SELECT n FROM Neighborhood n WHERE n.district.id = :districtId AND n.isActive = true ORDER BY n.name ASC")
     List<Neighborhood> findByDistrictIdAndHasMetroStationTrueAndIsActiveTrueOrderByNameAsc(@Param("districtId") Long districtId);
 
+
+    @Query("SELECT n FROM Neighborhood n WHERE n.id IN (SELECT s.campus.neighborhood.id FROM School s) AND n.district.id = :districtId AND n.isActive = true ORDER BY n.name ASC")
+    List<Neighborhood> findByDistrictIdAndHasMetroStationTrueAndIsActiveTrueOrderByNameAscForSearch(@Param("districtId") Long districtId);
+
+
+
     @Query("SELECT COUNT(n) FROM Neighborhood n WHERE n.isActive = true")
     Long countByIsActiveTrue();
 

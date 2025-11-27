@@ -38,6 +38,10 @@ public interface InstitutionTypeRepository extends JpaRepository<InstitutionType
     List<InstitutionType> findByIsActiveTrue();
 
 
+    @Query("SELECT it FROM InstitutionType it WHERE it.isActive = true and it.id IN (SELECT s.institutionType.id FROM School s) ORDER BY it.sortOrder ASC, it.name ASC")
+    List<InstitutionType> findByIsActiveTrueWithHas();
+
+
     Optional<InstitutionType> findByNameAndIsActiveTrue(String name);
 
     @Query("SELECT it FROM InstitutionType it WHERE it.isActive = true ORDER BY it.sortOrder ASC, it.name ASC")
@@ -51,6 +55,6 @@ public interface InstitutionTypeRepository extends JpaRepository<InstitutionType
     @Query("SELECT g FROM InstitutionType g where g.name= :name and  g.group.id = :id")
     List<InstitutionType> checkIfExist(@Param("name") String name, @Param("id") Long id );
 
-
-
+    @Query("SELECT g.name FROM InstitutionType g where g.group.name= :name order by g.name")
+    List<String> getAllInstitutionTypeNamesByInstitutionTypeGroupName(@Param("name") String name);
 }

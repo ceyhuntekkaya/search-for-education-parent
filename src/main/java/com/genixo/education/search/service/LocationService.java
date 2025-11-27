@@ -169,6 +169,16 @@ public class LocationService {
                 .collect(Collectors.toList());
     }
 
+
+    @Cacheable(value = "provinces", key = "#countryId")
+    public List<ProvinceSummaryDto> getProvincesByCountryForSearch(Long countryId) {
+
+        List<Province> provinces = provinceRepository.findByCountryIdAndIsActiveTrueOrderBySortOrderAscNameAscForSearch(countryId);
+        return provinces.stream()
+                .map(converterService::mapToSummaryDto)
+                .collect(Collectors.toList());
+    }
+
     @Cacheable(value = "provinces", key = "#id")
     public ProvinceDto getProvinceById(Long id) {
 
@@ -253,6 +263,15 @@ public class LocationService {
     public List<DistrictSummaryDto> getDistrictsByProvince(Long provinceId) {
 
         List<District> districts = districtRepository.findByProvinceIdAndIsActiveTrueOrderBySortOrderAscNameAsc(provinceId);
+        return districts.stream()
+                .map(converterService::mapToSummaryDto)
+                .collect(Collectors.toList());
+    }
+
+    @Cacheable(value = "districts", key = "#provinceId")
+    public List<DistrictSummaryDto> getDistrictsByProvinceForSearch(Long provinceId) {
+
+        List<District> districts = districtRepository.findByProvinceIdAndIsActiveTrueOrderBySortOrderAscNameAscForSearch(provinceId);
         return districts.stream()
                 .map(converterService::mapToSummaryDto)
                 .collect(Collectors.toList());
@@ -349,6 +368,15 @@ public class LocationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Neighborhood", id));
 
         return converterService.mapToDto(neighborhood);
+    }
+
+    @Cacheable(value = "neighborhoods", key = "#id")
+    public Neighborhood getNeighborhoodClassById(Long id) {
+
+        Neighborhood neighborhood = neighborhoodRepository.findByIdAndIsActiveTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Neighborhood", id));
+
+        return neighborhood;
     }
 
     @Cacheable(value = "neighborhoods", key = "#slug")
@@ -946,6 +974,14 @@ public class LocationService {
     public List<NeighborhoodSummaryDto> getNeighborhoodsWithMetroAccess(Long districtId) {
 
         List<Neighborhood> neighborhoods = neighborhoodRepository.findByDistrictIdAndHasMetroStationTrueAndIsActiveTrueOrderByNameAsc(districtId);
+        return neighborhoods.stream()
+                .map(converterService::mapToSummaryDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<NeighborhoodSummaryDto> getNeighborhoodsWithMetroAccessForSearch(Long districtId) {
+
+        List<Neighborhood> neighborhoods = neighborhoodRepository.findByDistrictIdAndHasMetroStationTrueAndIsActiveTrueOrderByNameAscForSearch(districtId);
         return neighborhoods.stream()
                 .map(converterService::mapToSummaryDto)
                 .collect(Collectors.toList());

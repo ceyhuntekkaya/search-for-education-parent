@@ -375,6 +375,12 @@ public class InstitutionService {
         school.setInstitutionType(institutionType);
         school.setCreatedBy(user.getId());
 
+        school.setFacebookUrl(createDto.getFacebookUrl());
+        school.setTwitterUrl(createDto.getTwitterUrl());
+        school.setInstagramUrl(createDto.getInstagramUrl());
+        school.setLinkedinUrl(createDto.getLinkedinUrl());
+        school.setYoutubeUrl(createDto.getYoutubeUrl());
+
         school = schoolRepository.save(school);
 
         return converterService.mapToDto(school);
@@ -1136,6 +1142,41 @@ public class InstitutionService {
 
         return searchDto;
     }
+
+
+
+    public List<InstitutionTypeListDto> getAllInstitutionTypesWithPropertiesWithHas() {
+        // 1. Tüm aktif InstitutionType'ları getir
+        List<InstitutionType> institutionTypes = institutionTypeRepository.findByIsActiveTrueWithHas();
+
+        if (institutionTypes.isEmpty()) {
+            return List.of();
+        }
+
+        // 2. InstitutionType ID'lerini topla
+        List<Long> institutionTypeIds = institutionTypes.stream()
+                .map(InstitutionType::getId)
+                .collect(Collectors.toList());
+
+        // 3. Bu InstitutionType'lara ait PropertyGroupType'ları getir
+        List<PropertyGroupType> propertyGroupTypes =
+                propertyGroupTypeRepository.findByInstitutionTypeIdInAndIsActiveTrueWithHas(institutionTypeIds);
+
+        // 4. PropertyGroupType ID'lerini topla
+        List<Long> propertyGroupTypeIds = propertyGroupTypes.stream()
+                .map(PropertyGroupType::getId)
+                .collect(Collectors.toList());
+
+        // 5. Bu PropertyGroupType'lara ait PropertyType'ları getir
+        List<PropertyType> propertyTypes = List.of(); // Boş liste, eğer PropertyType'lar da gerekirse
+        if (!propertyGroupTypeIds.isEmpty()) {
+            propertyTypes = propertyTypeRepository.findByPropertyGroupTypeIdInAndIsActiveTrueWithHas(propertyGroupTypeIds);
+        }
+
+        // 6. Verileri grupla ve DTO'ya dönüştür
+        return buildInstitutionTypeListDtos(institutionTypes, propertyGroupTypes, propertyTypes);
+    }
+
 
 
     /**

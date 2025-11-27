@@ -6,6 +6,7 @@ import com.genixo.education.search.entity.institution.Brand;
 import com.genixo.education.search.entity.institution.Campus;
 import com.genixo.education.search.entity.location.Country;
 import com.genixo.education.search.entity.location.District;
+import com.genixo.education.search.entity.location.Neighborhood;
 import com.genixo.education.search.entity.location.Province;
 import com.genixo.education.search.entity.user.Role;
 import com.genixo.education.search.entity.user.User;
@@ -152,6 +153,7 @@ public class RegisterService {
         District district = locationService.getDistrictClassById(registerCampusDto.getDistrictId());
         Country country = locationService.getCountryClassById(registerCampusDto.getCountryId());
         Province province = locationService.getProvinceClassById(registerCampusDto.getProvinceId());
+        Neighborhood neighborhood = locationService.getNeighborhoodClassById(registerCampusDto.getNeighborhoodId());
 
         Campus campus = new Campus();
         campus.setName(registerCampusDto.getName());
@@ -172,6 +174,7 @@ public class RegisterService {
         campus.setNeighborhood(null);
         campus.setCountry(country);
         campus.setProvince(province);
+        campus.setNeighborhood(neighborhood);
 
         campus.setLatitude(0d);
         campus.setLatitude(0d);

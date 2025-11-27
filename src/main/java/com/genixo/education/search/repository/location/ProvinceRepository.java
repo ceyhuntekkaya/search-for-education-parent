@@ -17,6 +17,10 @@ public interface ProvinceRepository extends JpaRepository<Province, Long> {
     @Query("SELECT p FROM Province p WHERE p.country.id = :countryId AND p.isActive = true ORDER BY p.sortOrder ASC, p.name ASC")
     List<Province> findByCountryIdAndIsActiveTrueOrderBySortOrderAscNameAsc(@Param("countryId") Long countryId);
 
+
+    @Query("SELECT p FROM Province p WHERE p.id IN (SELECT s.campus.province.id FROM School s ) AND p.country.id = :countryId AND p.isActive = true ORDER BY p.sortOrder ASC, p.name ASC")
+    List<Province> findByCountryIdAndIsActiveTrueOrderBySortOrderAscNameAscForSearch(@Param("countryId") Long countryId);
+
     @Query("SELECT p FROM Province p WHERE p.id = :id AND p.isActive = true")
     Optional<Province> findByIdAndIsActiveTrue(@Param("id") Long id);
 
@@ -95,4 +99,6 @@ public interface ProvinceRepository extends JpaRepository<Province, Long> {
     List<Province> checkIfExist(@Param("name") String name, @Param("id") Long id);
 
 
+    @Query("SELECT n.name FROM Province n order by n.name")
+    List<String> getAllProvinceNames();
 }

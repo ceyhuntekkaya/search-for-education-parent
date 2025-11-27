@@ -84,6 +84,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/sms/**").permitAll()
                         .requestMatchers("/ai/**").permitAll()
                         .requestMatchers("/pricing/**").permitAll()
+                        .requestMatchers("/schools-search/**").permitAll()
                         .requestMatchers("/register/**").permitAll()
                         .requestMatchers("/upload/**").permitAll()
                         .requestMatchers("/subscriptions/**").permitAll()

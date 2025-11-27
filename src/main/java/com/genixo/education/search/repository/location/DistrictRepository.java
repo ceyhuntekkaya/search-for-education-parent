@@ -19,6 +19,12 @@ public interface DistrictRepository extends JpaRepository<District, Long> {
     @Query("SELECT d FROM District d WHERE d.province.id = :provinceId AND d.isActive = true ORDER BY d.sortOrder ASC, d.name ASC")
     List<District> findByProvinceIdAndIsActiveTrueOrderBySortOrderAscNameAsc(@Param("provinceId") Long provinceId);
 
+
+    @Query("SELECT d FROM District d WHERE d.id IN (SELECT s.campus.district.id FROM School s) AND d.province.id = :provinceId AND d.isActive = true ORDER BY d.sortOrder ASC, d.name ASC")
+    List<District> findByProvinceIdAndIsActiveTrueOrderBySortOrderAscNameAscForSearch(@Param("provinceId") Long provinceId);
+
+
+
     @Query("SELECT d FROM District d WHERE d.id = :id AND d.isActive = true")
     Optional<District> findByIdAndIsActiveTrue(@Param("id") Long id);
 
@@ -121,4 +127,6 @@ public interface DistrictRepository extends JpaRepository<District, Long> {
     List<District> checkIfExist(@Param("name") String name, @Param("id") Long id);
 
 
+    @Query("SELECT n.name FROM District n WHERE n.province.name = :provinceName order by n.name")
+    List<String> getAllDistrictsNamesByProvinceName(@Param("provinceName") String provinceName);
 }

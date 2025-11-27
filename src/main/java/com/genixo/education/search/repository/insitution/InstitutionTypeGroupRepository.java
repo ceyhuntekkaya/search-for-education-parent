@@ -15,4 +15,7 @@ public interface InstitutionTypeGroupRepository extends JpaRepository<Institutio
 
     @Query("SELECT g FROM InstitutionTypeGroup g where g.name= :name")
     List<InstitutionTypeGroup> checkIfExist(@Param("name") String name);
+
+    @Query("SELECT g.name FROM InstitutionTypeGroup g order by g.name")
+    List<String> getAllInstitutionTypeGroupNames();
 }

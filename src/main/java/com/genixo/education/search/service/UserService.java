@@ -55,6 +55,64 @@ public class UserService {
 
 
 
+    public UserDto registerInstitutionUser(UserRegistrationDto registrationDto, User _mainUser) throws ValidationException {
+
+
+        User mainUser = findUserById(_mainUser.getId());
+
+        // Validate registration data
+        validateRegistrationData(registrationDto);
+
+        // Check if user already exists
+        if (userRepository.existsByEmail(registrationDto.getEmail())) {
+            throw new ValidationException("User with this email already exists");
+        }
+
+        if (StringUtils.hasText(registrationDto.getPhone()) &&
+                userRepository.existsByPhone(registrationDto.getPhone())) {
+            throw new ValidationException("User with this phone number already exists");
+        }
+
+        // Create new user entity
+        User user = new User();
+        user.setEmail(registrationDto.getEmail().toLowerCase().trim());
+        user.setPhone(registrationDto.getPhone());
+        user.setFirstName(registrationDto.getFirstName().trim());
+        user.setLastName(registrationDto.getLastName().trim());
+        user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
+        user.setUserType(registrationDto.getUserType());
+        user.setIsEmailVerified(false);
+        user.setIsPhoneVerified(false);
+
+        // Set location if provided
+        setUserLocation(user, registrationDto.getCountryId(), registrationDto.getProvinceId(),
+                registrationDto.getDistrictId(), registrationDto.getNeighborhoodId());
+
+        user.setAddressLine1(registrationDto.getAddressLine1());
+        user.setAddressLine2(registrationDto.getAddressLine2());
+        user.setPostalCode(registrationDto.getPostalCode());
+
+        // Generate verification tokens
+        user.setEmailVerificationToken(generateVerificationToken());
+        user.setPhoneVerificationCode(generatePhoneVerificationCode());
+
+        user.setUserRoles(mainUser.getUserRoles());
+        user.setInstitutionAccess(mainUser.getInstitutionAccess());
+
+
+        // Save user
+        User savedUser = userRepository.save(user);
+
+        // Send verification emails/SMS
+        // emailService.sendEmailVerification(savedUser.getEmail(), savedUser.getEmailVerificationToken());
+        // if (StringUtils.hasText(savedUser.getPhone())) {
+        //     smsService.sendPhoneVerification(savedUser.getPhone(), savedUser.getPhoneVerificationCode());
+        // }
+
+        return converterService.mapToDto(savedUser);
+    }
+
+
     public UserDto registerUser(UserRegistrationDto registrationDto) throws ValidationException {
 
         // Validate registration data

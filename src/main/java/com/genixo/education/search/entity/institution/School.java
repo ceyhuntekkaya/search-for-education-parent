@@ -140,10 +140,6 @@ public class School extends BaseEntity {
     @JsonIgnore
     private Set<CampaignSchool> campaignSchools = new HashSet<>();
 
-
-
-
-
     @Column(name = "facebook_url")
     private String facebookUrl;
 

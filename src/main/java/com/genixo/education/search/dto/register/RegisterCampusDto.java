@@ -18,6 +18,7 @@ public class RegisterCampusDto {
     private String postalCode;
     private Long countryId;
     private Long provinceId;
+    private Long neighborhoodId;
 
 
 

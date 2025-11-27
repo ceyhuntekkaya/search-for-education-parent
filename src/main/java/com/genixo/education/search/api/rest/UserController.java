@@ -1,8 +1,11 @@
 package com.genixo.education.search.api.rest;
 
 import com.genixo.education.search.dto.user.*;
+import com.genixo.education.search.entity.user.User;
+import com.genixo.education.search.enumaration.UserType;
 import com.genixo.education.search.service.UserService;
 import com.genixo.education.search.enumaration.AccessType;
+import com.genixo.education.search.service.auth.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -27,6 +30,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final JwtService jwtService;
     // ================================ USER REGISTRATION & AUTHENTICATION ================================
 
     @PostMapping("/register")
@@ -40,10 +44,39 @@ public class UserController {
             @Valid @RequestBody UserRegistrationDto registrationDto,
             HttpServletRequest request) {
 
-
         try {
             UserDto user = userService.registerUser(registrationDto);
+            ApiResponse<UserDto> response = ApiResponse.success(user, "User registered successfully. Please check your email for verification.");
+            response.setPath(request.getRequestURI());
+            response.setTimestamp(LocalDateTime.now());
 
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
+        } catch (com.genixo.education.search.common.exception.ValidationException e) {
+            ApiResponse<UserDto> response = ApiResponse.error(e.getMessage());
+            response.setPath(request.getRequestURI());
+            response.setTimestamp(LocalDateTime.now());
+            throw new RuntimeException(e);
+
+        }
+    }
+
+
+
+    @PostMapping("/register/institution")
+    @Operation(summary = "Register new user", description = "Register a new user account")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "User registered successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid registration data or user already exists"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "422", description = "Validation errors")
+    })
+    public ResponseEntity<ApiResponse<UserDto>> registerInstitutionUser(
+            @Valid @RequestBody UserRegistrationDto registrationDto,
+            HttpServletRequest request) {
+
+        try {
+            User _mainUser = jwtService.getUser(request);
+            UserDto user = userService.registerInstitutionUser(registrationDto, _mainUser);
             ApiResponse<UserDto> response = ApiResponse.success(user, "User registered successfully. Please check your email for verification.");
             response.setPath(request.getRequestURI());
             response.setTimestamp(LocalDateTime.now());
