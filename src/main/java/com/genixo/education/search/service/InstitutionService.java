@@ -39,6 +39,7 @@ import com.genixo.education.search.repository.content.PostRepository;
 import com.genixo.education.search.repository.content.MessageRepository;
 import com.genixo.education.search.repository.content.GalleryItemRepository;
 import com.genixo.education.search.repository.content.GalleryRepository;
+import com.genixo.education.search.repository.survey.SurveyQuestionResponseRepository;
 import com.genixo.education.search.repository.survey.SurveyResponseRepository;
 import com.genixo.education.search.repository.survey.SurveyRatingRepository;
 import com.genixo.education.search.repository.analytics.VisitorLogRepository;
@@ -108,6 +109,7 @@ public class InstitutionService {
     private final MessageRepository messageRepository;
     private final GalleryItemRepository galleryItemRepository;
     private final GalleryRepository galleryRepository;
+    private final SurveyQuestionResponseRepository surveyQuestionResponseRepository;
     private final SurveyResponseRepository surveyResponseRepository;
     private final SurveyRatingRepository surveyRatingRepository;
     private final VisitorLogRepository visitorLogRepository;
@@ -1733,22 +1735,37 @@ public class InstitutionService {
             campaignSchoolRepository.deleteAll(campaignSchools);
         }
 
-        // 5. Delete AppointmentParticipant (must be deleted before Appointment due to foreign key constraint)
+        // 5. Delete SurveyQuestionResponse (must be deleted before SurveyResponse due to foreign key constraint)
+        log.debug("Deleting survey question responses for school {}", schoolId);
+        surveyQuestionResponseRepository.deleteBySchoolId(schoolId);
+        surveyQuestionResponseRepository.flush();
+
+        // 6. Delete SurveyRating (must be deleted before SurveyResponse due to foreign key constraint)
+        log.debug("Deleting survey ratings for school {}", schoolId);
+        surveyRatingRepository.deleteBySchoolIdFromSurveyResponse(schoolId);
+        surveyRatingRepository.flush();
+
+        // 7. Delete SurveyResponse (must be deleted before Appointment due to foreign key constraint)
+        log.debug("Deleting survey responses for school {}", schoolId);
+        surveyResponseRepository.deleteBySchoolId(schoolId);
+        surveyResponseRepository.flush();
+
+        // 8. Delete AppointmentParticipant (must be deleted before Appointment due to foreign key constraint)
         log.debug("Deleting appointment participants for school {}", schoolId);
         appointmentParticipantRepository.deleteBySchoolId(schoolId);
         appointmentParticipantRepository.flush();
 
-        // 6. Delete AppointmentNote (must be deleted before Appointment due to foreign key constraint)
+        // 9. Delete AppointmentNote (must be deleted before Appointment due to foreign key constraint)
         log.debug("Deleting appointment notes for school {}", schoolId);
         appointmentNoteRepository.deleteBySchoolId(schoolId);
         appointmentNoteRepository.flush();
 
-        // 7. Delete Appointment (must be deleted before AppointmentSlot due to foreign key constraint)
+        // 10. Delete Appointment (must be deleted before AppointmentSlot due to foreign key constraint)
         log.debug("Deleting appointments for school {}", schoolId);
         appointmentRepository.deleteBySchoolId(schoolId);
         appointmentRepository.flush();
 
-        // 8. Delete AppointmentSlot
+        // 11. Delete AppointmentSlot
         List<com.genixo.education.search.entity.appointment.AppointmentSlot> appointmentSlots = appointmentSlotRepository
                 .findBySchoolIdAndIsActiveTrueOrderByDayOfWeekAscStartTimeAsc(schoolId);
         if (!appointmentSlots.isEmpty()) {
@@ -1756,21 +1773,21 @@ public class InstitutionService {
             appointmentSlotRepository.deleteAll(appointmentSlots);
         }
 
-        // 9. Delete ParentSchoolListItem - using direct delete to avoid entity loading issues
+        // 12. Delete ParentSchoolListItem - using direct delete to avoid entity loading issues
         log.debug("Deleting parent school list items for school {}", schoolId);
         parentSchoolListItemRepository.deleteBySchoolId(schoolId);
 
-        // 10. Delete PostComment (must be deleted before Post due to foreign key constraint)
+        // 13. Delete PostComment (must be deleted before Post due to foreign key constraint)
         log.debug("Deleting post comments for school {}", schoolId);
         postCommentRepository.deleteBySchoolId(schoolId);
         postCommentRepository.flush();
 
-        // 11. Delete PostLike (must be deleted before Post due to foreign key constraint)
+        // 14. Delete PostLike (must be deleted before Post due to foreign key constraint)
         log.debug("Deleting post likes for school {}", schoolId);
         postLikeRepository.deleteBySchoolId(schoolId);
         postLikeRepository.flush();
 
-        // 12. Delete PostItem (must be deleted before Post due to foreign key constraint)
+        // 15. Delete PostItem (must be deleted before Post due to foreign key constraint)
         log.debug("Deleting post items for school {}", schoolId);
         postItemRepository.deleteBySchoolId(schoolId);
         postItemRepository.flush();
@@ -1783,7 +1800,7 @@ public class InstitutionService {
             postRepository.deleteAll(posts);
         }
 
-        // 14. Delete Message
+        // 17. Delete Message
         List<com.genixo.education.search.entity.content.Message> messages = messageRepository
                 .findBySchoolIdAndIsActiveTrueList(schoolId);
         if (!messages.isEmpty()) {
@@ -1791,23 +1808,11 @@ public class InstitutionService {
             messageRepository.deleteAll(messages);
         }
 
-        // 15. Delete SurveyResponse
-        List<com.genixo.education.search.entity.survey.SurveyResponse> surveyResponses = surveyResponseRepository
-                .findBySchoolId(schoolId);
-        if (!surveyResponses.isEmpty()) {
-            log.debug("Deleting {} survey responses", surveyResponses.size());
-            surveyResponseRepository.deleteAll(surveyResponses);
-        }
+        // SurveyResponse already deleted above (step 7)
 
-        // 16. Delete SurveyRating
-        List<com.genixo.education.search.entity.survey.SurveyRating> surveyRatings = surveyRatingRepository
-                .findBySchoolId(schoolId);
-        if (!surveyRatings.isEmpty()) {
-            log.debug("Deleting {} survey ratings", surveyRatings.size());
-            surveyRatingRepository.deleteAll(surveyRatings);
-        }
+        // SurveyRating already deleted above (step 6)
 
-        // 17. Delete CustomFee
+        // 18. Delete CustomFee
         List<com.genixo.education.search.entity.pricing.CustomFee> customFees = customFeeRepository
                 .findBySchoolIdAndIsActiveTrueOrderByDisplayOrder(schoolId);
         if (!customFees.isEmpty()) {
@@ -1815,11 +1820,11 @@ public class InstitutionService {
             customFeeRepository.deleteAll(customFees);
         }
 
-        // 18. Delete ParentSchoolNote - using direct delete to avoid entity loading issues
+        // 19. Delete ParentSchoolNote - using direct delete to avoid entity loading issues
         log.debug("Deleting parent school notes for school {}", schoolId);
         parentSchoolNoteRepository.deleteBySchoolId(schoolId);
 
-        // 19. Delete VisitorLog
+        // 20. Delete VisitorLog
         List<com.genixo.education.search.entity.analytics.VisitorLog> visitorLogs = visitorLogRepository
                 .findBySchoolIdOrderByVisitTimeDesc(schoolId, org.springframework.data.domain.Pageable.unpaged());
         if (!visitorLogs.isEmpty()) {
@@ -1827,7 +1832,7 @@ public class InstitutionService {
             visitorLogRepository.deleteAll(visitorLogs);
         }
 
-        // 20. Delete Analytics
+        // 21. Delete Analytics
         List<com.genixo.education.search.entity.analytics.Analytics> analytics = analyticsRepository
                 .findBySchoolIdOrderByDateDesc(schoolId, org.springframework.data.domain.Pageable.unpaged());
         if (!analytics.isEmpty()) {
@@ -1835,7 +1840,7 @@ public class InstitutionService {
             analyticsRepository.deleteAll(analytics);
         }
 
-        // 21. Delete GalleryItem (must be deleted before Gallery due to foreign key constraint)
+        // 22. Delete GalleryItem (must be deleted before Gallery due to foreign key constraint)
         log.debug("Deleting gallery items for school {}", schoolId);
         galleryItemRepository.deleteBySchoolId(schoolId);
         galleryItemRepository.flush();
@@ -1848,12 +1853,12 @@ public class InstitutionService {
             galleryRepository.deleteAll(galleries);
         }
 
-        // 23. Delete InstitutionPropertyValue (school related) - using direct delete method
+        // 24. Delete InstitutionPropertyValue (school related) - using direct delete method
         log.debug("Deleting school property values");
         institutionPropertyValueRepository.deleteBySchoolId(schoolId);
         institutionPropertyValueRepository.flush();
 
-        // 24. Remove school from UserRole many-to-many relationship
+        // 25. Remove school from UserRole many-to-many relationship
         List<com.genixo.education.search.entity.user.UserRole> userRoles = userRoleRepository
                 .findAll().stream()
                 .filter(ur -> ur.getSchools() != null && ur.getSchools().stream()
@@ -1870,6 +1875,9 @@ public class InstitutionService {
         // Flush all deletions
         campaignUsageRepository.flush();
         campaignSchoolRepository.flush();
+        surveyQuestionResponseRepository.flush();
+        surveyRatingRepository.flush();
+        surveyResponseRepository.flush();
         appointmentParticipantRepository.flush();
         appointmentNoteRepository.flush();
         appointmentRepository.flush();

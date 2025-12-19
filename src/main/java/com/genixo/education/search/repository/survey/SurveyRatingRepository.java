@@ -100,4 +100,8 @@ public interface SurveyRatingRepository extends JpaRepository<SurveyRating, Long
     @Modifying
     @Query("DELETE FROM SurveyRating sr WHERE sr.school.id = :schoolId")
     void deleteBySchoolId(@Param("schoolId") Long schoolId);
+
+    @Modifying
+    @Query("DELETE FROM SurveyRating sr WHERE sr.surveyResponse.school.id = :schoolId")
+    void deleteBySchoolIdFromSurveyResponse(@Param("schoolId") Long schoolId);
 }

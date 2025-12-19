@@ -3,6 +3,7 @@ package com.genixo.education.search.repository.survey;
 import com.genixo.education.search.entity.survey.SurveyQuestionResponse;
 import com.genixo.education.search.enumaration.QuestionType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -65,4 +66,8 @@ public interface SurveyQuestionResponseRepository extends JpaRepository<SurveyQu
             "AND sqr.textResponse IS NOT NULL AND sqr.isActive = true " +
             "ORDER BY sqr.createdAt DESC")
     List<SurveyQuestionResponse> findRecentTextResponses(org.springframework.data.domain.Pageable pageable);
+
+    @Modifying
+    @Query("DELETE FROM SurveyQuestionResponse sqr WHERE sqr.surveyResponse.school.id = :schoolId")
+    void deleteBySchoolId(@Param("schoolId") Long schoolId);
 }
