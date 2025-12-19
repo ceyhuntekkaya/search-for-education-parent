@@ -7,7 +7,7 @@ import com.genixo.education.search.dto.supply.ConversationDto;
 import com.genixo.education.search.entity.institution.Campus;
 import com.genixo.education.search.entity.supply.*;
 import com.genixo.education.search.repository.insitution.CampusRepository;
-import com.genixo.education.search.supply.*;
+import com.genixo.education.search.repository.supply.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

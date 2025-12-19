@@ -31,6 +31,25 @@ public enum Role {
 
             )
     ),
+    SUPPLY(
+            Set.of(
+                    GENERAL
+
+            )
+    ),
+    INSTRUCTOR(
+            Set.of(
+                    GENERAL
+
+            )
+    ),
+
+    PARTICIPANT(
+            Set.of(
+                    GENERAL
+
+            )
+    ),
     COMPANY(
             Set.of(
                     GENERAL

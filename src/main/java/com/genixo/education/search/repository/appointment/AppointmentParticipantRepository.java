@@ -51,4 +51,8 @@ public interface AppointmentParticipantRepository extends JpaRepository<Appointm
             "AND ap.isActive = true")
     long countByAppointmentIdAndAttendanceStatus(@Param("appointmentId") Long appointmentId,
                                                  @Param("status") AttendanceStatus status);
+
+    @Modifying
+    @Query("DELETE FROM AppointmentParticipant ap WHERE ap.appointment.school.id = :schoolId")
+    void deleteBySchoolId(@Param("schoolId") Long schoolId);
 }

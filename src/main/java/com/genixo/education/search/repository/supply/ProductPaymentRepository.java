@@ -1,4 +1,4 @@
-package com.genixo.education.search.supply;
+package com.genixo.education.search.repository.supply;
 
 import com.genixo.education.search.entity.supply.ProductPayment;
 import com.genixo.education.search.enumaration.PaymentStatus;

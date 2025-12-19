@@ -5,6 +5,7 @@ import com.genixo.education.search.enumaration.PaymentStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -69,4 +70,8 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
             "AND NOT EXISTS (SELECT p2 FROM Payment p2 WHERE p2.subscription.id = p.subscription.id " +
             "AND p2.paymentStatus = 'COMPLETED' AND p2.createdAt > p.createdAt) AND p.isActive = true")
     List<Payment> findFailedPaymentsForRetry(@Param("minDate") LocalDateTime minDate);
+
+    @Modifying
+    @Query("DELETE FROM Payment p WHERE p.subscription.campus.id = :campusId")
+    void deleteByCampusId(@Param("campusId") Long campusId);
 }

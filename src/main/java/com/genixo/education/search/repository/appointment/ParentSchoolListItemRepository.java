@@ -5,6 +5,7 @@ import com.genixo.education.search.enumaration.SchoolItemStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -72,4 +73,8 @@ public interface ParentSchoolListItemRepository extends JpaRepository<ParentScho
             "WHERE psli.parentSchoolList.parentUser.id = :parentUserId " +
             "ORDER BY psli.createdAt DESC")
     List<ParentSchoolListItem> findRecentlyAddedByParentUserId(@Param("parentUserId") Long parentUserId, Pageable pageable);
+
+    @Modifying
+    @Query("DELETE FROM ParentSchoolListItem psli WHERE psli.school.id = :schoolId")
+    void deleteBySchoolId(@Param("schoolId") Long schoolId);
 }

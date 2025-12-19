@@ -5,6 +5,7 @@ import com.genixo.education.search.enumaration.NoteCategory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -51,4 +52,8 @@ public interface ParentSchoolNoteRepository extends JpaRepository<ParentSchoolNo
     @Query("SELECT COUNT(psn) FROM ParentSchoolNote psn " +
             "WHERE psn.parentSchoolListItem.id = :listItemId AND psn.isImportant = true")
     Integer countImportantByParentSchoolListItemId(@Param("listItemId") Long listItemId);
+
+    @Modifying
+    @Query("DELETE FROM ParentSchoolNote psn WHERE psn.school.id = :schoolId")
+    void deleteBySchoolId(@Param("schoolId") Long schoolId);
 }

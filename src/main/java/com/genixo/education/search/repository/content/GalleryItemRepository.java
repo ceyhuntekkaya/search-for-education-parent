@@ -81,4 +81,8 @@ public interface GalleryItemRepository extends JpaRepository<GalleryItem, Long> 
 
     @Query("SELECT gi FROM GalleryItem gi WHERE gi.gallery.id = :galleryId ")
     List<GalleryItem> findByGalleryId(@Param("galleryId") Long galleryId);
+
+    @Modifying
+    @Query("DELETE FROM GalleryItem gi WHERE gi.gallery.school.id = :schoolId")
+    void deleteBySchoolId(@Param("schoolId") Long schoolId);
 }

@@ -5,6 +5,7 @@ import com.genixo.education.search.enumaration.InvoiceStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -58,4 +59,8 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
     @Query("SELECT SUM(i.taxAmount) FROM Invoice i WHERE i.invoiceDate BETWEEN :startDate AND :endDate AND i.invoiceStatus = 'PAID' AND i.isActive = true")
     BigDecimal getTotalTaxAmountByDateRange(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    @Modifying
+    @Query("DELETE FROM Invoice i WHERE i.subscription.campus.id = :campusId")
+    void deleteByCampusId(@Param("campusId") Long campusId);
 }

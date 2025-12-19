@@ -3,6 +3,7 @@ package com.genixo.education.search.repository.appointment;
 import com.genixo.education.search.entity.appointment.AppointmentNote;
 import com.genixo.education.search.enumaration.NoteType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -57,4 +58,8 @@ public interface AppointmentNoteRepository extends JpaRepository<AppointmentNote
             "AND an.isActive = true " +
             "AND an.attachmentUrl IS NOT NULL")
     long countNotesWithAttachmentsByAppointmentId(@Param("appointmentId") Long appointmentId);
+
+    @Modifying
+    @Query("DELETE FROM AppointmentNote an WHERE an.appointment.school.id = :schoolId")
+    void deleteBySchoolId(@Param("schoolId") Long schoolId);
 }

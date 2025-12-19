@@ -2,6 +2,7 @@ package com.genixo.education.search.repository.insitution;
 
 import com.genixo.education.search.entity.institution.InstitutionPropertyValue;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -68,9 +69,11 @@ public interface InstitutionPropertyValueRepository extends JpaRepository<Instit
             @Param("propertyIds") List<Long> propertyIds,
             @Param("campusId") Long campusId);
 
+    @Modifying
     @Query("DELETE FROM InstitutionPropertyValue ipv WHERE ipv.school.id = :schoolId")
     void deleteBySchoolId(@Param("schoolId") Long schoolId);
 
+    @Modifying
     @Query("DELETE FROM InstitutionPropertyValue ipv WHERE ipv.campus.id = :campusId")
     void deleteByCampusId(@Param("campusId") Long campusId);
 

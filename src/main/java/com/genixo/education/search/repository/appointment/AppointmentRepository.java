@@ -553,4 +553,11 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             @Param("parentUserId") Long parentUserId,
             @Param("schoolId") Long schoolId,
             @Param("today") LocalDate today);
+
+    @Query("SELECT a FROM Appointment a WHERE a.school.id = :schoolId")
+    List<Appointment> findBySchoolId(@Param("schoolId") Long schoolId);
+
+    @Modifying
+    @Query("DELETE FROM Appointment a WHERE a.school.id = :schoolId")
+    void deleteBySchoolId(@Param("schoolId") Long schoolId);
 }

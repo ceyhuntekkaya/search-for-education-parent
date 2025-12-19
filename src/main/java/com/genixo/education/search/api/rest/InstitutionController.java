@@ -279,6 +279,26 @@ public class InstitutionController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/campuses/{campusId}/complete")
+    @Operation(summary = "Delete campus with all relations", description = "Permanently delete a campus and all its related data including schools and all their relations")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Campus and all relations deleted successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Campus not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Access denied")
+    })
+    public ResponseEntity<ApiResponse<Void>> deleteCampusWithAllRelations(
+            @Parameter(description = "Campus ID") @PathVariable Long campusId,
+            HttpServletRequest request) {
+
+        institutionService.deleteCampusWithAllRelations(campusId, request);
+
+        ApiResponse<Void> response = ApiResponse.success(null, "Campus and all relations deleted successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+
+        return ResponseEntity.ok(response);
+    }
+
     // ================================ SCHOOL OPERATIONS ================================
 
     @PostMapping("/schools")

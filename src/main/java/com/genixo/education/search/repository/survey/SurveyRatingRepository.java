@@ -5,6 +5,7 @@ import com.genixo.education.search.entity.survey.SurveyRating;
 import com.genixo.education.search.enumaration.RatingCategory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -92,4 +93,11 @@ public interface SurveyRatingRepository extends JpaRepository<SurveyRating, Long
     @Query("SELECT COUNT(sr) FROM SurveyRating sr " +
             "WHERE sr.isActive = true AND sr.createdAt >= :fromDate")
     Long countRatingsSince(@Param("fromDate") LocalDateTime fromDate);
+
+    @Query("SELECT sr FROM SurveyRating sr WHERE sr.school.id = :schoolId")
+    List<SurveyRating> findBySchoolId(@Param("schoolId") Long schoolId);
+
+    @Modifying
+    @Query("DELETE FROM SurveyRating sr WHERE sr.school.id = :schoolId")
+    void deleteBySchoolId(@Param("schoolId") Long schoolId);
 }

@@ -6,7 +6,7 @@ import com.genixo.education.search.dto.supply.*;
 import com.genixo.education.search.entity.supply.*;
 import com.genixo.education.search.enumaration.DiscountType;
 import com.genixo.education.search.enumaration.ProductStatus;
-import com.genixo.education.search.supply.*;
+import com.genixo.education.search.repository.supply.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

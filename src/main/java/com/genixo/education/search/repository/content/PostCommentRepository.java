@@ -58,4 +58,8 @@ public interface PostCommentRepository extends JpaRepository<PostComment, Long> 
 
     @Query("SELECT c FROM PostComment c WHERE c.isFlagged = true AND c.flagCount >= :threshold AND c.isActive = true")
     List<PostComment> findFlaggedComments(@Param("threshold") Integer threshold);
+
+    @Modifying
+    @Query("DELETE FROM PostComment c WHERE c.post.school.id = :schoolId")
+    void deleteBySchoolId(@Param("schoolId") Long schoolId);
 }

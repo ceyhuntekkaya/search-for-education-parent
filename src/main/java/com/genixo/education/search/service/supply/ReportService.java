@@ -6,7 +6,7 @@ import com.genixo.education.search.entity.supply.Supplier;
 import com.genixo.education.search.enumaration.OrderStatus;
 import com.genixo.education.search.enumaration.QuotationStatus;
 import com.genixo.education.search.repository.insitution.CampusRepository;
-import com.genixo.education.search.supply.*;
+import com.genixo.education.search.repository.supply.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;

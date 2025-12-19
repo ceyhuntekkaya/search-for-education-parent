@@ -82,4 +82,8 @@ public interface PostItemRepository extends JpaRepository<PostItem, Long> {
 
     @Query("SELECT gi FROM PostItem gi WHERE gi.post.id = :postId ")
     List<PostItem> findByPostId(@Param("postId") Long postId);
+
+    @Modifying
+    @Query("DELETE FROM PostItem gi WHERE gi.post.school.id = :schoolId")
+    void deleteBySchoolId(@Param("schoolId") Long schoolId);
 }

@@ -3,7 +3,7 @@ package com.genixo.education.search.service.supply;
 import com.genixo.education.search.common.exception.ResourceNotFoundException;
 import com.genixo.education.search.dto.supply.NotificationDto;
 import com.genixo.education.search.entity.supply.Notification;
-import com.genixo.education.search.supply.NotificationRepository;
+import com.genixo.education.search.repository.supply.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

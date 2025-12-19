@@ -7,7 +7,7 @@ import com.genixo.education.search.entity.supply.*;
 import com.genixo.education.search.enumaration.QuotationStatus;
 import com.genixo.education.search.enumaration.RFQStatus;
 import com.genixo.education.search.enumaration.RFQType;
-import com.genixo.education.search.supply.*;
+import com.genixo.education.search.repository.supply.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
