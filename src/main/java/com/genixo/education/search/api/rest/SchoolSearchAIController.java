@@ -223,6 +223,9 @@ public class SchoolSearchAIController {
                     .conversationId(null) // Yeni conversation
                     .build();
 
+
+
+
             ChatMessageResponse response = orchestrationService.processUserMessage(chatRequest);
 
             ResponseEntity<ConversationStartResponse> result =  ResponseEntity.ok(ConversationStartResponse.builder()

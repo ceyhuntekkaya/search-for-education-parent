@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.servlet.http.HttpServletRequest;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -140,12 +141,65 @@ public class PricingService {
         return converterService.mapToDto(pricing);
     }
 
+    @Transactional
     public List<SchoolPricingDto> getAllSchoolPricings(Long schoolId, HttpServletRequest request) {
 
         User user = jwtService.getUser(request);
         validateUserCanAccessSchoolPricing(user, schoolId);
 
         List<SchoolPricing> pricings = schoolPricingRepository.findBySchoolIdAndIsActiveTrueOrderByCreatedAtDesc(schoolId);
+        if (pricings.isEmpty()) {
+
+            School school = schoolRepository.findById(schoolId).orElse(null);
+            if (school != null) {
+                SchoolPricing pricing = new SchoolPricing();
+                pricing.setSchool(school);
+                pricing.setCreatedByUser(user);
+                pricing.setAcademicYear("");
+                pricing.setGradeLevel("");
+                pricing.setClassLevel(null);
+                pricing.setCurrency(Currency.TRY);
+
+                SchoolPricingCreateDto pricingCreateDto = new SchoolPricingCreateDto();
+                pricingCreateDto.setAnnualTuition(BigDecimal.ZERO);
+                pricingCreateDto.setMonthlyTuition(BigDecimal.ZERO);
+                pricingCreateDto.setSemesterTuition(BigDecimal.ZERO);
+
+                // Set all fees
+                setAllFees(pricing, pricingCreateDto);
+
+                // Calculate totals
+                calculateTotals(pricing);
+
+                pricing.setValidFrom(LocalDate.now());
+                pricing.setValidUntil(LocalDate.now().plusYears(1));
+                pricing.setStatus(PricingStatus.DRAFT);
+                pricing.setPaymentFrequency(PaymentFrequency.ANNUAL);
+                pricing.setInstallmentCount(0);
+                pricing.setDownPaymentPercentage(0d);
+                pricing.setEarlyPaymentDiscountPercentage(0d);
+                pricing.setSiblingDiscountPercentage(0d);
+                pricing.setMultiYearDiscountPercentage(0d);
+                pricing.setLoyaltyDiscountPercentage(0d);
+                pricing.setNeedBasedAidAvailable(true);
+                pricing.setMeritBasedAidAvailable(true);
+                pricing.setRefundPolicy("");
+                pricing.setPaymentTerms("");
+                pricing.setLatePaymentPenaltyPercentage(0d);
+                pricing.setCancellationFee(BigDecimal.ZERO);
+                pricing.setWithdrawalRefundPercentage(0d);
+                pricing.setMarketPosition("");
+                pricing.setPublicDescription("");
+                pricing.setShowDetailedBreakdown(true);
+                pricing.setShowPaymentOptions(true);
+                pricing.setVersion(1);
+                pricing.setIsCurrent(true);
+
+                pricing = schoolPricingRepository.save(pricing);
+                pricings.add(pricing);
+            }
+
+        }
         return pricings.stream()
                 .map(converterService::mapToDto)
                 .collect(Collectors.toList());
@@ -174,7 +228,7 @@ public class PricingService {
         SchoolPricing existingPricing = schoolPricingRepository.findBySchoolId(id);
 
 
-        if(existingPricing == null) {
+        if (existingPricing == null) {
 
             School school = schoolRepository.findByIdAndIsActiveTrue(id)
                     .orElseThrow(() -> new ResourceNotFoundException("School", id));
@@ -215,15 +269,13 @@ public class PricingService {
             pricing.setIsCurrent(true);
             pricing.setAcademicYear("-");
 
-            if(pricing.getGradeLevel() == null){
+            if (pricing.getGradeLevel() == null) {
                 pricing.setGradeLevel("");
             }
 
             existingPricing = schoolPricingRepository.save(pricing);
             return converterService.mapToDto(existingPricing);
         }
-
-
 
 
         validateUserCanManageSchoolPricing(user, existingPricing.getSchool().getId());
@@ -768,7 +820,7 @@ public class PricingService {
             pricing.setInstallmentAmount(result);
 
 
-          //  pricing.setInstallmentAmount(installmentBase.divide(BigDecimal.valueOf(pricing.getInstallmentCount())));
+            //  pricing.setInstallmentAmount(installmentBase.divide(BigDecimal.valueOf(pricing.getInstallmentCount())));
         }
     }
 
@@ -850,7 +902,8 @@ public class PricingService {
         // Update payment terms
         if (updateDto.getPaymentFrequency() != null) pricing.setPaymentFrequency(updateDto.getPaymentFrequency());
         if (updateDto.getInstallmentCount() != null) pricing.setInstallmentCount(updateDto.getInstallmentCount());
-        if (updateDto.getDownPaymentPercentage() != null) pricing.setDownPaymentPercentage(updateDto.getDownPaymentPercentage());
+        if (updateDto.getDownPaymentPercentage() != null)
+            pricing.setDownPaymentPercentage(updateDto.getDownPaymentPercentage());
 
         // Update discount policies
         if (updateDto.getEarlyPaymentDiscountPercentage() != null)

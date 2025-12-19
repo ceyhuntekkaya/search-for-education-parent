@@ -106,11 +106,12 @@ public class SchoolSearchAIOrchestrationService {
             FormDataDTO mergedFormData = formParserService.mergeFormData(currentFormData, extractedFormData);
 
             // 12. Form data'yı validate et
-            FormValidationDTO validation = formParserService.validateFormData(mergedFormData);
-            if (!validation.getIsValid()) {
-                log.warn("Form validation failed: {} errors", validation.getErrors().size());
-                // Validation hatalarını AI'a bildir ve düzeltme iste
-                mergedFormData = handleValidationErrors(validation, mergedFormData);
+            if ("complete".equalsIgnoreCase(mergedFormData.getNextStep())) {
+                FormValidationDTO validation = formParserService.validateFormData(mergedFormData);
+                if (!validation.getIsValid()) {
+                    log.warn("Form validation failed: {} errors", validation.getErrors().size());
+                    mergedFormData = handleValidationErrors(validation, mergedFormData);
+                }
             }
 
             // 13. AI yanıtını kaydet

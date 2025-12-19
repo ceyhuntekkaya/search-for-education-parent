@@ -28,6 +28,23 @@ public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
 
+
+    /*
+1 yıl 360.000- okul
+240.000 - kurs dershane anaokulu
+180.000- spor okulu- plates vs...
+
+6 ay 200.000 okul
+140.000 kus dershane anaokul
+110.000 spor okulu vs.
+
+ yıl alanlarda %50 indirim 3 yıl geçerli.
+6 ay alanlarda %50 1 yıl geçerli
+
+tözok- özkur vs.. ilk 4 ay ücretsiz
+
+
+     */
     // ================================ SUBSCRIPTION PLAN OPERATIONS ================================
 
     @GetMapping("/plans")

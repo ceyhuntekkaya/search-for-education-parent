@@ -20,6 +20,7 @@ public class SchoolSearchResultDto {
     private String coverImageUrl;
     private String description;
     private String institutionTypeName;
+    private String institutionTypeDisplayName;
     private String institutionTypeIcon;
     private String institutionTypeColor;
 
@@ -33,11 +34,18 @@ public class SchoolSearchResultDto {
     private Long ratingCount;
 
     // Location
+    private Long campusId;
+    private Boolean campusIsSubscribed;
     private String campusName;
+    private String campusSlug;
     private String address;
     private String district;
+    private String province;
+    private String neighborhood;
     private String city;
     private Double distanceKm;
+    private String fullLocation;
+
 
     // Highlights
     private List<String> highlights; // Matching search terms
@@ -57,6 +65,39 @@ public class SchoolSearchResultDto {
     private String instagramUrl;
     private String linkedinUrl;
     private String youtubeUrl;
+
+    private Double latitude;
+    private Double longitude;
+    private String ratingStars;
+
+    private String curriculumType;
+    private String languageOfInstruction;
+    private String brandName;
+    private String brandSlug;
+    private String brandLogo;
+
+
+
+
+    private Long viewCount;
+    private Integer studentCapacity;
+    private Integer occupancyRate;
+    private String ageRangeText;
+    private Double annualFee;
+    private String feeRangeText;
+    private String phone;
+    private String email;
+    private String websiteUrl;
+    private Double popularityScore;
+
+
+    private Integer trustScore;
+    private Double qualityScore;
+    private String trustLevel;
+    private Integer foundedYear;
+    private Long propertyCount;
+    private Integer currentStudentCount;
+
 
 
 }
