@@ -92,6 +92,8 @@ public class SecurityConfiguration {
                         .requestMatchers("/users/**").permitAll()
                         .requestMatchers("/api/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
+                        .requestMatchers("/supply/**").permitAll()
+
 
                         // Swagger/OpenAPI endpoints
                         .requestMatchers("/swagger-ui/**").permitAll()
