@@ -250,7 +250,7 @@ public class FileUploadController {
         String requestUri =
                 ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
                         .getRequest().getRequestURI();
-
+;//api/v1/storage/serve/Project/banner/0558c0a5-cad9-4e8a-ac24-7dcc7c842c59_images.jpeg
         // DÜZELTME: /api/upload/serve/ olmalı
         return requestUri.substring("/api/upload/serve/".length());
     }

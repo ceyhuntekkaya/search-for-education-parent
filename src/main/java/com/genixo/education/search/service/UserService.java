@@ -7,6 +7,7 @@ import com.genixo.education.search.dto.user.*;
 import com.genixo.education.search.entity.institution.School;
 import com.genixo.education.search.enumaration.AccessType;
 import com.genixo.education.search.enumaration.PermissionCategory;
+import com.genixo.education.search.enumaration.RoleLevel;
 import com.genixo.education.search.enumaration.UserType;
 import com.genixo.education.search.entity.user.*;
 import com.genixo.education.search.repository.insitution.SchoolRepository;
@@ -17,6 +18,7 @@ import com.genixo.education.search.repository.location.ProvinceRepository;
 import com.genixo.education.search.repository.user.*;
 import com.genixo.education.search.service.converter.UserConverterService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -43,6 +45,7 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserRoleRepository userRoleRepository;
     private final UserInstitutionAccessRepository userInstitutionAccessRepository;
     private final CountryRepository countryRepository;
     private final SchoolRepository schoolRepository;
@@ -605,5 +608,64 @@ public class UserService {
                 .collect(Collectors.toSet());
         List<User> users = userRepository.findByCampus(campusId, schoolIds);
         return converterService.mapToSummaryDto(users);
+    }
+
+    public UserDto registerSupplyUser(@Valid SupplyRegistrationDto registrationDto) throws ValidationException {
+
+        if (userRepository.existsByEmail(registrationDto.getEmail())) {
+            throw new ValidationException("User with this email already exists");
+        }
+
+        if (StringUtils.hasText(registrationDto.getPhone()) &&
+                userRepository.existsByPhone(registrationDto.getPhone())) {
+            throw new ValidationException("User with this phone number already exists");
+        }
+
+        // Create new user entity
+        User user = new User();
+        user.setEmail(registrationDto.getEmail().toLowerCase().trim());
+        user.setPhone(registrationDto.getPhone());
+        user.setFirstName(registrationDto.getFirstName().trim());
+        user.setLastName(registrationDto.getLastName().trim());
+        user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
+        user.setUserType(UserType.INSTITUTION_USER);
+        user.setIsEmailVerified(false);
+        user.setIsPhoneVerified(false);
+        user.setEmailVerificationToken("token");
+        user.setPhoneVerificationCode("code");
+        user.setPasswordResetToken("reset_token");
+user.setPasswordResetExpiresAt(LocalDateTime.now());
+user.setLastLoginAt(LocalDateTime.now());
+user.setProfileImageUrl("");
+
+
+        User savedUser = userRepository.saveAndFlush(user);
+
+        UserRole userRole = new UserRole();
+        userRole.setUser(savedUser);
+        userRole.setRole(Role.SUPPLY);
+        userRole.setRoleLevel(RoleLevel.INSTITUTION);
+        UserRole savedUserRole = userRoleRepository.saveAndFlush(userRole);
+
+
+
+        Set<UserRole> roles = new HashSet<>();
+        roles.add(savedUserRole);
+
+
+        savedUser.setUserRoles(roles);
+        savedUser = userRepository.saveAndFlush(savedUser);
+
+
+        // Save user
+
+
+        // Send verification emails/SMS
+        // emailService.sendEmailVerification(savedUser.getEmail(), savedUser.getEmailVerificationToken());
+        // if (StringUtils.hasText(savedUser.getPhone())) {
+        //     smsService.sendPhoneVerification(savedUser.getPhone(), savedUser.getPhoneVerificationCode());
+        // }
+
+        return converterService.mapToDto(savedUser);
     }
 }

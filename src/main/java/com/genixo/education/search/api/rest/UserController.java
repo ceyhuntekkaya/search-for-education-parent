@@ -93,6 +93,35 @@ public class UserController {
     }
 
 
+
+
+
+    @PostMapping("/register/supply")
+    @Operation(summary = "Register new user", description = "Register a new user account")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "User registered successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid registration data or user already exists"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "422", description = "Validation errors")
+    })
+    public ResponseEntity<ApiResponse<UserDto>> registerSupplerUser(
+            @Valid @RequestBody SupplyRegistrationDto registrationDto) {
+
+        try {
+            UserDto user = userService.registerSupplyUser(registrationDto);
+            ApiResponse<UserDto> response = ApiResponse.success(user, "User registered successfully. Please check your email for verification.");
+            response.setTimestamp(LocalDateTime.now());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
+        } catch (com.genixo.education.search.common.exception.ValidationException e) {
+            ApiResponse<UserDto> response = ApiResponse.error(e.getMessage());
+            response.setTimestamp(LocalDateTime.now());
+            throw new RuntimeException(e);
+
+        }
+    }
+
+
+
     @GetMapping("/campus/{campusId}")
     @Operation(summary = "Get user by ID", description = "Get user information by ID")
     @ApiResponses(value = {
