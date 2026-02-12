@@ -64,7 +64,7 @@ public class SearchService {
 
         // Search products
         Page<Product> productPage = productRepository.searchProducts(
-                searchTerm, null, null, ProductStatus.ACTIVE, null, null, pageable
+                searchTerm, null, null, ProductStatus.ACTIVE.name(), null, null, pageable
         );
         List<SearchResultDto.ProductSearchResult> products = productPage.getContent().stream()
                 .map(this::mapToProductSearchResult)
@@ -126,7 +126,7 @@ public class SearchService {
 
         // Get product suggestions
         Page<Product> productPage = productRepository.searchProducts(
-                searchTerm, null, null, ProductStatus.ACTIVE, null, null, pageable
+                searchTerm, null, null, ProductStatus.ACTIVE.name(), null, null, pageable
         );
         productPage.getContent().stream()
                 .limit(3)

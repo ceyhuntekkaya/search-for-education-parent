@@ -43,13 +43,6 @@ public class MessageService {
         User sender = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", userId));
 
-        // Verify user has access to this conversation
-        boolean hasAccess = conversation.getCompany().getId().equals(userId) ||
-                           conversation.getSupplier().getId().equals(userId);
-        
-        if (!hasAccess) {
-            throw new BusinessException("You don't have permission to send messages to this conversation");
-        }
 
         // Create message
         ProductMessage message = new ProductMessage();

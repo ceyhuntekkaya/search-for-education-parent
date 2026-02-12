@@ -26,12 +26,20 @@ public interface SupplierRepository extends JpaRepository<Supplier, Long> {
     @Query("SELECT s FROM Supplier s WHERE s.isActive = :isActive")
     Page<Supplier> findByIsActive(@Param("isActive") Boolean isActive, Pageable pageable);
 
-    @Query("SELECT s FROM Supplier s WHERE " +
+    @Query(value = "SELECT s.* FROM suppliers s WHERE " +
            "(:searchTerm IS NULL OR " +
-           "LOWER(s.companyName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-           "LOWER(s.taxNumber) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-           "LOWER(s.email) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) AND " +
-           "(:isActive IS NULL OR s.isActive = :isActive)")
+           "LOWER(s.company_name::text) LIKE LOWER('%' || :searchTerm || '%') OR " +
+           "LOWER(s.tax_number::text) LIKE LOWER('%' || :searchTerm || '%') OR " +
+           "LOWER(s.email::text) LIKE LOWER('%' || :searchTerm || '%')) AND " +
+           "(:isActive IS NULL OR s.is_active = :isActive) " +
+           "ORDER BY s.id DESC",
+           countQuery = "SELECT COUNT(*) FROM suppliers s WHERE " +
+           "(:searchTerm IS NULL OR " +
+           "LOWER(s.company_name::text) LIKE LOWER('%' || :searchTerm || '%') OR " +
+           "LOWER(s.tax_number::text) LIKE LOWER('%' || :searchTerm || '%') OR " +
+           "LOWER(s.email::text) LIKE LOWER('%' || :searchTerm || '%')) AND " +
+           "(:isActive IS NULL OR s.is_active = :isActive)",
+           nativeQuery = true)
     Page<Supplier> searchSuppliers(
             @Param("searchTerm") String searchTerm,
             @Param("isActive") Boolean isActive,

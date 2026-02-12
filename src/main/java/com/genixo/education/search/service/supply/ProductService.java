@@ -93,7 +93,8 @@ public class ProductService {
                                           Pageable pageable) {
         log.info("Fetching products with filters");
 
-        Page<Product> products = productRepository.searchProducts(searchTerm, categoryId, supplierId, status, minPrice, maxPrice, pageable);
+        String statusString = status != null ? status.name() : null;
+        Page<Product> products = productRepository.searchProducts(searchTerm, categoryId, supplierId, statusString, minPrice, maxPrice, pageable);
         return products.map(this::mapToDto);
     }
 

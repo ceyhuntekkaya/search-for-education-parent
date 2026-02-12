@@ -11,6 +11,7 @@ import com.genixo.education.search.repository.supply.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,7 +85,11 @@ public class CategoryService {
     public Page<CategoryDto> getAllCategories(String searchTerm, Boolean isActive, Long parentId, Pageable pageable) {
         log.info("Fetching categories with searchTerm: {}, isActive: {}, parentId: {}", searchTerm, isActive, parentId);
 
-        Page<Category> categories = categoryRepository.searchCategories(searchTerm, isActive, parentId, pageable);
+        // Create unsorted Pageable for native query to avoid Spring Data JPA adding ORDER BY with entity property names
+        // The native query already includes ORDER BY c.display_order (database column name)
+        Pageable unsortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+        
+        Page<Category> categories = categoryRepository.searchCategories(searchTerm, isActive, parentId, unsortedPageable);
         return categories.map(this::mapToDto);
     }
 

@@ -2,6 +2,7 @@ package com.genixo.education.search.service.supply;
 
 import com.genixo.education.search.common.exception.BusinessException;
 import com.genixo.education.search.common.exception.ResourceNotFoundException;
+import com.genixo.education.search.dto.supply.ProductDto;
 import com.genixo.education.search.dto.supply.WishlistCheckDto;
 import com.genixo.education.search.dto.supply.WishlistCreateDto;
 import com.genixo.education.search.dto.supply.WishlistDto;
@@ -56,12 +57,13 @@ public class WishlistService {
         return mapToDto(saved);
     }
 
-    public List<WishlistDto> getUserWishlist(Long userId) {
+    public List<ProductDto> getUserWishlist(Long userId) {
         log.info("Fetching wishlist for user ID: {}", userId);
 
         List<Wishlist> wishlists = wishlistRepository.findByUserId(userId);
         return wishlists.stream()
-                .map(this::mapToDto)
+                .map(Wishlist::getProduct)
+                .map(this::mapProductToDto)
                 .collect(Collectors.toList());
     }
 
@@ -125,6 +127,32 @@ public class WishlistService {
                 .productMainImageUrl(product.getMainImageUrl())
                 .supplierCompanyName(product.getSupplier().getCompanyName())
                 .createdAt(wishlist.getCreatedAt())
+                .build();
+    }
+
+    private ProductDto mapProductToDto(Product product) {
+        return ProductDto.builder()
+                .id(product.getId())
+                .supplierId(product.getSupplier().getId())
+                .supplierCompanyName(product.getSupplier().getCompanyName())
+                .categoryId(product.getCategory().getId())
+                .categoryName(product.getCategory().getName())
+                .name(product.getName())
+                .sku(product.getSku())
+                .description(product.getDescription())
+                .technicalSpecs(product.getTechnicalSpecs())
+                .status(product.getStatus())
+                .stockTrackingType(product.getStockTrackingType())
+                .stockQuantity(product.getStockQuantity())
+                .minStockLevel(product.getMinStockLevel())
+                .basePrice(product.getBasePrice())
+                .currency(product.getCurrency())
+                .taxRate(product.getTaxRate())
+                .minOrderQuantity(product.getMinOrderQuantity())
+                .deliveryDays(product.getDeliveryDays())
+                .mainImageUrl(product.getMainImageUrl())
+                .createdAt(product.getCreatedAt())
+                .updatedAt(product.getUpdatedAt())
                 .build();
     }
 }

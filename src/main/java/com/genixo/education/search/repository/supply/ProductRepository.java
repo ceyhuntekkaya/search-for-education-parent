@@ -1,7 +1,6 @@
 package com.genixo.education.search.repository.supply;
 
 import com.genixo.education.search.entity.supply.Product;
-import com.genixo.education.search.enumaration.ProductStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,21 +17,32 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     Page<Product> findByCategoryId(Long categoryId, Pageable pageable);
 
-    @Query("SELECT p FROM Product p WHERE " +
+    @Query(value = "SELECT p.* FROM products p WHERE " +
            "(:searchTerm IS NULL OR " +
-           "LOWER(p.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-           "LOWER(p.sku) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-           "LOWER(p.description) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) AND " +
-           "(:categoryId IS NULL OR p.category.id = :categoryId) AND " +
-           "(:supplierId IS NULL OR p.supplier.id = :supplierId) AND " +
+           "LOWER(p.name::text) LIKE LOWER('%' || :searchTerm || '%') OR " +
+           "LOWER(p.sku::text) LIKE LOWER('%' || :searchTerm || '%') OR " +
+           "LOWER(p.description::text) LIKE LOWER('%' || :searchTerm || '%')) AND " +
+           "(:categoryId IS NULL OR p.category_id = :categoryId) AND " +
+           "(:supplierId IS NULL OR p.supplier_id = :supplierId) AND " +
            "(:status IS NULL OR p.status = :status) AND " +
-           "(:minPrice IS NULL OR p.basePrice >= :minPrice) AND " +
-           "(:maxPrice IS NULL OR p.basePrice <= :maxPrice)")
+           "(:minPrice IS NULL OR p.base_price >= :minPrice) AND " +
+           "(:maxPrice IS NULL OR p.base_price <= :maxPrice)",
+           countQuery = "SELECT COUNT(*) FROM products p WHERE " +
+           "(:searchTerm IS NULL OR " +
+           "LOWER(p.name::text) LIKE LOWER('%' || :searchTerm || '%') OR " +
+           "LOWER(p.sku::text) LIKE LOWER('%' || :searchTerm || '%') OR " +
+           "LOWER(p.description::text) LIKE LOWER('%' || :searchTerm || '%')) AND " +
+           "(:categoryId IS NULL OR p.category_id = :categoryId) AND " +
+           "(:supplierId IS NULL OR p.supplier_id = :supplierId) AND " +
+           "(:status IS NULL OR p.status = :status) AND " +
+           "(:minPrice IS NULL OR p.base_price >= :minPrice) AND " +
+           "(:maxPrice IS NULL OR p.base_price <= :maxPrice)",
+           nativeQuery = true)
     Page<Product> searchProducts(
             @Param("searchTerm") String searchTerm,
             @Param("categoryId") Long categoryId,
             @Param("supplierId") Long supplierId,
-            @Param("status") ProductStatus status,
+            @Param("status") String status,
             @Param("minPrice") BigDecimal minPrice,
             @Param("maxPrice") BigDecimal maxPrice,
             Pageable pageable

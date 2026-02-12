@@ -1,5 +1,6 @@
 package com.genixo.education.search.api.rest;
 
+import com.genixo.education.search.dto.supply.ProductDto;
 import com.genixo.education.search.dto.supply.WishlistCheckDto;
 import com.genixo.education.search.dto.supply.WishlistCreateDto;
 import com.genixo.education.search.dto.supply.WishlistDto;
@@ -58,13 +59,13 @@ public class WishlistController {
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Wishlist retrieved successfully")
     })
-    public ResponseEntity<ApiResponse<List<WishlistDto>>> getUserWishlist(
+    public ResponseEntity<ApiResponse<List<ProductDto>>> getUserWishlist(
             HttpServletRequest request) {
 
         User user = jwtService.getUser(request);
-        List<WishlistDto> wishlist = wishlistService.getUserWishlist(user.getId());
+        List<ProductDto> wishlist = wishlistService.getUserWishlist(user.getId());
 
-        ApiResponse<List<WishlistDto>> response = ApiResponse.success(wishlist, "Wishlist retrieved successfully");
+        ApiResponse<List<ProductDto>> response = ApiResponse.success(wishlist, "Wishlist retrieved successfully");
         response.setPath(request.getRequestURI());
         response.setTimestamp(LocalDateTime.now());
 

@@ -27,12 +27,20 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     @Query("SELECT c FROM Category c WHERE c.parent.id = :parentId AND c.isActive = :isActive ORDER BY c.displayOrder ASC")
     List<Category> findSubCategoriesByParentId(@Param("parentId") Long parentId, @Param("isActive") Boolean isActive);
 
-    @Query("SELECT c FROM Category c WHERE " +
+    @Query(value = "SELECT c.* FROM categories c WHERE " +
            "(:searchTerm IS NULL OR " +
-           "LOWER(c.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-           "LOWER(c.description) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) AND " +
-           "(:isActive IS NULL OR c.isActive = :isActive) AND " +
-           "(:parentId IS NULL OR c.parent.id = :parentId)")
+           "LOWER(c.name::text) LIKE LOWER('%' || :searchTerm || '%') OR " +
+           "LOWER(c.description::text) LIKE LOWER('%' || :searchTerm || '%')) AND " +
+           "(:isActive IS NULL OR c.is_active = :isActive) AND " +
+           "(:parentId IS NULL OR c.parent_id = :parentId) " +
+           "ORDER BY c.display_order",
+           countQuery = "SELECT COUNT(*) FROM categories c WHERE " +
+           "(:searchTerm IS NULL OR " +
+           "LOWER(c.name::text) LIKE LOWER('%' || :searchTerm || '%') OR " +
+           "LOWER(c.description::text) LIKE LOWER('%' || :searchTerm || '%')) AND " +
+           "(:isActive IS NULL OR c.is_active = :isActive) AND " +
+           "(:parentId IS NULL OR c.parent_id = :parentId)",
+           nativeQuery = true)
     Page<Category> searchCategories(
             @Param("searchTerm") String searchTerm,
             @Param("isActive") Boolean isActive,
