@@ -33,6 +33,54 @@ public class UserController {
     private final JwtService jwtService;
     // ================================ USER REGISTRATION & AUTHENTICATION ================================
 
+    @PostMapping("/register/teacher")
+    @Operation(summary = "Öğretmen kaydı", description = "TEACHER rolü ile yeni öğretmen hesabı oluşturur. Ardından TeacherProfile oluşturulabilir.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Öğretmen kaydı başarılı"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Geçersiz veri veya e-posta zaten kayıtlı"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "422", description = "Validasyon hatası")
+    })
+    public ResponseEntity<ApiResponse<UserDto>> registerTeacher(
+            @Valid @RequestBody UserRegistrationDto registrationDto,
+            HttpServletRequest request) {
+        try {
+            UserDto user = userService.registerTeacherUser(registrationDto);
+            ApiResponse<UserDto> response = ApiResponse.success(user, "Öğretmen kaydı başarılı. Profil oluşturmak için giriş yapabilirsiniz.");
+            response.setPath(request.getRequestURI());
+            response.setTimestamp(LocalDateTime.now());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (com.genixo.education.search.common.exception.ValidationException e) {
+            ApiResponse<UserDto> response = ApiResponse.error(e.getMessage());
+            response.setPath(request.getRequestURI());
+            response.setTimestamp(LocalDateTime.now());
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PostMapping("/register/instructor")
+    @Operation(summary = "Eğitmen kaydı", description = "INSTRUCTOR rolü ile yeni eğitmen hesabı oluşturur.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Eğitmen kaydı başarılı"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Geçersiz veri veya e-posta zaten kayıtlı"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "422", description = "Validasyon hatası")
+    })
+    public ResponseEntity<ApiResponse<UserDto>> registerInstructor(
+            @Valid @RequestBody UserRegistrationDto registrationDto,
+            HttpServletRequest request) {
+        try {
+            UserDto user = userService.registerInstructorUser(registrationDto);
+            ApiResponse<UserDto> response = ApiResponse.success(user, "Eğitmen kaydı başarılı. Giriş yapabilirsiniz.");
+            response.setPath(request.getRequestURI());
+            response.setTimestamp(LocalDateTime.now());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (com.genixo.education.search.common.exception.ValidationException e) {
+            ApiResponse<UserDto> response = ApiResponse.error(e.getMessage());
+            response.setPath(request.getRequestURI());
+            response.setTimestamp(LocalDateTime.now());
+            throw new RuntimeException(e);
+        }
+    }
+
     @PostMapping("/register")
     @Operation(summary = "Register new user", description = "Register a new user account")
     @ApiResponses(value = {

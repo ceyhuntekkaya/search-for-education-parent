@@ -55,6 +55,12 @@ public enum Role {
                     GENERAL
 
             )
+    ),
+    TEACHER(
+            Set.of(
+                    GENERAL
+
+            )
     );
 
     private final Set<Permission> permissions;

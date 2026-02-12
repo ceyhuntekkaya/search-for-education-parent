@@ -668,4 +668,111 @@ user.setProfileImageUrl("");
 
         return converterService.mapToDto(savedUser);
     }
+
+    /**
+     * Öğretmen kaydı - User + TEACHER rolü oluşturur.
+     * TeacherProfile oluşturmak için kullanıcı önce bu endpoint ile kayıt olmalı.
+     */
+    public UserDto registerTeacherUser(UserRegistrationDto registrationDto) throws ValidationException {
+        if (registrationDto.getUserType() == null) {
+            registrationDto.setUserType(UserType.INSTITUTION_USER);
+        }
+        validateRegistrationData(registrationDto);
+
+        if (userRepository.existsByEmail(registrationDto.getEmail())) {
+            throw new ValidationException("User with this email already exists");
+        }
+        if (StringUtils.hasText(registrationDto.getPhone()) &&
+                userRepository.existsByPhone(registrationDto.getPhone())) {
+            throw new ValidationException("User with this phone number already exists");
+        }
+
+        User user = new User();
+        user.setEmail(registrationDto.getEmail().toLowerCase().trim());
+        user.setPhone(registrationDto.getPhone());
+        user.setFirstName(registrationDto.getFirstName().trim());
+        user.setLastName(registrationDto.getLastName().trim());
+        user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
+        user.setUserType(UserType.INSTITUTION_USER);
+        user.setIsEmailVerified(false);
+        user.setIsPhoneVerified(false);
+
+        setUserLocation(user, registrationDto.getCountryId(), registrationDto.getProvinceId(),
+                registrationDto.getDistrictId(), registrationDto.getNeighborhoodId());
+
+        user.setAddressLine1(registrationDto.getAddressLine1());
+        user.setAddressLine2(registrationDto.getAddressLine2());
+        user.setPostalCode(registrationDto.getPostalCode());
+
+        user.setEmailVerificationToken(generateVerificationToken());
+        user.setPhoneVerificationCode(generatePhoneVerificationCode());
+
+        User savedUser = userRepository.saveAndFlush(user);
+
+        UserRole userRole = new UserRole();
+        userRole.setUser(savedUser);
+        userRole.setRole(Role.TEACHER);
+        userRole.setRoleLevel(RoleLevel.INDIVIDUAL);
+        UserRole savedUserRole = userRoleRepository.saveAndFlush(userRole);
+
+        Set<UserRole> roles = new HashSet<>();
+        roles.add(savedUserRole);
+        savedUser.setUserRoles(roles);
+        savedUser = userRepository.saveAndFlush(savedUser);
+
+        return converterService.mapToDto(savedUser);
+    }
+
+    /**
+     * Eğitmen kaydı - User + INSTRUCTOR rolü oluşturur.
+     */
+    public UserDto registerInstructorUser(UserRegistrationDto registrationDto) throws ValidationException {
+        if (registrationDto.getUserType() == null) {
+            registrationDto.setUserType(UserType.INSTITUTION_USER);
+        }
+        validateRegistrationData(registrationDto);
+
+        if (userRepository.existsByEmail(registrationDto.getEmail())) {
+            throw new ValidationException("User with this email already exists");
+        }
+        if (StringUtils.hasText(registrationDto.getPhone()) &&
+                userRepository.existsByPhone(registrationDto.getPhone())) {
+            throw new ValidationException("User with this phone number already exists");
+        }
+
+        User user = new User();
+        user.setEmail(registrationDto.getEmail().toLowerCase().trim());
+        user.setPhone(registrationDto.getPhone());
+        user.setFirstName(registrationDto.getFirstName().trim());
+        user.setLastName(registrationDto.getLastName().trim());
+        user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
+        user.setUserType(UserType.INSTITUTION_USER);
+        user.setIsEmailVerified(false);
+        user.setIsPhoneVerified(false);
+
+        setUserLocation(user, registrationDto.getCountryId(), registrationDto.getProvinceId(),
+                registrationDto.getDistrictId(), registrationDto.getNeighborhoodId());
+
+        user.setAddressLine1(registrationDto.getAddressLine1());
+        user.setAddressLine2(registrationDto.getAddressLine2());
+        user.setPostalCode(registrationDto.getPostalCode());
+
+        user.setEmailVerificationToken(generateVerificationToken());
+        user.setPhoneVerificationCode(generatePhoneVerificationCode());
+
+        User savedUser = userRepository.saveAndFlush(user);
+
+        UserRole userRole = new UserRole();
+        userRole.setUser(savedUser);
+        userRole.setRole(Role.INSTRUCTOR);
+        userRole.setRoleLevel(RoleLevel.INDIVIDUAL);
+        UserRole savedUserRole = userRoleRepository.saveAndFlush(userRole);
+
+        Set<UserRole> roles = new HashSet<>();
+        roles.add(savedUserRole);
+        savedUser.setUserRoles(roles);
+        savedUser = userRepository.saveAndFlush(savedUser);
+
+        return converterService.mapToDto(savedUser);
+    }
 }
