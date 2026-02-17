@@ -1,6 +1,13 @@
-185.123.156.110
+ssh -p 2222 root@185.123.156.110
 ujk!vpm5rwk9NDV6apd
 
 
-ürüne teklif isteme
+
+ssh -p 2222 -L 5433:172.18.0.6:5432 root@185.123.156.110
+
+
+
+
+
+
 

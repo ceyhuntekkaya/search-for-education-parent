@@ -60,13 +60,44 @@ public class JobPostingController {
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "DESC") String sortDir,
             HttpServletRequest request) {
-        Sort sort = sortDir.equalsIgnoreCase("ASC") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        // Native query uses DB column names; map entity property names to column names
+        String sortColumn = mapJobPostingSortToColumn(sortBy);
+        Sort sort = sortDir.equalsIgnoreCase("ASC") ? Sort.by(sortColumn).ascending() : Sort.by(sortColumn).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<JobPostingDto> result = jobPostingService.search(schoolId, branch, status, searchTerm, pageable);
         ApiResponse<Page<JobPostingDto>> response = ApiResponse.success(result, "İlanlar listelendi");
         response.setPath(request.getRequestURI());
         response.setTimestamp(LocalDateTime.now());
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Maps JobPosting entity property names to job_postings table column names
+     * for native query sort (ORDER BY jp.column_name).
+     */
+    private static String mapJobPostingSortToColumn(String sortBy) {
+        if (sortBy == null || sortBy.isBlank()) {
+            return "created_at";
+        }
+        return switch (sortBy) {
+            case "createdAt" -> "created_at";
+            case "updatedAt" -> "updated_at";
+            case "positionTitle" -> "position_title";
+            case "employmentType" -> "employment_type";
+            case "startDate" -> "start_date";
+            case "contractDuration" -> "contract_duration";
+            case "requiredExperienceYears" -> "required_experience_years";
+            case "requiredEducationLevel" -> "required_education_level";
+            case "salaryMin" -> "salary_min";
+            case "salaryMax" -> "salary_max";
+            case "showSalary" -> "show_salary";
+            case "applicationDeadline" -> "application_deadline";
+            case "isPublic" -> "is_public";
+            case "createdBy" -> "created_by";
+            case "updatedBy" -> "updated_by";
+            case "isActive" -> "is_active";
+            default -> sortBy; // already snake_case or unknown, use as-is
+        };
     }
 
     @GetMapping("/{id}")
