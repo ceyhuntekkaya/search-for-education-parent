@@ -16,14 +16,14 @@ public interface CampusRepository extends JpaRepository<Campus, Long> {
     @Query("SELECT c FROM Campus c WHERE c.isActive = true AND c.id = :id")
     Optional<Campus> findByIdAndIsActiveTrue(@Param("id") Long id);
 
-    @Query("SELECT c FROM Campus c WHERE c.isActive = true AND LOWER(c.slug) = LOWER(:slug)")
+    @Query("SELECT c FROM Campus c WHERE c.isActive = true AND LOWER(c.slug) = LOWER(CAST(:slug AS string))")
     Optional<Campus> findBySlugAndIsActiveTrue(@Param("slug") String slug);
 
-    @Query("SELECT c FROM Campus c WHERE c.isActive = true AND c.isSubscribed = true AND LOWER(c.slug) = LOWER(:slug)")
+    @Query("SELECT c FROM Campus c WHERE c.isActive = true AND c.isSubscribed = true AND LOWER(c.slug) = LOWER(CAST(:slug AS string))")
     Optional<Campus> findBySlugAndIsActiveTrueAndIsSubscribedTrue(@Param("slug") String slug);
 
     @Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END " +
-            "FROM Campus c WHERE LOWER(c.name) = LOWER(:name) AND c.brand.id = :brandId AND c.isActive = true")
+            "FROM Campus c WHERE LOWER(c.name) = LOWER(CAST(:name AS string)) AND c.brand.id = :brandId AND c.isActive = true")
     boolean existsByNameIgnoreCaseAndBrandIdAndIsActiveTrue(@Param("name") String name, @Param("brandId") Long brandId);
 
     @Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END " +
@@ -62,10 +62,10 @@ public interface CampusRepository extends JpaRepository<Campus, Long> {
     List<CampusSummaryDto> findCampusSummaries();
 
     @Query("SELECT c FROM Campus c WHERE c.isActive = true AND " +
-            "(:searchTerm IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "LOWER(c.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "LOWER(c.province.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "LOWER(c.district) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
+            "(:searchTerm IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "LOWER(c.description) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "LOWER(c.province.name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "LOWER(c.district) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')))")
     List<Campus> searchCampuses(@Param("searchTerm") String searchTerm);
 
     @Query("SELECT c FROM Campus c WHERE c.isActive = true AND c.isSubscribed = true AND " +
@@ -84,7 +84,7 @@ public interface CampusRepository extends JpaRepository<Campus, Long> {
 
 
     @Query("SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END " +
-            "FROM Campus b WHERE LOWER(b.name) = LOWER(:name) AND b.id != :id AND b.isActive = true")
+            "FROM Campus b WHERE LOWER(b.name) = LOWER(CAST(:name AS string)) AND b.id != :id AND b.isActive = true")
     boolean existsByNameIgnoreCaseAndIdNot(@Param("name") String name, @Param("id") Long id);
 
 

@@ -25,12 +25,11 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "(:categoryId IS NULL OR e.category.id = :categoryId) AND " +
             "(:eventType IS NULL OR e.eventType = :eventType) AND " +
             "(:status IS NULL OR e.status = :status) AND " +
-            "(:searchTerm IS NULL OR LOWER(e.title) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "LOWER(e.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "LOWER(e.targetAudience) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "LOWER(e.speakerName) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) AND " +
-            "(:startDateFrom IS NULL OR e.startDateTime >= :startDateFrom) AND " +
-            "(:startDateTo IS NULL OR e.startDateTime <= :startDateTo)")
+            "(:searchTerm IS NULL OR LOWER(e.title) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "LOWER(e.description) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "LOWER(e.targetAudience) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "LOWER(e.speakerName) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%'))) AND " +
+            "e.startDateTime >= :startDateFrom AND e.startDateTime <= :startDateTo")
     Page<Event> search(@Param("organizerId") Long organizerId,
                        @Param("categoryId") Long categoryId,
                        @Param("eventType") String eventType,

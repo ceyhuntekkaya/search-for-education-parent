@@ -19,9 +19,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query(value = "SELECT p.* FROM products p WHERE " +
            "(:searchTerm IS NULL OR " +
-           "LOWER(p.name::text) LIKE LOWER('%' || :searchTerm || '%') OR " +
-           "LOWER(p.sku::text) LIKE LOWER('%' || :searchTerm || '%') OR " +
-           "LOWER(p.description::text) LIKE LOWER('%' || :searchTerm || '%')) AND " +
+           "LOWER(p.name::text) LIKE LOWER('%' || CAST(:searchTerm AS TEXT) || '%') OR " +
+           "LOWER(p.sku::text) LIKE LOWER('%' || CAST(:searchTerm AS TEXT) || '%') OR " +
+           "LOWER(p.description::text) LIKE LOWER('%' || CAST(:searchTerm AS TEXT) || '%')) AND " +
            "(:categoryId IS NULL OR p.category_id = :categoryId) AND " +
            "(:supplierId IS NULL OR p.supplier_id = :supplierId) AND " +
            "(:status IS NULL OR p.status = :status) AND " +
@@ -29,9 +29,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
            "(:maxPrice IS NULL OR p.base_price <= :maxPrice)",
            countQuery = "SELECT COUNT(*) FROM products p WHERE " +
            "(:searchTerm IS NULL OR " +
-           "LOWER(p.name::text) LIKE LOWER('%' || :searchTerm || '%') OR " +
-           "LOWER(p.sku::text) LIKE LOWER('%' || :searchTerm || '%') OR " +
-           "LOWER(p.description::text) LIKE LOWER('%' || :searchTerm || '%')) AND " +
+           "LOWER(p.name::text) LIKE LOWER('%' || CAST(:searchTerm AS TEXT) || '%') OR " +
+           "LOWER(p.sku::text) LIKE LOWER('%' || CAST(:searchTerm AS TEXT) || '%') OR " +
+           "LOWER(p.description::text) LIKE LOWER('%' || CAST(:searchTerm AS TEXT) || '%')) AND " +
            "(:categoryId IS NULL OR p.category_id = :categoryId) AND " +
            "(:supplierId IS NULL OR p.supplier_id = :supplierId) AND " +
            "(:status IS NULL OR p.status = :status) AND " +

@@ -53,7 +53,7 @@ public class EventOrganizerService {
         organizer.setSocialMediaLinks(dto.getSocialMediaLinks());
         organizer.setIsVerified(dto.getIsVerified() != null ? dto.getIsVerified() : false);
         organizer.setIsActive(dto.getIsActive() != null ? dto.getIsActive() : true);
-        organizer.setCreatedByUser(createdBy);
+        organizer.setCreatedBy(createdBy.getId());
 
         EventOrganizer saved = eventOrganizerRepository.save(organizer);
         return mapToDto(saved);
@@ -156,8 +156,8 @@ public class EventOrganizerService {
                 .socialMediaLinks(o.getSocialMediaLinks())
                 .isVerified(o.getIsVerified())
                 .isActive(o.getIsActive())
-                .createdByUserId(o.getCreatedByUser() != null ? o.getCreatedByUser().getId() : null)
-                .createdByUserEmail(o.getCreatedByUser() != null ? o.getCreatedByUser().getEmail() : null)
+                .createdByUserId(o.getCreatedBy())
+                .createdByUserEmail(o.getCreatedBy() != null ? userRepository.findById(o.getCreatedBy()).map(User::getEmail).orElse(null) : null)
                 .eventCount(o.getEvents() != null ? o.getEvents().size() : 0)
                 .createdAt(o.getCreatedAt())
                 .updatedAt(o.getUpdatedAt())

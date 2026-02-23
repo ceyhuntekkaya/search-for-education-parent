@@ -22,9 +22,9 @@ public interface TeacherProfileRepository extends JpaRepository<TeacherProfile, 
     boolean existsByEmailAndIdNot(String email, Long id);
 
     @Query("SELECT t FROM TeacherProfile t WHERE " +
-            "(:branch IS NULL OR LOWER(t.branch) LIKE LOWER(CONCAT('%', :branch, '%'))) AND " +
-            "(:searchTerm IS NULL OR LOWER(t.fullName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "LOWER(t.email) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
+            "(:branch IS NULL OR LOWER(t.branch) LIKE LOWER(CONCAT('%', CAST(:branch AS string), '%'))) AND " +
+            "(:searchTerm IS NULL OR LOWER(t.fullName) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "LOWER(t.email) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')))")
     Page<TeacherProfile> search(@Param("branch") String branch,
                                @Param("searchTerm") String searchTerm,
                                Pageable pageable);

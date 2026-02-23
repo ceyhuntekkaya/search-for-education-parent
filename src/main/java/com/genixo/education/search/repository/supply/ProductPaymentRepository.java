@@ -21,8 +21,8 @@ public interface ProductPaymentRepository extends JpaRepository<ProductPayment, 
 
     @Query("SELECT p FROM ProductPayment p WHERE " +
            "(:searchTerm IS NULL OR " +
-           "LOWER(p.transactionId) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-           "LOWER(p.notes) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) AND " +
+           "LOWER(p.transactionId) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+           "LOWER(p.notes) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%'))) AND " +
            "(:companyId IS NULL OR p.order.company.id = :companyId) AND " +
            "(:orderId IS NULL OR p.order.id = :orderId) AND " +
            "(:status IS NULL OR p.status = :status)")

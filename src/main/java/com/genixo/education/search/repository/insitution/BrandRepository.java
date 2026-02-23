@@ -16,15 +16,15 @@ public interface BrandRepository extends JpaRepository<Brand, Long> {
     @Query("SELECT b FROM Brand b WHERE b.isActive = true AND b.id = :id")
     Optional<Brand> findByIdAndIsActiveTrue(@Param("id") Long id);
 
-    @Query("SELECT b FROM Brand b WHERE b.isActive = true AND LOWER(b.slug) = LOWER(:slug)")
+    @Query("SELECT b FROM Brand b WHERE b.isActive = true AND LOWER(b.slug) = LOWER(CAST(:slug AS string))")
     Optional<Brand> findBySlugAndIsActiveTrue(@Param("slug") String slug);
 
     @Query("SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END " +
-            "FROM Brand b WHERE LOWER(b.name) = LOWER(:name) AND b.isActive = true")
+            "FROM Brand b WHERE LOWER(b.name) = LOWER(CAST(:name AS string)) AND b.isActive = true")
     boolean existsByNameIgnoreCase(@Param("name") String name);
 
     @Query("SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END " +
-            "FROM Brand b WHERE LOWER(b.name) = LOWER(:name) AND b.id != :id AND b.isActive = true")
+            "FROM Brand b WHERE LOWER(b.name) = LOWER(CAST(:name AS string)) AND b.id != :id AND b.isActive = true")
     boolean existsByNameIgnoreCaseAndIdNot(@Param("name") String name, @Param("id") Long id);
 
     @Query("SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END " +
@@ -51,8 +51,8 @@ public interface BrandRepository extends JpaRepository<Brand, Long> {
 
 
     @Query("SELECT b FROM Brand b WHERE b.isActive = true AND " +
-            "(:searchTerm IS NULL OR LOWER(b.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "LOWER(b.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
+            "(:searchTerm IS NULL OR LOWER(b.name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "LOWER(b.description) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')))")
     List<Brand> searchBrands(@Param("searchTerm") String searchTerm);
 
     @Query("SELECT b.id FROM Brand b WHERE b.isActive = true")

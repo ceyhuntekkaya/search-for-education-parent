@@ -49,11 +49,11 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     @Query("SELECT DISTINCT m FROM Message m " +
             "WHERE m.isActive = true " +
             "AND (:searchTerm IS NULL OR " +
-            "    LOWER(m.senderName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "    LOWER(m.senderEmail) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "    LOWER(m.subject) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "    LOWER(m.content) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "    LOWER(m.referenceNumber) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) " +
+            "    LOWER(m.senderName) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "    LOWER(m.senderEmail) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "    LOWER(m.subject) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "    LOWER(m.content) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "    LOWER(m.referenceNumber) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%'))) " +
             "AND (:schoolId IS NULL OR m.school.id = :schoolId) " +
             "AND (:accessibleSchoolIds IS NULL OR m.school.id IN :accessibleSchoolIds) " +
             "AND (:assignedToUserId IS NULL OR m.assignedToUser.id = :assignedToUserId) " +
@@ -64,7 +64,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
             "AND (:hasAttachments IS NULL OR m.hasAttachments = :hasAttachments) " +
             "AND (:createdAfter IS NULL OR m.createdAt >= :createdAfter) " +
             "AND (:createdBefore IS NULL OR m.createdAt <= :createdBefore) " +
-            "AND (:tags IS NULL OR LOWER(m.tags) LIKE LOWER(CONCAT('%', :tags, '%')))")
+            "AND (:tags IS NULL OR LOWER(m.tags) LIKE LOWER(CONCAT('%', CAST(:tags AS string), '%')))")
     Page<Message> searchMessages(
             @Param("searchTerm") String searchTerm,
             @Param("schoolId") Long schoolId,

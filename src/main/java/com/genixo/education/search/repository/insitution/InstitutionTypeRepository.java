@@ -17,7 +17,7 @@ public interface InstitutionTypeRepository extends JpaRepository<InstitutionType
     Optional<InstitutionType> findByIdAndIsActiveTrue(@Param("id") Long id);
 
     @Query("SELECT CASE WHEN COUNT(it) > 0 THEN true ELSE false END " +
-            "FROM InstitutionType it WHERE LOWER(it.name) = LOWER(:name) AND it.isActive = true")
+            "FROM InstitutionType it WHERE LOWER(it.name) = LOWER(CAST(:name AS string)) AND it.isActive = true")
     boolean existsByNameIgnoreCase(@Param("name") String name);
 
     @Query("SELECT it FROM InstitutionType it WHERE it.isActive = true ORDER BY it.sortOrder ASC, it.name ASC")
@@ -30,7 +30,7 @@ public interface InstitutionTypeRepository extends JpaRepository<InstitutionType
     List<InstitutionTypeSummaryDto> findInstitutionTypeSummaries();
 
     @Query("SELECT it FROM InstitutionType it WHERE it.isActive = true AND " +
-            "LOWER(it.displayName) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+            "LOWER(it.displayName) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%'))")
     List<InstitutionType> searchByDisplayName(@Param("searchTerm") String searchTerm);
 
 

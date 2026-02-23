@@ -28,16 +28,16 @@ public interface SupplierRepository extends JpaRepository<Supplier, Long> {
 
     @Query(value = "SELECT s.* FROM suppliers s WHERE " +
            "(:searchTerm IS NULL OR " +
-           "LOWER(s.company_name::text) LIKE LOWER('%' || :searchTerm || '%') OR " +
-           "LOWER(s.tax_number::text) LIKE LOWER('%' || :searchTerm || '%') OR " +
-           "LOWER(s.email::text) LIKE LOWER('%' || :searchTerm || '%')) AND " +
+           "LOWER(s.company_name::text) LIKE LOWER('%' || CAST(:searchTerm AS TEXT) || '%') OR " +
+           "LOWER(s.tax_number::text) LIKE LOWER('%' || CAST(:searchTerm AS TEXT) || '%') OR " +
+           "LOWER(s.email::text) LIKE LOWER('%' || CAST(:searchTerm AS TEXT) || '%')) AND " +
            "(:isActive IS NULL OR s.is_active = :isActive) " +
            "ORDER BY s.id DESC",
            countQuery = "SELECT COUNT(*) FROM suppliers s WHERE " +
            "(:searchTerm IS NULL OR " +
-           "LOWER(s.company_name::text) LIKE LOWER('%' || :searchTerm || '%') OR " +
-           "LOWER(s.tax_number::text) LIKE LOWER('%' || :searchTerm || '%') OR " +
-           "LOWER(s.email::text) LIKE LOWER('%' || :searchTerm || '%')) AND " +
+           "LOWER(s.company_name::text) LIKE LOWER('%' || CAST(:searchTerm AS TEXT) || '%') OR " +
+           "LOWER(s.tax_number::text) LIKE LOWER('%' || CAST(:searchTerm AS TEXT) || '%') OR " +
+           "LOWER(s.email::text) LIKE LOWER('%' || CAST(:searchTerm AS TEXT) || '%')) AND " +
            "(:isActive IS NULL OR s.is_active = :isActive)",
            nativeQuery = true)
     Page<Supplier> searchSuppliers(

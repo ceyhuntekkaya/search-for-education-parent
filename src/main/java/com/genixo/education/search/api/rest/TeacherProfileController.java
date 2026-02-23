@@ -1,9 +1,7 @@
 package com.genixo.education.search.api.rest;
 
 import com.genixo.education.search.common.exception.BusinessException;
-import com.genixo.education.search.dto.hr.TeacherProfileCreateDto;
-import com.genixo.education.search.dto.hr.TeacherProfileDto;
-import com.genixo.education.search.dto.hr.TeacherProfileUpdateDto;
+import com.genixo.education.search.dto.hr.*;
 import com.genixo.education.search.entity.user.Role;
 import com.genixo.education.search.entity.user.User;
 import com.genixo.education.search.service.auth.JwtService;
@@ -25,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequestMapping("/hr/teacher-profiles")
@@ -126,5 +125,127 @@ public class TeacherProfileController {
         response.setPath(request.getRequestURI());
         response.setTimestamp(LocalDateTime.now());
         return ResponseEntity.ok(response);
+    }
+
+    // --- Eğitim bilgileri (sadece profil sahibi yazabilir) ---
+
+    @PostMapping("/{profileId}/educations")
+    @Operation(summary = "Profiline eğitim bilgisi ekle")
+    public ResponseEntity<ApiResponse<TeacherEducationDto>> addEducation(
+            @PathVariable Long profileId,
+            @Valid @RequestBody TeacherEducationCreateDto dto,
+            HttpServletRequest request) {
+        ensureProfileOwnedBy(profileId, request);
+        TeacherEducationDto result = teacherProfileService.addEducation(profileId, dto);
+        ApiResponse<TeacherEducationDto> response = ApiResponse.success(result, "Eğitim bilgisi eklendi");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/{profileId}/educations")
+    @Operation(summary = "Profil eğitim listesi")
+    public ResponseEntity<ApiResponse<List<TeacherEducationDto>>> getEducations(
+            @PathVariable Long profileId,
+            HttpServletRequest request) {
+        List<TeacherEducationDto> result = teacherProfileService.getEducations(profileId);
+        ApiResponse<List<TeacherEducationDto>> response = ApiResponse.success(result, "Eğitim listesi");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{profileId}/educations/{educationId}")
+    @Operation(summary = "Eğitim bilgisini güncelle")
+    public ResponseEntity<ApiResponse<TeacherEducationDto>> updateEducation(
+            @PathVariable Long profileId,
+            @PathVariable Long educationId,
+            @Valid @RequestBody TeacherEducationUpdateDto dto,
+            HttpServletRequest request) {
+        ensureProfileOwnedBy(profileId, request);
+        TeacherEducationDto result = teacherProfileService.updateEducation(profileId, educationId, dto);
+        ApiResponse<TeacherEducationDto> response = ApiResponse.success(result, "Eğitim bilgisi güncellendi");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{profileId}/educations/{educationId}")
+    @Operation(summary = "Eğitim bilgisini sil")
+    public ResponseEntity<ApiResponse<Void>> deleteEducation(
+            @PathVariable Long profileId,
+            @PathVariable Long educationId,
+            HttpServletRequest request) {
+        ensureProfileOwnedBy(profileId, request);
+        teacherProfileService.deleteEducation(profileId, educationId);
+        ApiResponse<Void> response = ApiResponse.success(null, "Eğitim bilgisi silindi");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
+    // --- Tecrübe (sadece profil sahibi yazabilir) ---
+
+    @PostMapping("/{profileId}/experiences")
+    @Operation(summary = "Profiline tecrübe ekle")
+    public ResponseEntity<ApiResponse<TeacherExperienceDto>> addExperience(
+            @PathVariable Long profileId,
+            @Valid @RequestBody TeacherExperienceCreateDto dto,
+            HttpServletRequest request) {
+        ensureProfileOwnedBy(profileId, request);
+        TeacherExperienceDto result = teacherProfileService.addExperience(profileId, dto);
+        ApiResponse<TeacherExperienceDto> response = ApiResponse.success(result, "Tecrübe eklendi");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/{profileId}/experiences")
+    @Operation(summary = "Profil tecrübe listesi")
+    public ResponseEntity<ApiResponse<List<TeacherExperienceDto>>> getExperiences(
+            @PathVariable Long profileId,
+            HttpServletRequest request) {
+        List<TeacherExperienceDto> result = teacherProfileService.getExperiences(profileId);
+        ApiResponse<List<TeacherExperienceDto>> response = ApiResponse.success(result, "Tecrübe listesi");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{profileId}/experiences/{experienceId}")
+    @Operation(summary = "Tecrübe güncelle")
+    public ResponseEntity<ApiResponse<TeacherExperienceDto>> updateExperience(
+            @PathVariable Long profileId,
+            @PathVariable Long experienceId,
+            @Valid @RequestBody TeacherExperienceUpdateDto dto,
+            HttpServletRequest request) {
+        ensureProfileOwnedBy(profileId, request);
+        TeacherExperienceDto result = teacherProfileService.updateExperience(profileId, experienceId, dto);
+        ApiResponse<TeacherExperienceDto> response = ApiResponse.success(result, "Tecrübe güncellendi");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{profileId}/experiences/{experienceId}")
+    @Operation(summary = "Tecrübe sil")
+    public ResponseEntity<ApiResponse<Void>> deleteExperience(
+            @PathVariable Long profileId,
+            @PathVariable Long experienceId,
+            HttpServletRequest request) {
+        ensureProfileOwnedBy(profileId, request);
+        teacherProfileService.deleteExperience(profileId, experienceId);
+        ApiResponse<Void> response = ApiResponse.success(null, "Tecrübe silindi");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
+    private void ensureProfileOwnedBy(Long profileId, HttpServletRequest request) {
+        User user = jwtService.getUser(request);
+        TeacherProfileDto profile = teacherProfileService.getById(profileId);
+        if (!profile.getUserId().equals(user.getId())) {
+            throw BusinessException.accessDenied("Bu profile ait eğitim/tecrübe yalnızca profil sahibi tarafından düzenlenebilir");
+        }
     }
 }

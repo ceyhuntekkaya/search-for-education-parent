@@ -39,8 +39,8 @@ public interface CountryRepository extends JpaRepository<Country, Long> {
     Long countByIsActiveTrueAndIsSupportedTrue();
 
     @Query("SELECT c FROM Country c WHERE c.isActive = true AND " +
-            "(:searchTerm IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "LOWER(c.nameEn) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
+            "(:searchTerm IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "LOWER(c.nameEn) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')))")
     List<Country> searchCountries(@Param("searchTerm") String searchTerm);
 
     boolean existsByIdAndIsActiveTrue(Long countryId);

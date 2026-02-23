@@ -30,7 +30,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
 
 
-    @Query("SELECT p FROM Post p WHERE p.isActive = true AND LOWER(p.slug) = LOWER(:slug) AND p.status = :status")
+    @Query("SELECT p FROM Post p WHERE p.isActive = true AND LOWER(p.slug) = LOWER(CAST(:slug AS string)) AND p.status = :status")
     Optional<Post> findBySlugAndStatusAndIsActiveTrue(@Param("slug") String slug, @Param("status") PostStatus status);
 
     @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END " +
@@ -58,9 +58,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("SELECT DISTINCT p FROM Post p " +
             "WHERE p.isActive = true " +
             "AND (:searchTerm IS NULL OR " +
-            "    LOWER(p.title) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "    LOWER(p.content) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "    LOWER(p.tags) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) " +
+            "    LOWER(p.title) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "    LOWER(p.content) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "    LOWER(p.tags) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%'))) " +
             "AND (:schoolId IS NULL OR p.school.id = :schoolId) " +
             "AND (:accessibleSchoolIds IS NULL OR p.school.id IN :accessibleSchoolIds) " +
             "AND (:authorId IS NULL OR p.authorUser.id = :authorId) " +
@@ -70,8 +70,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "AND (:isPinned IS NULL OR p.isPinned = :isPinned) " +
             "AND (:publishedAfter IS NULL OR p.publishedAt >= :publishedAfter) " +
             "AND (:publishedBefore IS NULL OR p.publishedAt <= :publishedBefore) " +
-            "AND (:tags IS NULL OR LOWER(p.tags) LIKE LOWER(CONCAT('%', :tags, '%'))) " +
-            "AND (:hashtags IS NULL OR LOWER(p.hashtags) LIKE LOWER(CONCAT('%', :hashtags, '%')))")
+            "AND (:tags IS NULL OR LOWER(p.tags) LIKE LOWER(CONCAT('%', CAST(:tags AS string), '%'))) " +
+            "AND (:hashtags IS NULL OR LOWER(p.hashtags) LIKE LOWER(CONCAT('%', CAST(:hashtags AS string), '%')))")
     Page<Post> searchPosts(
             @Param("searchTerm") String searchTerm,
             @Param("schoolId") Long schoolId,

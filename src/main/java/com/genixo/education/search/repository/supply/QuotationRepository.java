@@ -24,7 +24,7 @@ public interface QuotationRepository extends JpaRepository<Quotation, Long> {
 
     @Query("SELECT q FROM Quotation q WHERE " +
            "(:searchTerm IS NULL OR " +
-           "LOWER(q.notes) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) AND " +
+           "LOWER(q.notes) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%'))) AND " +
            "(:rfqId IS NULL OR q.rfq.id = :rfqId) AND " +
            "(:supplierId IS NULL OR q.supplier.id = :supplierId) AND " +
            "(:companyId IS NULL OR q.rfq.company.id = :companyId) AND " +

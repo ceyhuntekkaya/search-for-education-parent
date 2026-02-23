@@ -38,12 +38,6 @@ public class TeacherProfile extends BaseEntity {
     @Column(name = "branch", length = 100)
     private String branch; // Branş/ders alanı (örn: Matematik, İngilizce)
 
-    @Column(name = "education_level", length = 50)
-    private String educationLevel; // Lisans, Yüksek Lisans, Doktora
-
-    @Column(name = "experience_years")
-    private Integer experienceYears; // Deneyim süresi (yıl)
-
     @Column(name = "bio", columnDefinition = "TEXT")
     private String bio; // Kısa tanıtım metni
 
@@ -61,6 +55,12 @@ public class TeacherProfile extends BaseEntity {
 
     @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Application> applications = new ArrayList<>();
+
+    @OneToMany(mappedBy = "teacherProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TeacherEducation> educations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "teacherProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TeacherExperience> experiences = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

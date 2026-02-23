@@ -28,15 +28,15 @@ public interface DistrictRepository extends JpaRepository<District, Long> {
     @Query("SELECT d FROM District d WHERE d.id = :id AND d.isActive = true")
     Optional<District> findByIdAndIsActiveTrue(@Param("id") Long id);
 
-    @Query("SELECT d FROM District d WHERE LOWER(d.slug) = LOWER(:slug) AND d.isActive = true")
+    @Query("SELECT d FROM District d WHERE LOWER(d.slug) = LOWER(CAST(:slug AS string)) AND d.isActive = true")
     Optional<District> findBySlugAndIsActiveTrue(@Param("slug") String slug);
 
     @Query("SELECT CASE WHEN COUNT(d) > 0 THEN true ELSE false END " +
-            "FROM District d WHERE LOWER(d.name) = LOWER(:name) AND d.province.id = :provinceId AND d.isActive = true")
+            "FROM District d WHERE LOWER(d.name) = LOWER(CAST(:name AS string)) AND d.province.id = :provinceId AND d.isActive = true")
     boolean existsByNameIgnoreCaseAndProvinceIdAndIsActiveTrue(@Param("name") String name, @Param("provinceId") Long provinceId);
 
     @Query("SELECT CASE WHEN COUNT(d) > 0 THEN true ELSE false END " +
-            "FROM District d WHERE LOWER(d.name) = LOWER(:name) AND d.province.id = :provinceId AND d.id != :id AND d.isActive = true")
+            "FROM District d WHERE LOWER(d.name) = LOWER(CAST(:name AS string)) AND d.province.id = :provinceId AND d.id != :id AND d.isActive = true")
     boolean existsByNameIgnoreCaseAndProvinceIdAndIdNotAndIsActiveTrue(@Param("name") String name, @Param("provinceId") Long provinceId, @Param("id") Long id);
 
     @Query("SELECT CASE WHEN COUNT(d) > 0 THEN true ELSE false END FROM District d WHERE d.slug = :slug")
@@ -58,8 +58,8 @@ public interface DistrictRepository extends JpaRepository<District, Long> {
     // Complex search query for districts
     @Query("SELECT d FROM District d WHERE d.isActive = true " +
             "AND (:searchTerm IS NULL OR " +
-            "    LOWER(d.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "    LOWER(d.nameEn) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) " +
+            "    LOWER(d.name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "    LOWER(d.nameEn) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%'))) " +
             "AND (:provinceId IS NULL OR d.province.id = :provinceId) " +
             "AND (:hasSchools IS NULL OR " +
             "    (:hasSchools = true AND d.schoolCount > 0) OR " +

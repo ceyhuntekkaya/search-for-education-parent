@@ -27,8 +27,8 @@ public interface RFQRepository extends JpaRepository<RFQ, Long> {
 
     @Query("SELECT r FROM RFQ r WHERE " +
            "(:searchTerm IS NULL OR " +
-           "LOWER(r.title) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-           "LOWER(r.description) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) AND " +
+           "LOWER(r.title) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+           "LOWER(r.description) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%'))) AND " +
            "(:companyId IS NULL OR r.company.id = :companyId) AND " +
            "(:status IS NULL OR r.status = :status) AND " +
            "(:rfqType IS NULL OR r.rfqType = :rfqType)")

@@ -2,7 +2,6 @@ package com.genixo.education.search.dto.hr;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,10 +34,6 @@ public class TeacherProfileCreateDto {
     @Size(max = 100)
     private String branch;
 
-    @Size(max = 50)
-    private String educationLevel;
-
-    private Integer experienceYears;
     private String bio;
 
     @Size(max = 500)

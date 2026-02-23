@@ -20,13 +20,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 @Transactional(readOnly = true)
 public class EventService {
+
+    /** Sentinel dates within PostgreSQL timestamp range (avoids binding null for date params). */
+    private static final LocalDateTime DATE_FLOOR = LocalDateTime.of(1, 1, 1, 0, 0);
+    private static final LocalDateTime DATE_CEILING = LocalDateTime.of(9999, 12, 31, 23, 59, 59);
 
     private final EventRepository eventRepository;
     private final EventOrganizerRepository eventOrganizerRepository;
@@ -75,8 +78,10 @@ public class EventService {
                                  String searchTerm, LocalDateTime startDateFrom, LocalDateTime startDateTo,
                                  Pageable pageable) {
         Event.EventStatus statusEnum = parseEventStatus(status);
+        LocalDateTime from = startDateFrom != null ? startDateFrom : DATE_FLOOR;
+        LocalDateTime to = startDateTo != null ? startDateTo : DATE_CEILING;
         return eventRepository.search(organizerId, categoryId, eventType, statusEnum,
-                        searchTerm, startDateFrom, startDateTo, pageable)
+                        searchTerm, from, to, pageable)
                 .map(this::mapToDto);
     }
 
@@ -95,7 +100,7 @@ public class EventService {
 
     public Page<EventDto> getPublishedEvents(Pageable pageable) {
         return eventRepository.search(null, null, null, Event.EventStatus.PUBLISHED,
-                        null, LocalDateTime.now(), null, pageable)
+                        null, LocalDateTime.now(), DATE_CEILING, pageable)
                 .map(this::mapToDto);
     }
 

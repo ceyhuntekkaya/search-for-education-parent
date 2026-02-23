@@ -51,7 +51,7 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
     @Query("SELECT s FROM Subscription s WHERE s.isActive = true AND " +
             "(:status IS NULL OR s.status = :status) AND " +
             "(:planId IS NULL OR s.subscriptionPlan.id = :planId) AND " +
-            "(:campusName IS NULL OR LOWER(s.campus.name) LIKE LOWER(CONCAT('%', :campusName, '%')))")
+            "(:campusName IS NULL OR LOWER(s.campus.name) LIKE LOWER(CONCAT('%', CAST(:campusName AS string), '%')))")
     Page<Subscription> findByFilters(@Param("status") SubscriptionStatus status,
                                      @Param("planId") Long planId,
                                      @Param("campusName") String campusName,

@@ -15,7 +15,7 @@ public interface InstitutionPropertyRepository extends JpaRepository<Institution
     Optional<InstitutionProperty> findByIdAndIsActiveTrue(@Param("id") Long id);
 
     @Query("SELECT CASE WHEN COUNT(ip) > 0 THEN true ELSE false END " +
-            "FROM InstitutionProperty ip WHERE LOWER(ip.name) = LOWER(:name) " +
+            "FROM InstitutionProperty ip WHERE LOWER(ip.name) = LOWER(CAST(:name AS string)) " +
             "AND ip.institutionType.id = :institutionTypeId AND ip.isActive = true")
     boolean existsByNameIgnoreCaseAndInstitutionTypeIdAndIsActiveTrue(
             @Param("name") String name,

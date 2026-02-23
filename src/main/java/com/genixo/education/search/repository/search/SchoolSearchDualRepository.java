@@ -37,13 +37,13 @@ public interface SchoolSearchDualRepository extends JpaRepository<SchoolSearchVi
           AND (:maxAge IS NULL OR max_age >= :maxAge)
           AND (:minFee IS NULL OR monthly_fee >= :minFee)
           AND (:maxFee IS NULL OR monthly_fee <= :maxFee)
-          AND (:curriculumType IS NULL OR LOWER(curriculum_type) = LOWER(:curriculumType))
-          AND (:languageOfInstruction IS NULL OR LOWER(language_of_instruction) = LOWER(:languageOfInstruction))
+          AND (:curriculumType IS NULL OR LOWER(curriculum_type) = LOWER(CAST(:curriculumType AS TEXT)))
+          AND (:languageOfInstruction IS NULL OR LOWER(language_of_instruction) = LOWER(CAST(:languageOfInstruction AS TEXT)))
           AND (:minRating IS NULL OR rating_average >= :minRating)
           AND (:isSubscribed IS NULL OR campus_is_subscribed = :isSubscribed)
           AND (:searchTerm IS NULL OR 
-               search_vector @@ plainto_tsquery('turkish', :searchTerm) OR
-               LOWER(school_name) LIKE LOWER(CONCAT('%', :searchTerm, '%')))
+               search_vector @@ plainto_tsquery('turkish', CAST(:searchTerm AS TEXT)) OR
+               LOWER(school_name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')))
           AND (
               :propertyIds IS NULL OR
               CARDINALITY(:propertyIds) = 0 OR
@@ -74,13 +74,13 @@ public interface SchoolSearchDualRepository extends JpaRepository<SchoolSearchVi
           AND (:maxAge IS NULL OR max_age >= :maxAge)
           AND (:minFee IS NULL OR monthly_fee >= :minFee)
           AND (:maxFee IS NULL OR monthly_fee <= :maxFee)
-          AND (:curriculumType IS NULL OR LOWER(curriculum_type) = LOWER(:curriculumType))
-          AND (:languageOfInstruction IS NULL OR LOWER(language_of_instruction) = LOWER(:languageOfInstruction))
+          AND (:curriculumType IS NULL OR LOWER(curriculum_type) = LOWER(CAST(:curriculumType AS TEXT)))
+          AND (:languageOfInstruction IS NULL OR LOWER(language_of_instruction) = LOWER(CAST(:languageOfInstruction AS TEXT)))
           AND (:minRating IS NULL OR rating_average >= :minRating)
           AND (:isSubscribed IS NULL OR campus_is_subscribed = :isSubscribed)
           AND (:searchTerm IS NULL OR 
-               search_vector @@ plainto_tsquery('turkish', :searchTerm) OR
-               LOWER(school_name) LIKE LOWER(CONCAT('%', :searchTerm, '%')))
+               search_vector @@ plainto_tsquery('turkish', CAST(:searchTerm AS TEXT)) OR
+               LOWER(school_name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')))
           AND (
               :propertyIds IS NULL OR
               CARDINALITY(:propertyIds) = 0 OR
@@ -123,21 +123,21 @@ public interface SchoolSearchDualRepository extends JpaRepository<SchoolSearchVi
      */
     @Query(value = """
         SELECT * FROM school_search_materialized_v2
-        WHERE LOWER(institution_type_name) = LOWER(:institutionTypeName)
-          AND LOWER(province_name) = LOWER(:provinceName)
-          AND (:districtName IS NULL OR LOWER(district_name) = LOWER(:districtName))
-          AND (:neighborhoodName IS NULL OR LOWER(neighborhood_name) = LOWER(:neighborhoodName))
+        WHERE LOWER(institution_type_name) = LOWER(CAST(:institutionTypeName AS TEXT))
+          AND LOWER(province_name) = LOWER(CAST(:provinceName AS TEXT))
+          AND (:districtName IS NULL OR LOWER(district_name) = LOWER(CAST(:districtName AS TEXT)))
+          AND (:neighborhoodName IS NULL OR LOWER(neighborhood_name) = LOWER(CAST(:neighborhoodName AS TEXT)))
           AND (:minAge IS NULL OR min_age <= :minAge)
           AND (:maxAge IS NULL OR max_age >= :maxAge)
           AND (:minFee IS NULL OR monthly_fee >= :minFee)
           AND (:maxFee IS NULL OR monthly_fee <= :maxFee)
-          AND (:curriculumType IS NULL OR LOWER(curriculum_type) = LOWER(:curriculumType))
-          AND (:languageOfInstruction IS NULL OR LOWER(language_of_instruction) = LOWER(:languageOfInstruction))
+          AND (:curriculumType IS NULL OR LOWER(curriculum_type) = LOWER(CAST(:curriculumType AS TEXT)))
+          AND (:languageOfInstruction IS NULL OR LOWER(language_of_instruction) = LOWER(CAST(:languageOfInstruction AS TEXT)))
           AND (:minRating IS NULL OR rating_average >= :minRating)
           AND (:isSubscribed IS NULL OR campus_is_subscribed = :isSubscribed)
           AND (:searchTerm IS NULL OR 
-               search_vector @@ plainto_tsquery('turkish', :searchTerm) OR
-               LOWER(school_name) LIKE LOWER(CONCAT('%', :searchTerm, '%')))
+               search_vector @@ plainto_tsquery('turkish', CAST(:searchTerm AS TEXT)) OR
+               LOWER(school_name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')))
           AND (
               :propertyNames IS NULL OR
               CARDINALITY(:propertyNames) = 0 OR
@@ -145,7 +145,7 @@ public interface SchoolSearchDualRepository extends JpaRepository<SchoolSearchVi
                   SELECT 1 
                   FROM jsonb_array_elements(properties_json) elem
                   WHERE LOWER(elem->>'property_display_name') = ANY(
-                      SELECT LOWER(unnest(:propertyNames))
+                      SELECT LOWER(CAST(unnest(:propertyNames) AS TEXT))
                   )
               )
           )
@@ -162,21 +162,21 @@ public interface SchoolSearchDualRepository extends JpaRepository<SchoolSearchVi
         """,
             countQuery = """
         SELECT COUNT(*) FROM school_search_materialized_v2
-        WHERE LOWER(institution_type_name) = LOWER(:institutionTypeName)
-          AND LOWER(province_name) = LOWER(:provinceName)
-          AND (:districtName IS NULL OR LOWER(district_name) = LOWER(:districtName))
-          AND (:neighborhoodName IS NULL OR LOWER(neighborhood_name) = LOWER(:neighborhoodName))
+        WHERE LOWER(institution_type_name) = LOWER(CAST(:institutionTypeName AS TEXT))
+          AND LOWER(province_name) = LOWER(CAST(:provinceName AS TEXT))
+          AND (:districtName IS NULL OR LOWER(district_name) = LOWER(CAST(:districtName AS TEXT)))
+          AND (:neighborhoodName IS NULL OR LOWER(neighborhood_name) = LOWER(CAST(:neighborhoodName AS TEXT)))
           AND (:minAge IS NULL OR min_age <= :minAge)
           AND (:maxAge IS NULL OR max_age >= :maxAge)
           AND (:minFee IS NULL OR monthly_fee >= :minFee)
           AND (:maxFee IS NULL OR monthly_fee <= :maxFee)
-          AND (:curriculumType IS NULL OR LOWER(curriculum_type) = LOWER(:curriculumType))
-          AND (:languageOfInstruction IS NULL OR LOWER(language_of_instruction) = LOWER(:languageOfInstruction))
+          AND (:curriculumType IS NULL OR LOWER(curriculum_type) = LOWER(CAST(:curriculumType AS TEXT)))
+          AND (:languageOfInstruction IS NULL OR LOWER(language_of_instruction) = LOWER(CAST(:languageOfInstruction AS TEXT)))
           AND (:minRating IS NULL OR rating_average >= :minRating)
           AND (:isSubscribed IS NULL OR campus_is_subscribed = :isSubscribed)
           AND (:searchTerm IS NULL OR 
-               search_vector @@ plainto_tsquery('turkish', :searchTerm) OR
-               LOWER(school_name) LIKE LOWER(CONCAT('%', :searchTerm, '%')))
+               search_vector @@ plainto_tsquery('turkish', CAST(:searchTerm AS TEXT)) OR
+               LOWER(school_name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')))
           AND (
               :propertyNames IS NULL OR
               CARDINALITY(:propertyNames) = 0 OR
@@ -184,7 +184,7 @@ public interface SchoolSearchDualRepository extends JpaRepository<SchoolSearchVi
                   SELECT 1 
                   FROM jsonb_array_elements(properties_json) elem
                   WHERE LOWER(elem->>'property_display_name') = ANY(
-                      SELECT LOWER(unnest(:propertyNames))
+                      SELECT LOWER(CAST(unnest(:propertyNames) AS TEXT))
                   )
               )
           )
@@ -256,7 +256,7 @@ public interface SchoolSearchDualRepository extends JpaRepository<SchoolSearchVi
         FROM school_search_materialized_v2
         WHERE latitude IS NOT NULL 
           AND longitude IS NOT NULL
-          AND LOWER(institution_type_name) = LOWER(:institutionTypeName)
+          AND LOWER(institution_type_name) = LOWER(CAST(:institutionTypeName AS TEXT))
           AND (6371 * acos(
                 cos(radians(:targetLat)) * cos(radians(latitude)) * 
                 cos(radians(longitude) - radians(:targetLon)) + 

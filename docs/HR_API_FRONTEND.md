@@ -58,6 +58,33 @@ interface TeacherProfileSummaryDto {
   branch: string;
   profilePhotoUrl: string;
 }
+
+// Öğretmen profil detayında kullanılır (eğitim / tecrübe listeleri)
+interface TeacherEducationDto {
+  id: number;
+  teacherProfileId: number;
+  educationLevel: string;   // Ön Lisans, Lisans, Yüksek Lisans, Doktora
+  institution: string;
+  department: string | null;
+  startYear: number | null;
+  endYear: number | null;
+  displayOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface TeacherExperienceDto {
+  id: number;
+  teacherProfileId: number;
+  institution: string;
+  roleTitle: string;         // Görev unvanı (Sınıf Öğretmeni, Matematik Öğretmeni vb.)
+  startDate: string;         // "YYYY-MM-DD"
+  endDate: string | null;    // "YYYY-MM-DD" veya null = hâlâ çalışıyor
+  description: string | null; // Görev tanımı / iş açıklaması (metin)
+  displayOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
 ```
 
 ---
@@ -242,8 +269,6 @@ interface Page<T> {
   phone?: string;           // max 20
   city?: string;            // max 50
   branch?: string;          // max 100
-  educationLevel?: string;   // max 50
-  experienceYears?: number;
   bio?: string;
   profilePhotoUrl?: string;  // max 500
   videoUrl?: string;        // Tanıtım videosu linki, max 500
@@ -267,18 +292,20 @@ interface Page<T> {
   phone: string;
   city: string;
   branch: string;
-  educationLevel: string;
-  experienceYears: number;
   bio: string;
   profilePhotoUrl: string;
   videoUrl: string;
   cvUrl: string;
   isActive: boolean;
   provinces: ProvinceSummaryDto[];
+  educations: TeacherEducationDto[];   // Sadece tek profil getirildiğinde dolu (GET by id / by-user)
+  experiences: TeacherExperienceDto[]; // Liste sayfasında boş döner
   createdAt: string;
   updatedAt: string;
 }
 ```
+
+> **Not:** `educations` ve `experiences` sadece **GET /hr/teacher-profiles/{id}** ve **GET /hr/teacher-profiles/by-user/{userId}** cevabında dolu gelir. **GET /hr/teacher-profiles** (liste/arama) cevabında performans için boş array döner.
 
 ---
 
@@ -328,8 +355,6 @@ interface Page<T> {
   phone?: string;
   city?: string;
   branch?: string;
-  educationLevel?: string;
-  experienceYears?: number;
   bio?: string;
   profilePhotoUrl?: string;
   videoUrl?: string;
@@ -346,6 +371,150 @@ interface Page<T> {
 ## 2.6 Profil Sil
 
 `DELETE /hr/teacher-profiles/{id}`
+
+**Response:** `ApiResponse<null>`
+
+---
+
+## 2.7 Eğitim Bilgileri (Teacher Education)
+
+Öğretmenin eğitim geçmişi (lisans, yüksek lisans, doktora vb.) profil altında yönetilir. **Sadece profil sahibi** (JWT'deki kullanıcı, ilgili profilin userId'si ile aynı olmalı) ekleme/güncelleme/silme yapabilir. Listeleme herkese açıktır.
+
+**Base path:** `/hr/teacher-profiles/{profileId}/educations`
+
+### 2.7.1 Eğitim Ekle
+
+`POST /hr/teacher-profiles/{profileId}/educations`
+
+**Auth:** Gerekli. Sadece profil sahibi (403 döner aksi halde).
+
+**Request Body:** `TeacherEducationCreateDto`
+```typescript
+{
+  educationLevel: string;   // Zorunlu, max 50 — "Ön Lisans" | "Lisans" | "Yüksek Lisans" | "Doktora"
+  institution: string;      // Zorunlu, max 200 — Üniversite/kurum adı
+  department?: string;      // max 200 — Bölüm (örn: Matematik Öğretmenliği)
+  startYear?: number;       // Başlangıç yılı
+  endYear?: number;         // Bitiş/mezuniyet yılı (devam ediyorsa boş bırakılabilir)
+  displayOrder?: number;    // Sıralama (küçük önce), default: 0
+}
+```
+
+**Response:** `ApiResponse<TeacherEducationDto>` (201 Created)
+
+---
+
+### 2.7.2 Eğitim Listesi
+
+`GET /hr/teacher-profiles/{profileId}/educations`
+
+**Auth:** Gerekli (profil görüntüleme yetkisine göre).
+
+**Response:** `ApiResponse<TeacherEducationDto[]>`
+
+Sıralama: `displayOrder` artan, sonra `endYear` azalan (en güncel üstte).
+
+---
+
+### 2.7.3 Eğitim Güncelle
+
+`PUT /hr/teacher-profiles/{profileId}/educations/{educationId}`
+
+**Auth:** Gerekli. Sadece profil sahibi.
+
+**Request Body:** `TeacherEducationUpdateDto` (tüm alanlar opsiyonel)
+```typescript
+{
+  educationLevel?: string;   // max 50
+  institution?: string;     // max 200
+  department?: string;      // max 200
+  startYear?: number;
+  endYear?: number;
+  displayOrder?: number;
+}
+```
+
+**Response:** `ApiResponse<TeacherEducationDto>`
+
+---
+
+### 2.7.4 Eğitim Sil
+
+`DELETE /hr/teacher-profiles/{profileId}/educations/{educationId}`
+
+**Auth:** Gerekli. Sadece profil sahibi.
+
+**Response:** `ApiResponse<null>`
+
+---
+
+## 2.8 Tecrübe Bilgileri (Teacher Experience)
+
+Öğretmenin iş tecrübesi (kurum, görev, giriş/çıkış tarihi) profil altında yönetilir. **Sadece profil sahibi** ekleme/güncelleme/silme yapabilir. Listeleme herkese açıktır.
+
+**Base path:** `/hr/teacher-profiles/{profileId}/experiences`
+
+### 2.8.1 Tecrübe Ekle
+
+`POST /hr/teacher-profiles/{profileId}/experiences`
+
+**Auth:** Gerekli. Sadece profil sahibi (403 döner aksi halde).
+
+**Request Body:** `TeacherExperienceCreateDto`
+```typescript
+{
+  institution: string;    // Zorunlu, max 200 — Okul/kurum adı
+  roleTitle: string;      // Zorunlu, max 200 — Görev unvanı (Sınıf Öğretmeni, Matematik Öğretmeni vb.)
+  startDate: string;      // Zorunlu, "YYYY-MM-DD" — İşe giriş tarihi
+  endDate?: string | null; // "YYYY-MM-DD" veya null — null = hâlâ çalışıyor
+  description?: string;   // Görev tanımı / iş açıklaması (metin, opsiyonel)
+  displayOrder?: number;   // Sıralama (küçük önce), default: 0
+}
+```
+
+**Response:** `ApiResponse<TeacherExperienceDto>` (201 Created)
+
+---
+
+### 2.8.2 Tecrübe Listesi
+
+`GET /hr/teacher-profiles/{profileId}/experiences`
+
+**Auth:** Gerekli (profil görüntüleme yetkisine göre).
+
+**Response:** `ApiResponse<TeacherExperienceDto[]>`
+
+Sıralama: `displayOrder` artan, sonra `endDate` azalan (devam eden / en güncel üstte).
+
+---
+
+### 2.8.3 Tecrübe Güncelle
+
+`PUT /hr/teacher-profiles/{profileId}/experiences/{experienceId}`
+
+**Auth:** Gerekli. Sadece profil sahibi.
+
+**Request Body:** `TeacherExperienceUpdateDto` (tüm alanlar opsiyonel)
+```typescript
+{
+  institution?: string;     // max 200
+  roleTitle?: string;       // max 200
+  startDate?: string;       // "YYYY-MM-DD"
+  endDate?: string | null;  // "YYYY-MM-DD" veya null
+  description?: string | null; // Görev tanımı / iş açıklaması (boş string ile temizlenebilir)
+  displayOrder?: number;
+}
+```
+
+**Response:** `ApiResponse<TeacherExperienceDto>`
+
+---
+
+### 2.8.4 Tecrübe Sil
+
+`DELETE /hr/teacher-profiles/{profileId}/experiences/{experienceId}`
+
+**Auth:** Gerekli. Sadece profil sahibi.
 
 **Response:** `ApiResponse<null>`
 

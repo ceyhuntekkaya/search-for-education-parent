@@ -24,11 +24,11 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
     @Query("SELECT c FROM Campaign c WHERE c.isActive = true AND c.id = :id")
     Optional<Campaign> findByIdAndIsActiveTrue(@Param("id") Long id);
 
-    @Query("SELECT c FROM Campaign c WHERE c.isActive = true AND LOWER(c.slug) = LOWER(:slug)")
+    @Query("SELECT c FROM Campaign c WHERE c.isActive = true AND LOWER(c.slug) = LOWER(CAST(:slug AS string))")
     Optional<Campaign> findBySlugAndIsActiveTrue(@Param("slug") String slug);
 
     @Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END " +
-            "FROM Campaign c WHERE LOWER(c.promoCode) = LOWER(:promoCode) AND c.isActive = true")
+            "FROM Campaign c WHERE LOWER(c.promoCode) = LOWER(CAST(:promoCode AS string)) AND c.isActive = true")
     boolean existsByPromoCodeIgnoreCase(@Param("promoCode") String promoCode);
 
     @Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END " +
@@ -36,7 +36,7 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
     boolean existsBySlug(@Param("slug") String slug);
 
     @Query("SELECT c FROM Campaign c WHERE c.isActive = true " +
-            "AND LOWER(c.promoCode) = LOWER(:promoCode)")
+            "AND LOWER(c.promoCode) = LOWER(CAST(:promoCode AS string))")
     Optional<Campaign> findByPromoCodeIgnoreCaseAndIsActiveTrue(@Param("promoCode") String promoCode);
 
     // Active campaigns query
@@ -90,9 +90,9 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
             "LEFT JOIN cs.school s " +
             "WHERE c.isActive = true " +
             "AND (:searchTerm IS NULL OR " +
-            "    LOWER(c.title) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "    LOWER(c.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "    LOWER(c.shortDescription) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) " +
+            "    LOWER(c.title) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "    LOWER(c.description) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "    LOWER(c.shortDescription) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%'))) " +
             "AND (:campaignTypes IS NULL OR c.campaignType IN :campaignTypes) " +
             "AND (:discountTypes IS NULL OR c.discountType IN :discountTypes) " +
             "AND (:statuses IS NULL OR c.status IN :statuses) " +

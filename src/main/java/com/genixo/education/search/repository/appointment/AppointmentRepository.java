@@ -66,7 +66,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "FROM Appointment a " +
             "WHERE a.isActive = true " +
             "AND a.school.id = :schoolId " +
-            "AND LOWER(a.parentEmail) = LOWER(:parentEmail) " +
+            "AND LOWER(a.parentEmail) = LOWER(CAST(:parentEmail AS string)) " +
             "AND a.status = 'WAITING'")
     boolean existsInWaitlist(@Param("schoolId") Long schoolId, @Param("parentEmail") String parentEmail);
 
@@ -77,10 +77,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "LEFT JOIN a.parentUser pu " +
             "WHERE a.isActive = true " +
             "AND (:searchTerm IS NULL OR " +
-            "    LOWER(a.parentName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "    LOWER(a.studentName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "    LOWER(a.appointmentNumber) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "    LOWER(s.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) " +
+            "    LOWER(a.parentName) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "    LOWER(a.studentName) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "    LOWER(a.appointmentNumber) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "    LOWER(s.name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%'))) " +
             "AND (:schoolIds IS NULL OR a.school.id IN :schoolIds) " +
             "AND (:staffUserIds IS NULL OR a.staffUser.id IN :staffUserIds) " +
             "AND (:statuses IS NULL OR a.status IN :statuses) " +
@@ -89,10 +89,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "AND (:appointmentDateTo IS NULL OR a.appointmentDate <= :appointmentDateTo) " +
             "AND (:createdFrom IS NULL OR a.createdAt >= :createdFrom) " +
             "AND (:createdTo IS NULL OR a.createdAt <= :createdTo) " +
-            "AND (:parentEmail IS NULL OR LOWER(a.parentEmail) LIKE LOWER(CONCAT('%', :parentEmail, '%'))) " +
-            "AND (:parentPhone IS NULL OR a.parentPhone LIKE CONCAT('%', :parentPhone, '%')) " +
-            "AND (:studentName IS NULL OR LOWER(a.studentName) LIKE LOWER(CONCAT('%', :studentName, '%'))) " +
-            "AND (:gradeInterested IS NULL OR LOWER(a.gradeInterested) LIKE LOWER(CONCAT('%', :gradeInterested, '%'))) " +
+            "AND (:parentEmail IS NULL OR LOWER(a.parentEmail) LIKE LOWER(CONCAT('%', CAST(:parentEmail AS string), '%'))) " +
+            "AND (:parentPhone IS NULL OR a.parentPhone LIKE CONCAT('%', CAST(:parentPhone AS string), '%')) " +
+            "AND (:studentName IS NULL OR LOWER(a.studentName) LIKE LOWER(CONCAT('%', CAST(:studentName AS string), '%'))) " +
+            "AND (:gradeInterested IS NULL OR LOWER(a.gradeInterested) LIKE LOWER(CONCAT('%', CAST(:gradeInterested AS string), '%'))) " +
             "AND (:outcomes IS NULL OR a.outcome IN :outcomes) " +
             "AND (:followUpRequired IS NULL OR a.followUpRequired = :followUpRequired) " +
             "AND (:isOnline IS NULL OR a.isOnline = :isOnline) " +

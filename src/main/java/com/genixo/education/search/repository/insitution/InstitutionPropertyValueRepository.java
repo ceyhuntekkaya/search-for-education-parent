@@ -80,7 +80,7 @@ public interface InstitutionPropertyValueRepository extends JpaRepository<Instit
     // Search by property values
     @Query("SELECT DISTINCT ipv.school.id FROM InstitutionPropertyValue ipv " +
             "WHERE ipv.property.id = :propertyId AND ipv.isActive = true " +
-            "AND (:textValue IS NULL OR LOWER(ipv.textValue) LIKE LOWER(CONCAT('%', :textValue, '%'))) " +
+            "AND (:textValue IS NULL OR LOWER(ipv.textValue) LIKE LOWER(CONCAT('%', CAST(:textValue AS string), '%'))) " +
             "AND (:numberValue IS NULL OR ipv.numberValue = :numberValue) " +
             "AND (:booleanValue IS NULL OR ipv.booleanValue = :booleanValue)")
     List<Long> findSchoolIdsByPropertyValue(

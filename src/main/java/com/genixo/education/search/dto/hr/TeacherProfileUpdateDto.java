@@ -31,10 +31,6 @@ public class TeacherProfileUpdateDto {
     @Size(max = 100)
     private String branch;
 
-    @Size(max = 50)
-    private String educationLevel;
-
-    private Integer experienceYears;
     private String bio;
 
     @Size(max = 500)

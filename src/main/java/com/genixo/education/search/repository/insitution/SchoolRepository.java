@@ -24,15 +24,15 @@ public interface SchoolRepository extends JpaRepository<School, Long> {
     @Query("SELECT s FROM School s WHERE s.isActive = true AND s.id = :id")
     Optional<School> findByIdAndIsActiveTrue(@Param("id") Long id);
 
-    @Query("SELECT s FROM School s WHERE s.isActive = true AND LOWER(s.slug) = LOWER(:slug)")
+    @Query("SELECT s FROM School s WHERE s.isActive = true AND LOWER(s.slug) = LOWER(CAST(:slug AS string))")
     Optional<School> findBySlugAndIsActiveTrue(@Param("slug") String slug);
 
     @Query("SELECT s FROM School s " +
-            "WHERE s.isActive = true AND s.campus.isSubscribed = true AND LOWER(s.slug) = LOWER(:slug)")
+            "WHERE s.isActive = true AND s.campus.isSubscribed = true AND LOWER(s.slug) = LOWER(CAST(:slug AS string))")
     Optional<School> findBySlugAndIsActiveTrueAndCampusIsSubscribedTrue(@Param("slug") String slug);
 
     @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END " +
-            "FROM School s WHERE LOWER(s.name) = LOWER(:name) AND s.campus.id = :campusId AND s.isActive = true")
+            "FROM School s WHERE LOWER(s.name) = LOWER(CAST(:name AS string)) AND s.campus.id = :campusId AND s.isActive = true")
     boolean existsByNameIgnoreCaseAndCampusIdAndIsActiveTrue(@Param("name") String name, @Param("campusId") Long campusId);
 
     @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END " +
@@ -99,27 +99,27 @@ public interface SchoolRepository extends JpaRepository<School, Long> {
                                     
                                     
                     WHERE s.is_active = true
-                    AND (:searchTerm IS NULL OR :searchTerm = '' OR
-                        LOWER(s.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
-                        LOWER(s.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
-                        LOWER(c.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
-                        LOWER(b.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
-                        LOWER(it.display_name) LIKE LOWER(CONCAT('%', :searchTerm, '%')))
+AND (:searchTerm IS NULL OR :searchTerm = '' OR
+                        LOWER(s.name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')) OR
+                        LOWER(s.description) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')) OR
+                        LOWER(c.name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')) OR
+                        LOWER(b.name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')) OR
+                        LOWER(it.display_name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')))
                     AND (:institutionTypeIds IS NULL OR it.id = ANY(CAST(:institutionTypeIds AS bigint[])))
                     AND (:propertyFilters IS NULL OR pv.property_id = ANY(CAST(:propertyFilters AS bigint[])))
                     AND (:minAge IS NULL OR s.min_age IS NULL OR s.min_age >= :minAge)
                     AND (:maxAge IS NULL OR s.max_age IS NULL OR s.max_age <= :maxAge)
-                                      
-                                      
+                      
+                      
                     AND (:minFee IS NULL OR sp.annual_tuition IS NULL OR sp.annual_tuition >= :minFee)
                     AND (:maxFee IS NULL OR sp.annual_tuition IS NULL OR sp.annual_tuition <= :maxFee)
-                                      
-                                      
-                                      
+                      
+                      
+                      
                     AND (:curriculumType IS NULL OR :curriculumType = '' OR
-                        LOWER(s.curriculum_type) LIKE LOWER(CONCAT('%', :curriculumType, '%')))
+                        LOWER(s.curriculum_type) LIKE LOWER(CONCAT('%', CAST(:curriculumType AS TEXT), '%')))
                     AND (:languageOfInstruction IS NULL OR :languageOfInstruction = '' OR
-                        LOWER(s.language_of_instruction) LIKE LOWER(CONCAT('%', :languageOfInstruction, '%')))
+                        LOWER(s.language_of_instruction) LIKE LOWER(CONCAT('%', CAST(:languageOfInstruction AS TEXT), '%')))
                     AND (:countryId IS NULL OR p.country_id = :countryId)
                     AND (:provinceId IS NULL OR c.province_id = :provinceId)
                     AND (:districtId IS NULL OR n.district_id = :districtId)
@@ -189,11 +189,11 @@ public interface SchoolRepository extends JpaRepository<School, Long> {
                     LEFT JOIN institution_property_values pv ON pv.school_id = s.id
                     WHERE s.is_active = true
                     AND (:searchTerm IS NULL OR :searchTerm = '' OR
-                        LOWER(s.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
-                        LOWER(s.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
-                        LOWER(c.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
-                        LOWER(b.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
-                        LOWER(it.display_name) LIKE LOWER(CONCAT('%', :searchTerm, '%')))
+                        LOWER(s.name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')) OR
+                        LOWER(s.description) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')) OR
+                        LOWER(c.name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')) OR
+                        LOWER(b.name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')) OR
+                        LOWER(it.display_name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')))
                     AND (:institutionTypeIds IS NULL OR it.id = ANY(CAST(:institutionTypeIds AS bigint[])))
                     AND (:propertyFilters IS NULL OR pv.property_id = ANY(CAST(:propertyFilters AS bigint[])))
                     AND (:minAge IS NULL OR s.min_age IS NULL OR s.min_age >= :minAge)
@@ -201,9 +201,9 @@ public interface SchoolRepository extends JpaRepository<School, Long> {
                     AND (:minFee IS NULL OR s.monthly_fee IS NULL OR s.monthly_fee >= :minFee)
                     AND (:maxFee IS NULL OR s.monthly_fee IS NULL OR s.monthly_fee <= :maxFee)
                     AND (:curriculumType IS NULL OR :curriculumType = '' OR
-                        LOWER(s.curriculum_type) LIKE LOWER(CONCAT('%', :curriculumType, '%')))
+                        LOWER(s.curriculum_type) LIKE LOWER(CONCAT('%', CAST(:curriculumType AS TEXT), '%')))
                     AND (:languageOfInstruction IS NULL OR :languageOfInstruction = '' OR
-                        LOWER(s.language_of_instruction) LIKE LOWER(CONCAT('%', :languageOfInstruction, '%')))
+                        LOWER(s.language_of_instruction) LIKE LOWER(CONCAT('%', CAST(:languageOfInstruction AS TEXT), '%')))
                     AND (:countryId IS NULL OR p.country_id = :countryId)
                     AND (:provinceId IS NULL OR c.province_id = :provinceId)
                     AND (:districtId IS NULL OR n.district_id = :districtId)
@@ -269,20 +269,20 @@ public interface SchoolRepository extends JpaRepository<School, Long> {
     LEFT JOIN institution_property_values pv ON pv.school_id = s.id
     WHERE s.is_active = true
     AND (:searchTerm IS NULL OR :searchTerm = '' OR
-        LOWER(s.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
-        LOWER(s.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
-        LOWER(c.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
-        LOWER(b.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
-        LOWER(it.display_name) LIKE LOWER(CONCAT('%', :searchTerm, '%')))
+        LOWER(s.name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')) OR
+        LOWER(s.description) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')) OR
+        LOWER(c.name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')) OR
+        LOWER(b.name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')) OR
+        LOWER(it.display_name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')))
     AND (:institutionTypeIds IS NULL OR it.id = ANY(CAST(:institutionTypeIds AS bigint[])))
     AND (:minAge IS NULL OR s.min_age IS NULL OR s.min_age <= :minAge)
     AND (:maxAge IS NULL OR s.max_age IS NULL OR s.max_age >= :maxAge)
     AND (:minFee IS NULL OR s.monthly_fee IS NULL OR s.monthly_fee >= :minFee)
     AND (:maxFee IS NULL OR s.monthly_fee IS NULL OR s.monthly_fee <= :maxFee)
     AND (:curriculumType IS NULL OR :curriculumType = '' OR
-        LOWER(s.curriculum_type) LIKE LOWER(CONCAT('%', :curriculumType, '%')))
+        LOWER(s.curriculum_type) LIKE LOWER(CONCAT('%', CAST(:curriculumType AS TEXT), '%')))
     AND (:languageOfInstruction IS NULL OR :languageOfInstruction = '' OR
-        LOWER(s.language_of_instruction) LIKE LOWER(CONCAT('%', :languageOfInstruction, '%')))
+        LOWER(s.language_of_instruction) LIKE LOWER(CONCAT('%', CAST(:languageOfInstruction AS TEXT), '%')))
     AND (:countryId IS NULL OR p.country_id = :countryId)
     AND (:provinceId IS NULL OR c.province_id = :provinceId)
     AND (:districtId IS NULL OR n.district_id = :districtId)
@@ -409,7 +409,7 @@ public interface SchoolRepository extends JpaRepository<School, Long> {
 
 
     @Query("SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END " +
-            "FROM School b WHERE LOWER(b.name) = LOWER(:name) AND b.id != :id AND b.isActive = true")
+            "FROM School b WHERE LOWER(b.name) = LOWER(CAST(:name AS string)) AND b.id != :id AND b.isActive = true")
     boolean existsByNameIgnoreCaseAndIdNot(@Param("name") String name, @Param("id") Long id);
 
 

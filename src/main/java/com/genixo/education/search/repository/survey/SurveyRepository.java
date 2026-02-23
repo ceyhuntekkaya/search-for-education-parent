@@ -37,8 +37,8 @@ public interface SurveyRepository extends JpaRepository<Survey, Long> {
     @Query("SELECT DISTINCT s FROM Survey s " +
             "WHERE s.isActive = true " +
             "AND (:searchTerm IS NULL OR " +
-            "    LOWER(s.title) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "    LOWER(s.description) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) " +
+            "    LOWER(s.title) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "    LOWER(s.description) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%'))) " +
             "AND (:surveyTypes IS NULL OR s.surveyType IN :surveyTypes) " +
             "AND (:triggerEvents IS NULL OR s.triggerEvent IN :triggerEvents) " +
             "AND (:isActive IS NULL OR s.isActive = :isActive) " +

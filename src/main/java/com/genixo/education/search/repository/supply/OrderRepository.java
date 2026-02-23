@@ -24,10 +24,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT o FROM Order o WHERE " +
            "(:searchTerm IS NULL OR " +
-           "LOWER(o.orderNumber) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-           "LOWER(o.notes) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-           "LOWER(o.invoiceNumber) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-           "LOWER(o.trackingNumber) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) AND " +
+           "LOWER(o.orderNumber) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+           "LOWER(o.notes) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+           "LOWER(o.invoiceNumber) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+           "LOWER(o.trackingNumber) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%'))) AND " +
            "(:companyId IS NULL OR o.company.id = :companyId) AND " +
            "(:supplierId IS NULL OR o.supplier.id = :supplierId) AND " +
            "(:status IS NULL OR o.status = :status) AND " +

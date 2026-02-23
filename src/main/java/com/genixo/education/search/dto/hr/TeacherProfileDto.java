@@ -20,14 +20,14 @@ public class TeacherProfileDto {
     private String phone;
     private String city;
     private String branch;
-    private String educationLevel;
-    private Integer experienceYears;
     private String bio;
     private String profilePhotoUrl;
     private String videoUrl;
     private String cvUrl;
     private Boolean isActive;
     private List<ProvinceSummaryDto> provinces;
+    private List<TeacherEducationDto> educations;
+    private List<TeacherExperienceDto> experiences;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

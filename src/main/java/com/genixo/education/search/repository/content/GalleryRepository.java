@@ -20,7 +20,7 @@ public interface GalleryRepository  extends JpaRepository<Gallery, Long> {
     @Query("SELECT g FROM Gallery g WHERE g.isActive = true AND g.id = :id")
     Optional<Gallery> findByIdAndIsActiveTrue(@Param("id") Long id);
 
-    @Query("SELECT g FROM Gallery g WHERE g.isActive = true AND LOWER(g.slug) = LOWER(:slug)")
+    @Query("SELECT g FROM Gallery g WHERE g.isActive = true AND LOWER(g.slug) = LOWER(CAST(:slug AS string))")
     Optional<Gallery> findBySlugAndIsActiveTrue(@Param("slug") String slug);
 
     @Query("SELECT CASE WHEN COUNT(g) > 0 THEN true ELSE false END " +
@@ -40,9 +40,9 @@ public interface GalleryRepository  extends JpaRepository<Gallery, Long> {
     @Query("SELECT DISTINCT g FROM Gallery g " +
             "WHERE g.isActive = true " +
             "AND (:searchTerm IS NULL OR " +
-            "    LOWER(g.title) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "    LOWER(g.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "    LOWER(g.tags) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) " +
+            "    LOWER(g.title) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "    LOWER(g.description) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "    LOWER(g.tags) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%'))) " +
             "AND (:brandId IS NULL OR g.brand.id = :brandId) " +
             "AND (:campusId IS NULL OR g.campus.id = :campusId) " +
             "AND (:schoolId IS NULL OR g.school.id = :schoolId) " +
@@ -52,7 +52,7 @@ public interface GalleryRepository  extends JpaRepository<Gallery, Long> {
             "AND (:galleryType IS NULL OR g.galleryType = :galleryType) " +
             "AND (:visibility IS NULL OR g.visibility = :visibility) " +
             "AND (:isFeatured IS NULL OR g.isFeatured = :isFeatured) " +
-            "AND (:tags IS NULL OR LOWER(g.tags) LIKE LOWER(CONCAT('%', :tags, '%')))")
+            "AND (:tags IS NULL OR LOWER(g.tags) LIKE LOWER(CONCAT('%', CAST(:tags AS string), '%')))")
     Page<Gallery> searchGalleries(
             @Param("searchTerm") String searchTerm,
             @Param("brandId") Long brandId,

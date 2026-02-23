@@ -29,15 +29,15 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     @Query(value = "SELECT c.* FROM categories c WHERE " +
            "(:searchTerm IS NULL OR " +
-           "LOWER(c.name::text) LIKE LOWER('%' || :searchTerm || '%') OR " +
-           "LOWER(c.description::text) LIKE LOWER('%' || :searchTerm || '%')) AND " +
+           "LOWER(c.name::text) LIKE LOWER('%' || CAST(:searchTerm AS TEXT) || '%') OR " +
+           "LOWER(c.description::text) LIKE LOWER('%' || CAST(:searchTerm AS TEXT) || '%')) AND " +
            "(:isActive IS NULL OR c.is_active = :isActive) AND " +
            "(:parentId IS NULL OR c.parent_id = :parentId) " +
            "ORDER BY c.display_order",
            countQuery = "SELECT COUNT(*) FROM categories c WHERE " +
            "(:searchTerm IS NULL OR " +
-           "LOWER(c.name::text) LIKE LOWER('%' || :searchTerm || '%') OR " +
-           "LOWER(c.description::text) LIKE LOWER('%' || :searchTerm || '%')) AND " +
+           "LOWER(c.name::text) LIKE LOWER('%' || CAST(:searchTerm AS TEXT) || '%') OR " +
+           "LOWER(c.description::text) LIKE LOWER('%' || CAST(:searchTerm AS TEXT) || '%')) AND " +
            "(:isActive IS NULL OR c.is_active = :isActive) AND " +
            "(:parentId IS NULL OR c.parent_id = :parentId)",
            nativeQuery = true)

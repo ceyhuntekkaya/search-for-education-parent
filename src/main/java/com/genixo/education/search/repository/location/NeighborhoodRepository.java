@@ -22,15 +22,15 @@ public interface NeighborhoodRepository extends JpaRepository<Neighborhood, Long
     @Query("SELECT n FROM Neighborhood n WHERE n.id = :id AND n.isActive = true")
     Optional<Neighborhood> findByIdAndIsActiveTrue(@Param("id") Long id);
 
-    @Query("SELECT n FROM Neighborhood n WHERE LOWER(n.slug) = LOWER(:slug) AND n.isActive = true")
+    @Query("SELECT n FROM Neighborhood n WHERE LOWER(n.slug) = LOWER(CAST(:slug AS string)) AND n.isActive = true")
     Optional<Neighborhood> findBySlugAndIsActiveTrue(@Param("slug") String slug);
 
     @Query("SELECT CASE WHEN COUNT(n) > 0 THEN true ELSE false END " +
-            "FROM Neighborhood n WHERE LOWER(n.name) = LOWER(:name) AND n.district.id = :districtId AND n.isActive = true")
+            "FROM Neighborhood n WHERE LOWER(n.name) = LOWER(CAST(:name AS string)) AND n.district.id = :districtId AND n.isActive = true")
     boolean existsByNameIgnoreCaseAndDistrictIdAndIsActiveTrue(@Param("name") String name, @Param("districtId") Long districtId);
 
     @Query("SELECT CASE WHEN COUNT(n) > 0 THEN true ELSE false END " +
-            "FROM Neighborhood n WHERE LOWER(n.name) = LOWER(:name) AND n.district.id = :districtId AND n.id != :id AND n.isActive = true")
+            "FROM Neighborhood n WHERE LOWER(n.name) = LOWER(CAST(:name AS string)) AND n.district.id = :districtId AND n.id != :id AND n.isActive = true")
     boolean existsByNameIgnoreCaseAndDistrictIdAndIdNotAndIsActiveTrue(@Param("name") String name, @Param("districtId") Long districtId, @Param("id") Long id);
 
     @Query("SELECT CASE WHEN COUNT(n) > 0 THEN true ELSE false END FROM Neighborhood n WHERE n.slug = :slug")
@@ -58,8 +58,8 @@ public interface NeighborhoodRepository extends JpaRepository<Neighborhood, Long
     // Complex search query for neighborhoods
     @Query("SELECT n FROM Neighborhood n WHERE n.isActive = true " +
             "AND (:searchTerm IS NULL OR " +
-            "    LOWER(n.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "    LOWER(n.nameEn) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) " +
+            "    LOWER(n.name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "    LOWER(n.nameEn) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%'))) " +
             "AND (:districtId IS NULL OR n.district.id = :districtId) " +
             "AND (:hasSchools IS NULL OR " +
             "    (:hasSchools = true AND n.schoolCount > 0) OR " +
@@ -84,7 +84,7 @@ public interface NeighborhoodRepository extends JpaRepository<Neighborhood, Long
             "CONCAT(n.name, ', ', n.district.name, ', ', n.district.province.name), " +
             "n.latitude, n.longitude, n.schoolCount, '1.0') " +
             "FROM Neighborhood n WHERE n.isActive = true AND " +
-            "LOWER(n.name) LIKE LOWER(CONCAT('%', :query, '%')) " +
+            "LOWER(n.name) LIKE LOWER(CONCAT('%', CAST(:query AS string), '%')) " +
             "ORDER BY n.schoolCount DESC, n.name ASC")
     List<LocationSuggestionDto> findLocationSuggestions(@Param("query") String query, Pageable pageable);
 

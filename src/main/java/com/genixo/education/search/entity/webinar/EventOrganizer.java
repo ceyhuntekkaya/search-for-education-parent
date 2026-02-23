@@ -1,14 +1,12 @@
 package com.genixo.education.search.entity.webinar;
 
 import com.genixo.education.search.entity.BaseEntity;
-import com.genixo.education.search.entity.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,10 +57,6 @@ public class EventOrganizer extends BaseEntity {
 
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by_user_id")
-    private User createdByUser; // Profili oluşturan kullanıcı (admin veya kurum temsilcisi)
 
     @OneToMany(mappedBy = "organizer", cascade = CascadeType.ALL)
     private List<Event> events = new ArrayList<>();

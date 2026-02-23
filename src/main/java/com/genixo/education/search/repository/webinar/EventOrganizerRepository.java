@@ -21,9 +21,9 @@ public interface EventOrganizerRepository extends JpaRepository<EventOrganizer, 
 
     @Query("SELECT e FROM EventOrganizer e WHERE " +
             "(:type IS NULL OR e.type = :type) AND " +
-            "(:searchTerm IS NULL OR LOWER(e.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "LOWER(e.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "LOWER(e.slug) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) AND " +
+            "(:searchTerm IS NULL OR LOWER(e.name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "LOWER(e.description) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "LOWER(e.slug) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%'))) AND " +
             "(:isActive IS NULL OR e.isActive = :isActive)")
     Page<EventOrganizer> search(@Param("type") String type,
                                 @Param("searchTerm") String searchTerm,

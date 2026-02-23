@@ -20,14 +20,14 @@ public interface CustomFeeRepository extends JpaRepository<CustomFee, Long> {
     Optional<CustomFee> findByIdAndIsActiveTrue(@Param("id") Long id);
 
     @Query("SELECT CASE WHEN COUNT(cf) > 0 THEN true ELSE false END " +
-            "FROM CustomFee cf WHERE LOWER(cf.feeName) = LOWER(:feeName) " +
+            "FROM CustomFee cf WHERE LOWER(cf.feeName) = LOWER(CAST(:feeName AS string)) " +
             "AND cf.school.id = :schoolId AND cf.isActive = true")
     boolean existsByFeeNameIgnoreCaseAndSchoolIdAndIsActiveTrue(
             @Param("feeName") String feeName,
             @Param("schoolId") Long schoolId);
 
     @Query("SELECT CASE WHEN COUNT(cf) > 0 THEN true ELSE false END " +
-            "FROM CustomFee cf WHERE LOWER(cf.feeName) = LOWER(:feeName) " +
+            "FROM CustomFee cf WHERE LOWER(cf.feeName) = LOWER(CAST(:feeName AS string)) " +
             "AND cf.school.id = :schoolId AND cf.id != :id AND cf.isActive = true")
     boolean existsByFeeNameIgnoreCaseAndSchoolIdAndIdNotAndIsActiveTrue(
             @Param("feeName") String feeName,

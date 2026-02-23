@@ -24,15 +24,15 @@ public interface ProvinceRepository extends JpaRepository<Province, Long> {
     @Query("SELECT p FROM Province p WHERE p.id = :id AND p.isActive = true")
     Optional<Province> findByIdAndIsActiveTrue(@Param("id") Long id);
 
-    @Query("SELECT p FROM Province p WHERE LOWER(p.slug) = LOWER(:slug) AND p.isActive = true")
+    @Query("SELECT p FROM Province p WHERE LOWER(p.slug) = LOWER(CAST(:slug AS string)) AND p.isActive = true")
     Optional<Province> findBySlugAndIsActiveTrue(@Param("slug") String slug);
 
     @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END " +
-            "FROM Province p WHERE LOWER(p.name) = LOWER(:name) AND p.country.id = :countryId AND p.isActive = true")
+            "FROM Province p WHERE LOWER(p.name) = LOWER(CAST(:name AS string)) AND p.country.id = :countryId AND p.isActive = true")
     boolean existsByNameIgnoreCaseAndCountryIdAndIsActiveTrue(@Param("name") String name, @Param("countryId") Long countryId);
 
     @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END " +
-            "FROM Province p WHERE LOWER(p.name) = LOWER(:name) AND p.country.id = :countryId AND p.id != :id AND p.isActive = true")
+            "FROM Province p WHERE LOWER(p.name) = LOWER(CAST(:name AS string)) AND p.country.id = :countryId AND p.id != :id AND p.isActive = true")
     boolean existsByNameIgnoreCaseAndCountryIdAndIdNotAndIsActiveTrue(@Param("name") String name, @Param("countryId") Long countryId, @Param("id") Long id);
 
     @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM Province p WHERE p.code = :code AND p.isActive = true")
@@ -57,9 +57,9 @@ public interface ProvinceRepository extends JpaRepository<Province, Long> {
     // Complex search query for provinces
     @Query("SELECT p FROM Province p WHERE p.isActive = true " +
             "AND (:searchTerm IS NULL OR " +
-            "    LOWER(p.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "    LOWER(p.nameEn) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "    LOWER(p.region) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) " +
+            "    LOWER(p.name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "    LOWER(p.nameEn) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "    LOWER(p.region) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%'))) " +
             "AND (:countryId IS NULL OR p.country.id = :countryId) " +
             "AND (:hasSchools IS NULL OR " +
             "    (:hasSchools = true AND p.schoolCount > 0) OR " +
