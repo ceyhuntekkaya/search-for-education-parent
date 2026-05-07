@@ -19,7 +19,7 @@ spring:
     dbName: search_edu_app
     #dbUrl: jdbc:postgresql://localhost:5432/ #3
     #dbUrl: jdbc:postgresql://postgres:5432/
-    dbUrl: jdbc:postgresql://localhost:5433/ #3
+    dbUrl: jdbc:postgresql://localhost:5434/ #3
 
     url: ${spring.datasource.dbUrl}${spring.datasource.dbName}
     username: genixo
@@ -78,8 +78,8 @@ logging:
     org.hibernate.orm.jdbc.bind: OFF
 
 storage:
-  base: /app/uploads/
-  #base: /Users/macpro/Desktop/file/
+  #base: /app/uploads/
+  base: /Users/macpro/Desktop/file/
 
 sendgrid:
   api:

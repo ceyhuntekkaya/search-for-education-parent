@@ -6,6 +6,14 @@ tail -20 /var/log/sysmonitor.log
 ssh -p 2222 -L 5433:172.18.0.6:5432 root@185.123.156.110
 
 
+ssh -N -p 2222 -L 5433:172.18.0.6:5432 root@185.123.156.110
+
+
+macpro@MacBookPro ~ % ssh -L 5434:localhost:5432 -p 2223 -N -f root@185.123.156.110
+Enter passphrase for key '/Users/macpro/.ssh/id_ed25519':
+macpro@MacBookPro ~ %
+
+
 
 
 
