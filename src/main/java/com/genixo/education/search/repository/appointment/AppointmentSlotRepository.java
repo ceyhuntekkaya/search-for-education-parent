@@ -53,6 +53,32 @@ public interface AppointmentSlotRepository extends JpaRepository<AppointmentSlot
                                   @Param("endTime") LocalTime endTime,
                                   @Param("staffUserId") Long staffUserId);
 
+    @Query("SELECT CASE WHEN COUNT(as) > 0 THEN true ELSE false END " +
+            "FROM AppointmentSlot as " +
+            "WHERE as.school.id = :schoolId " +
+            "AND as.isActive = true " +
+            "AND ((:staffUserId IS NULL AND as.staffUser IS NULL) OR as.staffUser.id = :staffUserId) " +
+            "AND (" +
+            "  (as.slotDate IS NOT NULL AND as.slotDate >= :startOfDay AND as.slotDate < :endOfDay) " +
+            "  OR (as.isRecurring = true AND as.dayOfWeek = :dayOfWeek " +
+            "      AND (as.validFrom IS NULL OR as.validFrom <= :date) " +
+            "      AND (as.validUntil IS NULL OR as.validUntil >= :date)) " +
+            "  OR (as.isRecurring = false AND as.slotDate IS NULL " +
+            "      AND as.validFrom IS NOT NULL AND as.validUntil IS NOT NULL " +
+            "      AND as.validFrom <= :date AND as.validUntil >= :date)" +
+            ") " +
+            "AND ((as.startTime <= :startTime AND as.endTime > :startTime) OR " +
+            "     (as.startTime < :endTime AND as.endTime >= :endTime) OR " +
+            "     (as.startTime >= :startTime AND as.endTime <= :endTime))")
+    boolean existsOverlappingSlotOnDate(@Param("schoolId") Long schoolId,
+                                        @Param("staffUserId") Long staffUserId,
+                                        @Param("date") LocalDate date,
+                                        @Param("dayOfWeek") DayOfWeek dayOfWeek,
+                                        @Param("startOfDay") LocalDateTime startOfDay,
+                                        @Param("endOfDay") LocalDateTime endOfDay,
+                                        @Param("startTime") LocalTime startTime,
+                                        @Param("endTime") LocalTime endTime);
+
     @Query("SELECT as FROM AppointmentSlot as " +
             "WHERE as.isActive = true " +
             "AND (as.validUntil IS NOT NULL AND as.validUntil < :currentDate)")

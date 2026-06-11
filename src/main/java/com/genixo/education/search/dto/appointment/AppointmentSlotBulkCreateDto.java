@@ -15,7 +15,10 @@ import java.util.List;
 @Builder
 public class AppointmentSlotBulkCreateDto {
     private Long schoolId;
+
+    /** @deprecated use {@link #staffUserIds} */
     private Long staffUserId;
+    private List<Long> staffUserIds;
 
     /**
      * If {@link #selectedStartTimes} is used, durationMinutes must be provided
@@ -24,7 +27,9 @@ public class AppointmentSlotBulkCreateDto {
      */
     private Integer durationMinutes;
 
+    /** @deprecated use {@link #appointmentTypes} */
     private AppointmentType appointmentType;
+    private List<AppointmentType> appointmentTypes;
     private Boolean onlineMeetingAvailable;
 
     private List<LocalDate> selectedDates;

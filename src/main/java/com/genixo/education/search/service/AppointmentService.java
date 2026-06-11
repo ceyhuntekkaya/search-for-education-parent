@@ -131,18 +131,21 @@ public class AppointmentService {
         if (hasStartTimes && (bulkDto.getDurationMinutes() == null || bulkDto.getDurationMinutes() <= 0)) {
             throw new BusinessException("durationMinutes is required when using selectedStartTimes");
         }
-        if (bulkDto.getAppointmentType() == null) {
-            throw new BusinessException("appointmentType is required");
-        }
+        List<AppointmentType> appointmentTypes = resolveBulkAppointmentTypes(bulkDto);
+        List<Long> staffUserIds = resolveBulkStaffUserIds(bulkDto);
 
         School school = schoolRepository.findByIdAndIsActiveTrue(bulkDto.getSchoolId())
                 .orElseThrow(() -> new ResourceNotFoundException("School not found with ID: " + bulkDto.getSchoolId()));
 
-        User staffUser = null;
-        if (bulkDto.getStaffUserId() != null) {
-            staffUser = userRepository.findByIdAndIsActiveTrue(bulkDto.getStaffUserId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Staff user not found with ID: " + bulkDto.getStaffUserId()));
+        Map<Long, User> staffUsersById = new HashMap<>();
+        for (Long staffUserId : staffUserIds) {
+            if (staffUserId == null) {
+                continue;
+            }
+            User staffUser = userRepository.findByIdAndIsActiveTrue(staffUserId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Staff user not found with ID: " + staffUserId));
             validateUserCanAccessSchool(staffUser, bulkDto.getSchoolId());
+            staffUsersById.put(staffUserId, staffUser);
         }
 
         boolean skipExisting = bulkDto.getSkipExisting() != null ? bulkDto.getSkipExisting() : true;
@@ -154,76 +157,90 @@ public class AppointmentService {
 
         int totalRequested = 0;
 
-        for (LocalDate date : bulkDto.getSelectedDates()) {
-            if (date == null) {
-                continue;
-            }
+        List<TimeRange> ranges = hasTimeSlots
+                ? parseTimeRangesFromSlots(bulkDto.getSelectedTimeSlots(), bulkDto.getDurationMinutes())
+                : parseTimeRangesFromStartTimes(bulkDto.getSelectedStartTimes(), bulkDto.getDurationMinutes());
 
-            List<TimeRange> ranges = hasTimeSlots
-                    ? parseTimeRangesFromSlots(bulkDto.getSelectedTimeSlots(), bulkDto.getDurationMinutes())
-                    : parseTimeRangesFromStartTimes(bulkDto.getSelectedStartTimes(), bulkDto.getDurationMinutes());
+        for (Long staffUserId : staffUserIds) {
+            User staffUser = staffUserId != null ? staffUsersById.get(staffUserId) : null;
 
-            for (TimeRange range : ranges) {
-                totalRequested++;
-
-                LocalDateTime slotDate = LocalDateTime.of(date, range.startTime());
-                DayOfWeek dayOfWeek = slotDate.getDayOfWeek();
-
-                boolean overlapping = appointmentSlotRepository.existsOverlappingSlot(
-                        school.getId(), dayOfWeek, range.startTime(), range.endTime(),
-                        staffUser != null ? staffUser.getId() : null
-                );
-
-                String key = date + " " + range.startTime() + "-" + range.endTime();
-
-                if (overlapping) {
-                    if (skipExisting) {
-                        skipped.add(key);
+            for (AppointmentType appointmentType : appointmentTypes) {
+                for (LocalDate date : bulkDto.getSelectedDates()) {
+                    if (date == null) {
                         continue;
                     }
-                    String msg = "Overlapping appointment slot exists: " + key;
-                    if (failFast) {
-                        throw new BusinessException(msg);
-                    }
-                    errors.add(msg);
-                    continue;
-                }
 
-                try {
-                    AppointmentSlot slot = new AppointmentSlot();
-                    slot.setSlotDate(slotDate);
-                    slot.setSchool(school);
-                    slot.setStaffUser(staffUser);
-                    slot.setDayOfWeek(dayOfWeek);
-                    slot.setStartTime(range.startTime());
-                    slot.setEndTime(range.endTime());
-                    slot.setDurationMinutes(range.durationMinutes());
-                    slot.setCapacity(1);
-                    slot.setAppointmentType(bulkDto.getAppointmentType());
-                    slot.setTitle("");
-                    slot.setDescription("");
-                    slot.setLocation("");
-                    slot.setOnlineMeetingAvailable(bulkDto.getOnlineMeetingAvailable() != null ? bulkDto.getOnlineMeetingAvailable() : false);
-                    slot.setPreparationRequired(false);
-                    slot.setPreparationNotes("");
-                    slot.setIsRecurring(false);
-                    slot.setValidFrom(date);
-                    slot.setValidUntil(date);
-                    slot.setExcludedDates(null);
-                    slot.setAdvanceBookingHours(24);
-                    slot.setMaxAdvanceBookingDays(30);
-                    slot.setCancellationHours(4);
-                    slot.setRequiresApproval(true);
-                    slot.setCreatedBy(user.getId());
+                    for (TimeRange range : ranges) {
+                        totalRequested++;
 
-                    slot = appointmentSlotRepository.save(slot);
-                    created.add(converterService.mapToDto(slot));
-                } catch (Exception e) {
-                    String msg = "Failed to create slot " + key + ": " + e.getMessage();
-                    if (failFast) {
-                        throw e;
+                        LocalDateTime slotDate = LocalDateTime.of(date, range.startTime());
+                        DayOfWeek dayOfWeek = slotDate.getDayOfWeek();
+                        LocalDateTime startOfDay = date.atStartOfDay();
+                        LocalDateTime endOfDay = date.plusDays(1).atStartOfDay();
+
+                        boolean overlapping = appointmentSlotRepository.existsOverlappingSlotOnDate(
+                                school.getId(),
+                                staffUserId,
+                                date,
+                                dayOfWeek,
+                                startOfDay,
+                                endOfDay,
+                                range.startTime(),
+                                range.endTime()
+                        );
+
+                        String key = buildBulkSlotKey(staffUserId, appointmentType, date, range);
+
+                        if (overlapping) {
+                            if (skipExisting) {
+                                skipped.add(key);
+                                continue;
+                            }
+                            String msg = "Overlapping appointment slot exists: " + key;
+                            if (failFast) {
+                                throw new BusinessException(msg);
+                            }
+                            errors.add(msg);
+                            continue;
+                        }
+
+                        try {
+                            AppointmentSlot slot = new AppointmentSlot();
+                            slot.setSlotDate(slotDate);
+                            slot.setSchool(school);
+                            slot.setStaffUser(staffUser);
+                            slot.setDayOfWeek(dayOfWeek);
+                            slot.setStartTime(range.startTime());
+                            slot.setEndTime(range.endTime());
+                            slot.setDurationMinutes(range.durationMinutes());
+                            slot.setCapacity(1);
+                            slot.setAppointmentType(appointmentType);
+                            slot.setTitle("");
+                            slot.setDescription("");
+                            slot.setLocation("");
+                            slot.setOnlineMeetingAvailable(bulkDto.getOnlineMeetingAvailable() != null ? bulkDto.getOnlineMeetingAvailable() : false);
+                            slot.setPreparationRequired(false);
+                            slot.setPreparationNotes("");
+                            slot.setIsRecurring(false);
+                            slot.setValidFrom(date);
+                            slot.setValidUntil(date);
+                            slot.setExcludedDates(null);
+                            slot.setAdvanceBookingHours(24);
+                            slot.setMaxAdvanceBookingDays(30);
+                            slot.setCancellationHours(4);
+                            slot.setRequiresApproval(true);
+                            slot.setCreatedBy(user.getId());
+
+                            slot = appointmentSlotRepository.save(slot);
+                            created.add(converterService.mapToDto(slot));
+                        } catch (Exception e) {
+                            String msg = "Failed to create slot " + key + ": " + e.getMessage();
+                            if (failFast) {
+                                throw e;
+                            }
+                            errors.add(msg);
+                        }
                     }
-                    errors.add(msg);
                 }
             }
         }
@@ -1028,6 +1045,33 @@ public class AppointmentService {
         } catch (Exception e) {
             throw new BusinessException("Invalid time: " + value + " (expected HH:mm)");
         }
+    }
+
+    private List<Long> resolveBulkStaffUserIds(AppointmentSlotBulkCreateDto bulkDto) {
+        if (bulkDto.getStaffUserIds() != null && !bulkDto.getStaffUserIds().isEmpty()) {
+            return bulkDto.getStaffUserIds();
+        }
+        if (bulkDto.getStaffUserId() != null) {
+            return List.of(bulkDto.getStaffUserId());
+        }
+        return List.of((Long) null);
+    }
+
+    private List<AppointmentType> resolveBulkAppointmentTypes(AppointmentSlotBulkCreateDto bulkDto) {
+        if (bulkDto.getAppointmentTypes() != null && !bulkDto.getAppointmentTypes().isEmpty()) {
+            return bulkDto.getAppointmentTypes();
+        }
+        if (bulkDto.getAppointmentType() != null) {
+            return List.of(bulkDto.getAppointmentType());
+        }
+        throw new BusinessException("appointmentTypes or appointmentType is required");
+    }
+
+    private String buildBulkSlotKey(Long staffUserId, AppointmentType appointmentType,
+                                    LocalDate date, TimeRange range) {
+        return "staff=" + staffUserId
+                + " type=" + appointmentType
+                + " " + date + " " + range.startTime() + "-" + range.endTime();
     }
 
     private boolean hasAvailableCapacity(AppointmentSlot slot, LocalDate appointmentDate, LocalTime startTime) {
