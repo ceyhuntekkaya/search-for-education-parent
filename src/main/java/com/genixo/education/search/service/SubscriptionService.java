@@ -47,7 +47,6 @@ public class SubscriptionService {
     private final SubscriptionConverterService converterService;
     private final JwtService jwtService;
     private final PaymentGatewayService paymentGatewayService;
-    private final EmailService emailService;
     private final InvoiceService invoiceService;
 
     // ================================ SUBSCRIPTION PLAN OPERATIONS ================================
@@ -136,8 +135,7 @@ public class SubscriptionService {
             createInitialPayment(subscription, createDto.getPaymentMethod());
         }
 
-        // Send welcome email
-        emailService.sendSubscriptionWelcomeEmail(subscription);
+
 
         return converterService.mapToDto(subscription);
     }
@@ -212,7 +210,6 @@ public class SubscriptionService {
         subscriptionRepository.save(subscription);
 
         // Send cancellation email
-        emailService.sendSubscriptionCancellationEmail(subscription);
 
     }
 
@@ -258,7 +255,6 @@ public class SubscriptionService {
         }
 
         // Send plan change email
-        emailService.sendSubscriptionPlanChangeEmail(subscription, proratedAmount);
 
         return converterService.mapToDto(subscription);
     }
@@ -339,7 +335,6 @@ public class SubscriptionService {
 
 
                 // Send payment confirmation
-                emailService.sendPaymentConfirmationEmail(payment);
 
             } else {
                 payment.setPaymentStatus(PaymentStatus.FAILED);
@@ -371,7 +366,6 @@ public class SubscriptionService {
         subscriptionRepository.save(subscription);
 
         // Send payment failed notification
-        emailService.sendPaymentFailedEmail(failedPayment);
 
         // Schedule retry attempts
         schedulePaymentRetry(subscription, 1);
@@ -391,7 +385,6 @@ public class SubscriptionService {
         }
 
         // Notify administrators
-        emailService.sendBillingErrorNotification(subscription, error);
     }
 
     private void handleExpiredSubscription(Subscription subscription) {
@@ -421,7 +414,6 @@ public class SubscriptionService {
                 subscriptionRepository.save(subscription);
 
                 // Send suspension notification
-                emailService.sendSubscriptionSuspensionEmail(subscription);
 
             }
         }
@@ -640,7 +632,6 @@ public class SubscriptionService {
             paymentRepository.save(payment);
 
             // Send confirmation email
-            emailService.sendPaymentConfirmationEmail(payment);
         }
     }
 
@@ -666,7 +657,6 @@ public class SubscriptionService {
         paymentRepository.save(payment);
 
         // Send refund notification
-        emailService.sendRefundNotificationEmail(payment);
     }
 
 
@@ -947,12 +937,6 @@ public class SubscriptionService {
 
         payment = paymentRepository.save(payment);
 
-// Send payment confirmation email
-        if (payment.getPaymentStatus() == PaymentStatus.COMPLETED) {
-            emailService.sendPaymentConfirmationEmail(payment);
-        } else {
-            emailService.sendPaymentFailedEmail(payment);
-        }
 
         return converterService.mapToDto(payment);
     } // ceyhun

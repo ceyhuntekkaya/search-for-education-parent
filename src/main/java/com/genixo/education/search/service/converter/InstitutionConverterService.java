@@ -448,6 +448,7 @@ public class InstitutionConverterService {
                 .addressLine2(entity.getAddressLine2())
                 .district(mapToSummaryDto(entity.getDistrict()))
                 .province(mapToSummaryDto(entity.getProvince()))
+                .neighborhood(mapToSummaryDto(entity.getNeighborhood()))
                 .postalCode(entity.getPostalCode())
                 .country(mapToSummaryDto(entity.getCountry()))
                 .latitude(entity.getLatitude())

@@ -42,7 +42,6 @@ public class RegisterService {
     private final UserRoleRepository userRoleRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserConverterService converterService;
-    private final EmailService emailService;
     private final LocationService locationService;
     private final InstitutionService institutionService;
     private static final SecureRandom secureRandom = new SecureRandom();
@@ -116,7 +115,6 @@ public class RegisterService {
         String code = "1234";
         user.setPhoneVerificationCode(code);
         user.setEmailVerificationToken(code);
-        emailService.sendCode(code, user.getEmail(), user.getFirstName(), user.getLastName());
 
         userRepository.saveAndFlush(user);
 

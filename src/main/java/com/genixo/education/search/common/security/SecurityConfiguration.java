@@ -76,6 +76,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/analytics/**").permitAll()
                         .requestMatchers("/appointments/**").permitAll()
                         .requestMatchers("/campaigns/**").permitAll()
+                        .requestMatchers("/mail/**").permitAll()
                         .requestMatchers("/content/**").permitAll()
                         .requestMatchers("/institutions/**").permitAll()
                         .requestMatchers("/locations/**").permitAll()

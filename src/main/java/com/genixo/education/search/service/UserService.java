@@ -6,7 +6,6 @@ import com.genixo.education.search.common.exception.*;
 import com.genixo.education.search.dto.user.*;
 import com.genixo.education.search.entity.institution.School;
 import com.genixo.education.search.enumaration.AccessType;
-import com.genixo.education.search.enumaration.PermissionCategory;
 import com.genixo.education.search.enumaration.RoleLevel;
 import com.genixo.education.search.enumaration.UserType;
 import com.genixo.education.search.entity.user.*;
@@ -21,7 +20,6 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -99,8 +97,44 @@ public class UserService {
         user.setEmailVerificationToken(generateVerificationToken());
         user.setPhoneVerificationCode(generatePhoneVerificationCode());
 
-        user.setUserRoles(mainUser.getUserRoles());
-        user.setInstitutionAccess(mainUser.getInstitutionAccess());
+        // IMPORTANT: Do not reuse the same child entities across different users.
+        // Create new UserRole/UserInstitutionAccess rows and link them to the new user.
+        if (mainUser.getUserRoles() != null) {
+            Set<UserRole> copiedRoles = new HashSet<>();
+            for (UserRole mainRole : mainUser.getUserRoles()) {
+                UserRole newRole = new UserRole();
+                newRole.setUser(user);
+                newRole.setRole(mainRole.getRole());
+                newRole.setRoleLevel(mainRole.getRoleLevel());
+                newRole.setExpiresAt(mainRole.getExpiresAt());
+                newRole.setSubscription(mainRole.getSubscription());
+                if (mainRole.getDepartments() != null) {
+                    newRole.setDepartments(new HashSet<>(mainRole.getDepartments()));
+                }
+                if (mainRole.getPermissions() != null) {
+                    newRole.setPermissions(new HashSet<>(mainRole.getPermissions()));
+                }
+                if (mainRole.getSchools() != null) {
+                    newRole.setSchools(new HashSet<>(mainRole.getSchools()));
+                }
+                copiedRoles.add(newRole);
+            }
+            user.setUserRoles(copiedRoles);
+        }
+
+        if (mainUser.getInstitutionAccess() != null) {
+            Set<UserInstitutionAccess> copiedAccess = new HashSet<>();
+            for (UserInstitutionAccess mainAccess : mainUser.getInstitutionAccess()) {
+                UserInstitutionAccess newAccess = new UserInstitutionAccess();
+                newAccess.setUser(user);
+                newAccess.setAccessType(mainAccess.getAccessType());
+                newAccess.setEntityId(mainAccess.getEntityId());
+                newAccess.setGrantedAt(LocalDateTime.now());
+                newAccess.setExpiresAt(mainAccess.getExpiresAt());
+                copiedAccess.add(newAccess);
+            }
+            user.setInstitutionAccess(copiedAccess);
+        }
 
 
         // Save user
@@ -765,6 +799,57 @@ user.setProfileImageUrl("");
         UserRole userRole = new UserRole();
         userRole.setUser(savedUser);
         userRole.setRole(Role.INSTRUCTOR);
+        userRole.setRoleLevel(RoleLevel.INDIVIDUAL);
+        UserRole savedUserRole = userRoleRepository.saveAndFlush(userRole);
+
+        Set<UserRole> roles = new HashSet<>();
+        roles.add(savedUserRole);
+        savedUser.setUserRoles(roles);
+        savedUser = userRepository.saveAndFlush(savedUser);
+
+        return converterService.mapToDto(savedUser);
+    }
+
+    /**
+     * Veli kaydı - standart kullanıcı. UserType=PARENT + USER rolü oluşturur.
+     */
+    public UserDto registerParentUser(UserRegistrationDto registrationDto) throws ValidationException {
+        registrationDto.setUserType(UserType.PARENT);
+        validateRegistrationData(registrationDto);
+
+        if (userRepository.existsByEmail(registrationDto.getEmail())) {
+            throw new ValidationException("User with this email already exists");
+        }
+        if (StringUtils.hasText(registrationDto.getPhone()) &&
+                userRepository.existsByPhone(registrationDto.getPhone())) {
+            throw new ValidationException("User with this phone number already exists");
+        }
+
+        User user = new User();
+        user.setEmail(registrationDto.getEmail().toLowerCase().trim());
+        user.setPhone(registrationDto.getPhone());
+        user.setFirstName(registrationDto.getFirstName().trim());
+        user.setLastName(registrationDto.getLastName().trim());
+        user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
+        user.setUserType(UserType.PARENT);
+        user.setIsEmailVerified(false);
+        user.setIsPhoneVerified(false);
+
+        setUserLocation(user, registrationDto.getCountryId(), registrationDto.getProvinceId(),
+                registrationDto.getDistrictId(), registrationDto.getNeighborhoodId());
+
+        user.setAddressLine1(registrationDto.getAddressLine1());
+        user.setAddressLine2(registrationDto.getAddressLine2());
+        user.setPostalCode(registrationDto.getPostalCode());
+
+        user.setEmailVerificationToken(generateVerificationToken());
+        user.setPhoneVerificationCode(generatePhoneVerificationCode());
+
+        User savedUser = userRepository.saveAndFlush(user);
+
+        UserRole userRole = new UserRole();
+        userRole.setUser(savedUser);
+        userRole.setRole(Role.USER);
         userRole.setRoleLevel(RoleLevel.INDIVIDUAL);
         UserRole savedUserRole = userRoleRepository.saveAndFlush(userRole);
 

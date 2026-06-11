@@ -49,9 +49,30 @@ public class AuthController {
     public ResponseEntity<AuthenticationResponse> login(
             @RequestBody AuthenticationRequest request
     ) {
-        AuthenticationResponse response = service.authenticate(request);
-        System.out.println("authenticate");
-        return ResponseEntity.ok(response);
+        try {
+            AuthenticationResponse response = service.authenticate(request);
+            if (response == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                        AuthenticationResponse.builder()
+                                .message("Invalid email/phone or password")
+                                .build()
+                );
+            }
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    AuthenticationResponse.builder()
+                            .message(e.getMessage())
+                            .build()
+            );
+        } catch (Exception e) {
+            logger.error("Login failed", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    AuthenticationResponse.builder()
+                            .message("Login failed")
+                            .build()
+            );
+        }
     }
 
 

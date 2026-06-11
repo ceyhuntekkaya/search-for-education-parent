@@ -55,6 +55,27 @@ public class AppointmentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PostMapping("/slots/bulk")
+    @Operation(summary = "Create appointment slots in bulk", description = "Create multiple appointment slots for a school from selected dates and time ranges")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Appointment slots processed successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid bulk slot data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Access denied"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "School or staff user not found")
+    })
+    public ResponseEntity<ApiResponse<AppointmentSlotBulkCreateResultDto>> createAppointmentSlotsBulk(
+            @Valid @RequestBody AppointmentSlotBulkCreateDto bulkDto,
+            HttpServletRequest request) {
+
+        AppointmentSlotBulkCreateResultDto result = appointmentService.createAppointmentSlotsBulk(bulkDto, request);
+
+        ApiResponse<AppointmentSlotBulkCreateResultDto> response = ApiResponse.success(result, "Appointment slots processed successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
 
 
     @PostMapping("/slots/search/date")

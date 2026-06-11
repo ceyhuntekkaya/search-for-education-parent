@@ -575,6 +575,7 @@ public class InstitutionService {
         long total = schoolRepository.countSchools(
                 searchDto.getSearchTerm(),
                 institutionTypeIdsArray,
+                propertyIdsArray,
                 searchDto.getMinAge(),
                 searchDto.getMaxAge(),
                 searchDto.getMinFee(),

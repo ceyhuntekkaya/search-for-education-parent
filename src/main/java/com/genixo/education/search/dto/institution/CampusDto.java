@@ -2,10 +2,6 @@ package com.genixo.education.search.dto.institution;
 
 
 import com.genixo.education.search.dto.location.*;
-import com.genixo.education.search.entity.institution.Brand;
-import com.genixo.education.search.entity.location.Country;
-import com.genixo.education.search.entity.location.District;
-import com.genixo.education.search.entity.location.Province;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -38,6 +34,7 @@ public class CampusDto {
     private String addressLine2;
     private DistrictSummaryDto district;
     private ProvinceSummaryDto province;
+    private NeighborhoodSummaryDto neighborhood;
     private String postalCode;
     private CountrySummaryDto country;
     private Double latitude;

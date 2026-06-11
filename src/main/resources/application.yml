@@ -18,8 +18,8 @@ spring:
   datasource:
     dbName: search_edu_app
     #dbUrl: jdbc:postgresql://localhost:5432/ #3
-    #dbUrl: jdbc:postgresql://postgres:5432/
-    dbUrl: jdbc:postgresql://localhost:5434/ #3
+    dbUrl: jdbc:postgresql://postgres:5432/
+    #dbUrl: jdbc:postgresql://localhost:5434/ #3
 
     url: ${spring.datasource.dbUrl}${spring.datasource.dbName}
     username: genixo
@@ -55,6 +55,23 @@ spring:
       max-request-size: 100MB     # Maksimum request boyutu
       file-size-threshold: 2KB   # Bellek eşiği
 
+
+  mail:
+    host: email-smtp.us-east-1.amazonaws.com
+    port: 587
+    username: AKIAYFVAOB3C3ARSYYJV
+    password: BCELCA8+d5Y2fKhtfzS1g21/hxPGmu+odbjT2odeq0C2
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+mail:
+  from: noreply@info.genixo.ai
+
 management:
   endpoints:
     web:
@@ -78,8 +95,8 @@ logging:
     org.hibernate.orm.jdbc.bind: OFF
 
 storage:
-  #base: /app/uploads/
-  base: /Users/macpro/Desktop/file/
+  base: /app/uploads/
+  #base: /Users/macpro/Desktop/file/
 
 sendgrid:
   api:
@@ -122,3 +139,9 @@ ollama:
   context:
     max-tokens: 28000  # qwen2.5 için güvenli limit
     history-messages: 20  # Son 20 mesajı tut
+
+
+
+
+
+

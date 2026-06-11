@@ -90,32 +90,19 @@ public interface SchoolRepository extends JpaRepository<School, Long> {
                     LEFT JOIN provinces p ON p.id = c.province_id
                     LEFT JOIN neighborhoods n ON n.id = c.neighborhood_id
                     LEFT JOIN institution_types it ON it.id = s.institution_type_id
-                    LEFT JOIN institution_property_values pv ON pv.school_id = s.id
-                                    
-                                    
-                   LEFT JOIN school_pricing sp ON sp.school_id = s.id
-                                    
-                                    
-                                    
-                                    
+                    LEFT JOIN school_pricing sp ON sp.school_id = s.id
                     WHERE s.is_active = true
-AND (:searchTerm IS NULL OR :searchTerm = '' OR
+                    AND (:searchTerm IS NULL OR :searchTerm = '' OR
                         LOWER(s.name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')) OR
                         LOWER(s.description) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')) OR
                         LOWER(c.name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')) OR
                         LOWER(b.name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')) OR
                         LOWER(it.display_name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')))
                     AND (:institutionTypeIds IS NULL OR it.id = ANY(CAST(:institutionTypeIds AS bigint[])))
-                    AND (:propertyFilters IS NULL OR pv.property_id = ANY(CAST(:propertyFilters AS bigint[])))
                     AND (:minAge IS NULL OR s.min_age IS NULL OR s.min_age >= :minAge)
                     AND (:maxAge IS NULL OR s.max_age IS NULL OR s.max_age <= :maxAge)
-                      
-                      
                     AND (:minFee IS NULL OR sp.annual_tuition IS NULL OR sp.annual_tuition >= :minFee)
                     AND (:maxFee IS NULL OR sp.annual_tuition IS NULL OR sp.annual_tuition <= :maxFee)
-                      
-                      
-                      
                     AND (:curriculumType IS NULL OR :curriculumType = '' OR
                         LOWER(s.curriculum_type) LIKE LOWER(CONCAT('%', CAST(:curriculumType AS TEXT), '%')))
                     AND (:languageOfInstruction IS NULL OR :languageOfInstruction = '' OR
@@ -133,13 +120,13 @@ AND (:searchTerm IS NULL OR :searchTerm = '' OR
                             SELECT 1 FROM campaign_schools cs 
                             WHERE cs.school_id = s.id AND cs.status = 'ACTIVE')))
                     AND (:isSubscribed IS NULL OR c.is_subscribed = :isSubscribed)
-                        AND (:propertyFilters IS NULL OR s.id IN (
-                            SELECT pv2.school_id
-                            FROM institution_property_values pv2
-                            WHERE pv2.property_id = ANY(CAST(:propertyFilters AS bigint[]))
-                            GROUP BY pv2.school_id
-                            HAVING COUNT(DISTINCT pv2.property_id) = array_length(CAST(:propertyFilters AS bigint[]), 1)
-                        ))
+                    AND (:propertyFilters IS NULL OR (
+                        SELECT COUNT(DISTINCT ip2.property_type_id)
+                        FROM institution_property_values pv2
+                        JOIN institution_properties ip2 ON ip2.id = pv2.property_id
+                        WHERE (pv2.school_id = s.id OR pv2.campus_id = c.id)
+                          AND ip2.property_type_id = ANY(CAST(:propertyFilters AS bigint[]))
+                    ) = array_length(CAST(:propertyFilters AS bigint[]), 1))
                 )
                 SELECT id FROM filtered_schools
                 ORDER BY 
@@ -266,7 +253,7 @@ AND (:searchTerm IS NULL OR :searchTerm = '' OR
     LEFT JOIN provinces p ON p.id = c.province_id
     LEFT JOIN neighborhoods n ON n.id = c.neighborhood_id
     LEFT JOIN institution_types it ON it.id = s.institution_type_id
-    LEFT JOIN institution_property_values pv ON pv.school_id = s.id
+    LEFT JOIN school_pricing sp ON sp.school_id = s.id
     WHERE s.is_active = true
     AND (:searchTerm IS NULL OR :searchTerm = '' OR
         LOWER(s.name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')) OR
@@ -275,10 +262,10 @@ AND (:searchTerm IS NULL OR :searchTerm = '' OR
         LOWER(b.name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')) OR
         LOWER(it.display_name) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS TEXT), '%')))
     AND (:institutionTypeIds IS NULL OR it.id = ANY(CAST(:institutionTypeIds AS bigint[])))
-    AND (:minAge IS NULL OR s.min_age IS NULL OR s.min_age <= :minAge)
-    AND (:maxAge IS NULL OR s.max_age IS NULL OR s.max_age >= :maxAge)
-    AND (:minFee IS NULL OR s.monthly_fee IS NULL OR s.monthly_fee >= :minFee)
-    AND (:maxFee IS NULL OR s.monthly_fee IS NULL OR s.monthly_fee <= :maxFee)
+    AND (:minAge IS NULL OR s.min_age IS NULL OR s.min_age >= :minAge)
+    AND (:maxAge IS NULL OR s.max_age IS NULL OR s.max_age <= :maxAge)
+    AND (:minFee IS NULL OR sp.annual_tuition IS NULL OR sp.annual_tuition >= :minFee)
+    AND (:maxFee IS NULL OR sp.annual_tuition IS NULL OR sp.annual_tuition <= :maxFee)
     AND (:curriculumType IS NULL OR :curriculumType = '' OR
         LOWER(s.curriculum_type) LIKE LOWER(CONCAT('%', CAST(:curriculumType AS TEXT), '%')))
     AND (:languageOfInstruction IS NULL OR :languageOfInstruction = '' OR
@@ -296,10 +283,18 @@ AND (:searchTerm IS NULL OR :searchTerm = '' OR
             SELECT 1 FROM campaign_schools cs 
             WHERE cs.school_id = s.id AND cs.status = 'ACTIVE')))
     AND (:isSubscribed IS NULL OR c.is_subscribed = :isSubscribed)
+    AND (:propertyFilters IS NULL OR (
+        SELECT COUNT(DISTINCT ip2.property_type_id)
+        FROM institution_property_values pv2
+        JOIN institution_properties ip2 ON ip2.id = pv2.property_id
+        WHERE (pv2.school_id = s.id OR pv2.campus_id = c.id)
+          AND ip2.property_type_id = ANY(CAST(:propertyFilters AS bigint[]))
+    ) = array_length(CAST(:propertyFilters AS bigint[]), 1))
     """, nativeQuery = true)
     long countSchools(
             @Param("searchTerm") String searchTerm,
             @Param("institutionTypeIds") String institutionTypeIds,
+            @Param("propertyFilters") String propertyFilters,
             @Param("minAge") Integer minAge,
             @Param("maxAge") Integer maxAge,
             @Param("minFee") Double minFee,

@@ -2,7 +2,6 @@ package com.genixo.education.search.api.rest;
 
 import com.genixo.education.search.dto.user.*;
 import com.genixo.education.search.entity.user.User;
-import com.genixo.education.search.enumaration.UserType;
 import com.genixo.education.search.service.UserService;
 import com.genixo.education.search.enumaration.AccessType;
 import com.genixo.education.search.service.auth.JwtService;
@@ -16,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -70,6 +68,30 @@ public class UserController {
         try {
             UserDto user = userService.registerInstructorUser(registrationDto);
             ApiResponse<UserDto> response = ApiResponse.success(user, "Eğitmen kaydı başarılı. Giriş yapabilirsiniz.");
+            response.setPath(request.getRequestURI());
+            response.setTimestamp(LocalDateTime.now());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (com.genixo.education.search.common.exception.ValidationException e) {
+            ApiResponse<UserDto> response = ApiResponse.error(e.getMessage());
+            response.setPath(request.getRequestURI());
+            response.setTimestamp(LocalDateTime.now());
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PostMapping({"/register/parent", "/register/user"})
+    @Operation(summary = "Veli kaydı", description = "USER rolü (standart kullanıcı/veli) ile yeni hesap oluşturur.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Veli kaydı başarılı"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Geçersiz veri veya e-posta zaten kayıtlı"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "422", description = "Validasyon hatası")
+    })
+    public ResponseEntity<ApiResponse<UserDto>> registerParent(
+            @Valid @RequestBody UserRegistrationDto registrationDto,
+            HttpServletRequest request) {
+        try {
+            UserDto user = userService.registerParentUser(registrationDto);
+            ApiResponse<UserDto> response = ApiResponse.success(user, "Veli kaydı başarılı. Lütfen e-posta doğrulamasını tamamlayın.");
             response.setPath(request.getRequestURI());
             response.setTimestamp(LocalDateTime.now());
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -135,7 +157,7 @@ public class UserController {
             ApiResponse<UserDto> response = ApiResponse.error(e.getMessage());
             response.setPath(request.getRequestURI());
             response.setTimestamp(LocalDateTime.now());
-            throw new RuntimeException(e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
 
         }
     }
