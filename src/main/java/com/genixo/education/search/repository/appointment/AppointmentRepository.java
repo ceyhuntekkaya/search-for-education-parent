@@ -319,7 +319,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "a.appointmentDate, a.startTime, a.endTime, a.status, a.appointmentType, " +
             "a.location, a.isOnline, " +
             "COALESCE(CONCAT(a.staffUser.firstName, ' ', a.staffUser.lastName), ''), " +
-            "a.outcome, a.followUpRequired, " +
+            "a.outcome, a.followUpRequired, a.followUpDate, a.followUpTime, " +
+            "a.parentFollowUpOutcome, a.noSaleReason, a.outcomeNotes, " +
             "'', '', '') " + // Display fields - set in service
             "FROM Appointment a " +
             "WHERE a.school.id = :schoolId " +

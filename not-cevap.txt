@@ -1,0 +1,131 @@
+
+1. Bulk slot oluşturma — POST /api/appointments/slots/bulk
+Request (AppointmentSlotBulkCreateDto) — yeni alanlar:
+
+{
+  "schoolId": 38,
+  "staffUserIds": [108, 109],
+  "appointmentTypes": ["PARENT_MEETING", "INFORMATION_MEETING"],
+  "selectedDates": ["2026-06-08"],
+  "selectedTimeSlots": ["09:00-09:30", "09:30-10:00"],
+  "skipExisting": true,
+  "failFast": false
+}
+staffUserIds ve appointmentTypes artık dizi; eski tekil staffUserId / appointmentType hâlâ çalışır.
+Kombinasyon: her personel × her tip × her tarih × her saat.
+Response (AppointmentSlotBulkCreateResultDto) — mutlaka kontrol et:
+
+{
+  "totalRequested": 14,
+  "createdCount": 14,
+  "skippedCount": 0,
+  "errorCount": 0,
+  "skipped": null,
+  "createdSlots": [...]
+}
+success: true tek başına yeterli değil; createdCount / skippedCount / skipped listesine bak.
+
+2. Randevu oluşturma — POST /api/appointments
+studentBirthDate artık opsiyonel 
+
+Alan gönderilmeyebilir, null veya "" olabilir.
+
+3. Veli randevu notları  
+Yeni enum değeri — NoteType:
+
+PARENT_PERSONAL   // Velinin kendine özel notu
+Yeni endpoint'ler:
+
+Method	URL	Body
+POST
+/api/appointments/slots/search/user/{userId}/appointments/{appointmentId}/notes
+{ "note": "..." }
+GET
+/api/appointments/slots/search/user/{userId}/appointments/{appointmentId}/notes
+—
+Güncellenen endpoint — GET /api/appointments/slots/search/user/{userId}
+
+Auth zorunlu; yalnızca ilgili veli (veya admin) erişebilir.
+İptal edilmiş randevular listeden çıkar.
+Her slot içinde appointment.appointmentNotes → velinin PARENT_PERSONAL notları döner.
+Okul personeli bu notları görmez.
+4. İptal sonrası slot görünümü  
+Etkilenen endpoint'ler:
+
+POST /api/appointments/slots/search/date
+GET /api/appointments/slots/search/user/{userId}
+GET /api/appointments/schools/{schoolId}/slots
+Davranış değişikliği:
+
+İptal edilmiş randevu artık appointment: null döner.
+isAvailable: true olur (kapasite boşaldıysa).
+CANCELLED, REJECTED, RESCHEDULED status'lu randevular slot'a bağlanmaz.
+5. Veli takip sonucu — POST /api/appointments/bulk (madde 7)
+Yeni enum — ParentFollowUpOutcome:
+
+ENROLLED              // Kayıt oldu
+TO_FOLLOW_UP          // Takip edilecek
+APPOINTMENT_POSTPONED // Randevu erteleme
+WAITING_FOR_INFO      // Bilgi bekliyor
+WONT_FOLLOW_UP        // Takip edilmeyecek
+DID_NOT_ATTEND        // Görüşmeye gelmedi
+BulkAppointmentOperationDto — yeni alanlar:
+
+parentFollowUpOutcome?: ParentFollowUpOutcome
+followUpRequired?: boolean
+followUpDate?: string        // "2026-06-15"
+followUpTime?: string        // "14:30"
+outcomeNotes?: string
+noSaleReason?: string
+// mevcut alanlar: operation, appointmentIds, newStatus, customMessage, notifyParticipants...
+Zorunlu alan kuralları (frontend validasyonu):
+
+Sonuç	Zorunlu alanlar	newStatus
+ENROLLED
+—
+COMPLETED (varsayılan)
+TO_FOLLOW_UP
+followUpDate, followUpTime, outcomeNotes, noSaleReason
+COMPLETED
+APPOINTMENT_POSTPONED
+followUpDate, followUpTime, outcomeNotes
+COMPLETED
+WAITING_FOR_INFO
+followUpDate, followUpTime, outcomeNotes
+COMPLETED
+WONT_FOLLOW_UP
+noSaleReason
+COMPLETED
+DID_NOT_ATTEND
+followUpDate, followUpTime, outcomeNotes
+NO_SHOW (zorunlu)
+parentFollowUpOutcome yalnızca operation: "UPDATE_STATUS" ile kullanılır.
+Response DTO'larda yeni alanlar (AppointmentDto, AppointmentSummaryDto):
+
+followUpTime
+parentFollowUpOutcome
+noSaleReason
+outcomeNotes        // summary'de de var
+Örnek — Takip edilecek:
+
+{
+  "operation": "UPDATE_STATUS",
+  "appointmentIds": [27],
+  "newStatus": "COMPLETED",
+  "parentFollowUpOutcome": "TO_FOLLOW_UP",
+  "followUpDate": "2026-06-15",
+  "followUpTime": "14:30",
+  "outcomeNotes": "Veli tekrar aranacak",
+  "noSaleReason": "Fiyat Pahalı"
+}
+6. Okul araması — madde 5 (backend değişikliği YOK)
+POST /api/institutions/schools/search endpoint'inde kod değişikliği yapılmadı.
+
+Kontrol edilmesi gereken filtreler:
+
+isSubscribed: true → kampüs abone değilse okul elenir
+provinceId / districtId / neighborhoodId → kampüs konumu eksikse elenir
+institutionTypeIds → tip uyuşmazlığı
+propertyFilters → tüm property'ler yoksa elenir
+searchTerm → isim eşleşmesi gerekir
+DB kontrolü (backend/ops):

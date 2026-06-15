@@ -6,6 +6,7 @@ import com.genixo.education.search.enumaration.AppointmentOutcome;
 import com.genixo.education.search.enumaration.AppointmentStatus;
 import com.genixo.education.search.enumaration.AppointmentType;
 import com.genixo.education.search.enumaration.CancelledByType;
+import com.genixo.education.search.enumaration.ParentFollowUpOutcome;
 import com.genixo.education.search.entity.institution.School;
 import com.genixo.education.search.entity.user.User;
 import jakarta.persistence.*;
@@ -142,6 +143,16 @@ public class Appointment extends BaseEntity {
 
     @Column(name = "follow_up_date")
     private LocalDate followUpDate;
+
+    @Column(name = "follow_up_time")
+    private LocalTime followUpTime;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "parent_follow_up_outcome")
+    private ParentFollowUpOutcome parentFollowUpOutcome;
+
+    @Column(name = "no_sale_reason")
+    private String noSaleReason;
 
     // Cancellation
     @Column(name = "canceled_at")

@@ -12,5 +12,6 @@ public enum NoteType {
     CANCELLATION,       // İptal
     REASON_FOR_NEGATIVITY,
     REMINDER,           // Hatırlatma
-    INTERNAL            // Dahili not
+    INTERNAL,           // Dahili not
+    PARENT_PERSONAL     // Velinin kendine özel notu
 }

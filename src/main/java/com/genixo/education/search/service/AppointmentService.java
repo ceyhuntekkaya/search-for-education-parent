@@ -11,8 +11,11 @@ import com.genixo.education.search.enumaration.*;
 import com.genixo.education.search.repository.appointment.*;
 import com.genixo.education.search.repository.insitution.SchoolRepository;
 import com.genixo.education.search.repository.user.UserRepository;
+import com.genixo.education.search.service.appointment.ParentFollowUpOutcomeApplier;
+import com.genixo.education.search.service.appointment.ParentFollowUpOutcomeValidator;
 import com.genixo.education.search.service.auth.JwtService;
 import com.genixo.education.search.service.converter.AppointmentConverterService;
+import com.genixo.education.search.util.ConversionUtils;
 import jakarta.validation.Valid;
 import lombok.Builder;
 import lombok.Data;
@@ -409,6 +412,7 @@ public class AppointmentService {
         if (updateDto.getIsOnline() != null) appointment.setIsOnline(updateDto.getIsOnline());
         if (updateDto.getStudentName() != null) appointment.setStudentName(updateDto.getStudentName());
         if (updateDto.getStudentAge() != null) appointment.setStudentAge(updateDto.getStudentAge());
+        if (updateDto.getStudentBirthDate() != null) appointment.setStudentBirthDate(updateDto.getStudentBirthDate());
         if (updateDto.getStudentGender() != null) appointment.setStudentGender(updateDto.getStudentGender());
         if (updateDto.getCurrentSchool() != null) appointment.setCurrentSchool(updateDto.getCurrentSchool());
         if (updateDto.getGradeInterested() != null) appointment.setGradeInterested(updateDto.getGradeInterested());
@@ -595,14 +599,56 @@ public class AppointmentService {
 
         List<AppointmentNote> notes = appointmentNoteRepository.findByAppointmentIdAndIsActiveTrueOrderByNoteDateDesc(appointmentId);
 
-        // Filter private notes if user doesn't have permission
-        if (!canViewPrivateNotes(user, appointment.getSchool().getId())) {
-            notes = notes.stream()
-                    .filter(note -> !note.getIsPrivate())
-                    .collect(Collectors.toList());
+        return notes.stream()
+                .filter(note -> isNoteVisibleToUser(note, user, appointment))
+                .map(converterService::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    @CacheEvict(value = "appointments", allEntries = true)
+    public AppointmentNoteDto addParentAppointmentNote(Long parentUserId, Long appointmentId,
+                                                       ParentAppointmentNoteCreateDto createDto,
+                                                       HttpServletRequest request) {
+        User user = jwtService.getUser(request);
+        validateUserCanAccessParentData(user, parentUserId);
+
+        Appointment appointment = appointmentRepository.findByIdAndIsActiveTrue(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with ID: " + appointmentId));
+
+        if (appointment.getParentUser() == null || !parentUserId.equals(appointment.getParentUser().getId())) {
+            throw new BusinessException("Appointment does not belong to the specified parent user");
         }
 
-        return notes.stream()
+        AppointmentNote note = new AppointmentNote();
+        note.setAppointment(appointment);
+        note.setAuthorUser(user);
+        note.setNote(createDto.getNote());
+        note.setNoteType(NoteType.PARENT_PERSONAL);
+        note.setIsPrivate(true);
+        note.setIsImportant(false);
+        note.setNoteDate(LocalDateTime.now());
+        note.setCreatedBy(user.getId());
+
+        note = appointmentNoteRepository.save(note);
+        return converterService.mapToDto(note);
+    }
+
+    public List<AppointmentNoteDto> getParentAppointmentNotes(Long parentUserId, Long appointmentId,
+                                                            HttpServletRequest request) {
+        User user = jwtService.getUser(request);
+        validateUserCanAccessParentData(user, parentUserId);
+
+        Appointment appointment = appointmentRepository.findByIdAndIsActiveTrue(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with ID: " + appointmentId));
+
+        if (appointment.getParentUser() == null || !parentUserId.equals(appointment.getParentUser().getId())) {
+            throw new BusinessException("Appointment does not belong to the specified parent user");
+        }
+
+        return appointmentNoteRepository.findByAppointmentIdAndAuthorUserIdAndNoteType(
+                        appointmentId, parentUserId, NoteType.PARENT_PERSONAL)
+                .stream()
                 .map(converterService::mapToDto)
                 .collect(Collectors.toList());
     }
@@ -669,6 +715,13 @@ public class AppointmentService {
     public BulkAppointmentResultDto bulkUpdateAppointments(BulkAppointmentOperationDto bulkDto, HttpServletRequest request) {
 
         User user = jwtService.getUser(request);
+
+        if (bulkDto.getAppointmentIds() == null || bulkDto.getAppointmentIds().isEmpty()) {
+            throw new BusinessException("appointmentIds is required");
+        }
+
+        ParentFollowUpOutcomeValidator.validateBulkRequest(bulkDto);
+
         String operationId = UUID.randomUUID().toString();
 
         BulkAppointmentResultDto result = BulkAppointmentResultDto.builder()
@@ -936,6 +989,35 @@ public class AppointmentService {
 
     private boolean canViewPrivateNotes(User user, Long schoolId) {
         return hasSystemRole(user) || hasManageAccessToSchool(user, schoolId);
+    }
+
+    private void validateUserCanAccessParentData(User user, Long parentUserId) {
+        if (hasSystemRole(user) || user.getId().equals(parentUserId)) {
+            return;
+        }
+        throw new BusinessException("User does not have permission to access this parent's appointment data");
+    }
+
+    private boolean isActiveBookingStatus(AppointmentStatus status) {
+        if (status == null) {
+            return false;
+        }
+        return status != AppointmentStatus.CANCELLED
+                && status != AppointmentStatus.REJECTED
+                && status != AppointmentStatus.RESCHEDULED;
+    }
+
+    private boolean isNoteVisibleToUser(AppointmentNote note, User user, Appointment appointment) {
+        if (note.getNoteType() == NoteType.PARENT_PERSONAL) {
+            return note.getAuthorUser() != null && note.getAuthorUser().getId().equals(user.getId());
+        }
+        if (note.getNoteType() == NoteType.INTERNAL) {
+            return canViewPrivateNotes(user, appointment.getSchool().getId());
+        }
+        if (Boolean.TRUE.equals(note.getIsPrivate())) {
+            return canViewPrivateNotes(user, appointment.getSchool().getId());
+        }
+        return true;
     }
 
     private List<Long> getUserAccessibleSchoolIds(User user) {
@@ -1221,6 +1303,11 @@ public class AppointmentService {
                 break;
 
             case "UPDATE_STATUS":
+                if (bulkDto.getParentFollowUpOutcome() != null) {
+                    ParentFollowUpOutcomeApplier.apply(appointment, bulkDto, userId);
+                    appointmentRepository.save(appointment);
+                    return true;
+                }
                 if (bulkDto.getNewStatus() != null) {
                     updateAppointmentStatus(appointment, bulkDto.getNewStatus(), userId);
                     appointment.setUpdatedBy(userId);
@@ -1948,13 +2035,42 @@ public class AppointmentService {
         return converterService.mapSlotToDto(slots);
     }
 
-    public List<AppointmentSlotDto> searchSlotsWithUser(Long userId) {
+    public List<AppointmentSlotDto> searchSlotsWithUser(Long userId, HttpServletRequest request) {
+        User user = jwtService.getUser(request);
+        validateUserCanAccessParentData(user, userId);
+
         List<AppointmentSlot> slots = appointmentSlotRepository.findByParentUserId(userId);
-        return converterService.mapSlotToDto(slots);
+        return mapParentSlotsWithNotes(slots, userId);
     }
-    public List<AppointmentSlotDto> searchSlotsWithUser(Long userId, Long schoolId) {
+
+    public List<AppointmentSlotDto> searchSlotsWithUser(Long userId, Long schoolId, HttpServletRequest request) {
+        User user = jwtService.getUser(request);
+        validateUserCanAccessParentData(user, userId);
+
         List<AppointmentSlot> slots = appointmentSlotRepository.findByParentUserIdAndSchoolId(userId, schoolId);
-        return converterService.mapSlotToDto(slots);
+        return mapParentSlotsWithNotes(slots, userId);
+    }
+
+    private List<AppointmentSlotDto> mapParentSlotsWithNotes(List<AppointmentSlot> slots, Long parentUserId) {
+        List<Long> appointmentIds = slots.stream()
+                .flatMap(slot -> slot.getAppointments() != null ? slot.getAppointments().stream() : java.util.stream.Stream.empty())
+                .filter(appointment -> appointment.getParentUser() != null
+                        && parentUserId.equals(appointment.getParentUser().getId()))
+                .filter(appointment -> ConversionUtils.defaultIfNull(appointment.getIsActive(), true))
+                .filter(appointment -> isActiveBookingStatus(appointment.getStatus()))
+                .map(Appointment::getId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        Map<Long, List<AppointmentNote>> notesByAppointmentId = new HashMap<>();
+        if (!appointmentIds.isEmpty()) {
+            List<AppointmentNote> parentNotes = appointmentNoteRepository.findByAppointmentIdsAndAuthorUserIdAndNoteType(
+                    appointmentIds, parentUserId, NoteType.PARENT_PERSONAL);
+            notesByAppointmentId = parentNotes.stream()
+                    .collect(Collectors.groupingBy(note -> note.getAppointment().getId()));
+        }
+
+        return converterService.mapSlotToDtoForParent(slots, parentUserId, notesByAppointmentId);
     }
 
     @Transactional

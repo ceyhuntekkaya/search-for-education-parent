@@ -3,6 +3,7 @@ package com.genixo.education.search.service.converter;
 
 import com.genixo.education.search.dto.appointment.*;
 import com.genixo.education.search.entity.appointment.*;
+import com.genixo.education.search.enumaration.AppointmentStatus;
 import com.genixo.education.search.util.ConversionUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,13 +31,9 @@ public class AppointmentConverterService {
             return null;
         }
         AppointmentDto appointmentDto = null;
-        if(entity.getAppointments() != null) {
-            if(!entity.getAppointments().isEmpty()) {
-                Appointment appointment = entity.getAppointments().stream().findFirst().orElse(null);
-                if(appointment != null) {
-                    appointmentDto = mapToDto(appointment);
-                }
-            }
+        Appointment activeAppointment = findActiveAppointmentForSlot(entity);
+        if (activeAppointment != null) {
+            appointmentDto = mapToDto(activeAppointment);
         }
 
 
@@ -123,6 +120,110 @@ public class AppointmentConverterService {
                 .collect(Collectors.toList());
     }
 
+    public List<AppointmentSlotDto> mapSlotToDtoForParent(List<AppointmentSlot> entities, Long parentUserId,
+                                                          Map<Long, List<AppointmentNote>> notesByAppointmentId) {
+        if (CollectionUtils.isEmpty(entities)) {
+            return new ArrayList<>();
+        }
+        return entities.stream()
+                .map(slot -> mapSlotToDtoForParent(slot, parentUserId, notesByAppointmentId))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    public AppointmentSlotDto mapSlotToDtoForParent(AppointmentSlot entity, Long parentUserId,
+                                                    Map<Long, List<AppointmentNote>> notesByAppointmentId) {
+        if (entity == null) {
+            return null;
+        }
+
+        Appointment appointment = findParentAppointment(entity, parentUserId);
+        AppointmentDto appointmentDto = null;
+        if (appointment != null) {
+            List<AppointmentNote> parentNotes = notesByAppointmentId.getOrDefault(appointment.getId(), List.of());
+            appointmentDto = mapToDtoWithNotes(appointment, parentNotes);
+        }
+
+        return AppointmentSlotDto.builder()
+                .id(entity.getId())
+                .schoolId(entity.getSchool() != null ? entity.getSchool().getId() : null)
+                .schoolName(entity.getSchool() != null ? entity.getSchool().getName() : null)
+                .staffUserId(entity.getStaffUser() != null ? entity.getStaffUser().getId() : null)
+                .appointment(appointmentDto)
+                .slotDate(entity.getSlotDate())
+                .staffUserName(entity.getStaffUser() != null ?
+                        (entity.getStaffUser().getFirstName() + " " + entity.getStaffUser().getLastName()).trim() : null)
+                .durationMinutes(entity.getDurationMinutes())
+                .appointmentType(entity.getAppointmentType())
+                .onlineMeetingAvailable(ConversionUtils.defaultIfNull(entity.getOnlineMeetingAvailable(), false))
+                .advanceBookingHours(ConversionUtils.defaultIfNull(entity.getAdvanceBookingHours(), 24))
+                .maxAdvanceBookingDays(ConversionUtils.defaultIfNull(entity.getMaxAdvanceBookingDays(), 30))
+                .cancellationHours(ConversionUtils.defaultIfNull(entity.getCancellationHours(), 4))
+                .requiresApproval(ConversionUtils.defaultIfNull(entity.getRequiresApproval(), false))
+                .dayOfWeekName(entity.getDayOfWeek() != null ?
+                        ConversionUtils.getDisplayName(entity.getDayOfWeek()) : null)
+                .isAvailable(calculateSlotAvailability(entity))
+                .isActive(ConversionUtils.defaultIfNull(entity.getIsActive(), true))
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
+                .build();
+    }
+
+    private Appointment findParentAppointment(AppointmentSlot slot, Long parentUserId) {
+        if (slot.getAppointments() == null || parentUserId == null) {
+            return null;
+        }
+        return slot.getAppointments().stream()
+                .filter(appointment -> appointment.getParentUser() != null
+                        && parentUserId.equals(appointment.getParentUser().getId()))
+                .filter(this::isActiveAppointmentEntity)
+                .filter(appointment -> isActiveBookingStatus(appointment.getStatus()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private Appointment findActiveAppointmentForSlot(AppointmentSlot slot) {
+        if (slot == null || CollectionUtils.isEmpty(slot.getAppointments())) {
+            return null;
+        }
+        return slot.getAppointments().stream()
+                .filter(this::isActiveAppointmentEntity)
+                .filter(appointment -> isActiveBookingStatus(appointment.getStatus()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private boolean isActiveAppointmentEntity(Appointment appointment) {
+        return appointment != null && ConversionUtils.defaultIfNull(appointment.getIsActive(), true);
+    }
+
+    private boolean isActiveBookingStatus(AppointmentStatus status) {
+        if (status == null) {
+            return false;
+        }
+        return status != AppointmentStatus.CANCELLED
+                && status != AppointmentStatus.REJECTED
+                && status != AppointmentStatus.RESCHEDULED;
+    }
+
+    private AppointmentDto mapToDtoWithNotes(Appointment entity, List<AppointmentNote> notes) {
+        AppointmentDto dto = mapToDto(entity);
+        if (dto == null) {
+            return null;
+        }
+        if (CollectionUtils.isEmpty(notes)) {
+            dto.setAppointmentNotes(new ArrayList<>());
+            return dto;
+        }
+        dto.setAppointmentNotes(notes.stream()
+                .map(this::mapToDto)
+                .filter(Objects::nonNull)
+                .sorted(Comparator.comparing(AppointmentNoteDto::getNoteDate,
+                        Comparator.nullsLast(Comparator.reverseOrder())))
+                .collect(Collectors.toList()));
+        return dto;
+    }
+
     // ================== APPOINTMENT CONVERSIONS ==================
 
     public AppointmentDto mapToDto(Appointment entity) {
@@ -186,6 +287,9 @@ public class AppointmentConverterService {
                 .reminderSentAt(entity.getReminderSentAt())
                 .followUpRequired(ConversionUtils.defaultIfNull(entity.getFollowUpRequired(), false))
                 .followUpDate(entity.getFollowUpDate())
+                .followUpTime(entity.getFollowUpTime())
+                .parentFollowUpOutcome(entity.getParentFollowUpOutcome())
+                .noSaleReason(entity.getNoSaleReason())
 
                 // Cancellation
                 .canceledAt(entity.getCanceledAt())
@@ -250,6 +354,11 @@ public class AppointmentConverterService {
                         (entity.getStaffUser().getFirstName() + " " + entity.getStaffUser().getLastName()).trim() : null)
                 .outcome(entity.getOutcome())
                 .followUpRequired(ConversionUtils.defaultIfNull(entity.getFollowUpRequired(), false))
+                .followUpDate(entity.getFollowUpDate())
+                .followUpTime(entity.getFollowUpTime())
+                .parentFollowUpOutcome(entity.getParentFollowUpOutcome())
+                .noSaleReason(entity.getNoSaleReason())
+                .outcomeNotes(entity.getOutcomeNotes())
                 .statusDisplayName(ConversionUtils.getDisplayName(entity.getStatus()))
                 .formattedDateTime(ConversionUtils.formatDateTime(
                         LocalDateTime.of(entity.getAppointmentDate(), entity.getStartTime())))
@@ -553,7 +662,8 @@ public class AppointmentConverterService {
             return false;
         }
 
-        return true;
+        int capacity = ConversionUtils.defaultIfNull(slot.getCapacity(), 1);
+        return calculateBookedCount(slot) < capacity;
     }
 
     private Integer calculateAvailableCapacity(AppointmentSlot slot) {
@@ -570,10 +680,9 @@ public class AppointmentConverterService {
             return 0;
         }
 
-        // Count active appointments (not cancelled or completed)
         return (int) slot.getAppointments().stream()
-                .filter(appointment ->
-                        appointment.getStatus() != com.genixo.education.search.enumaration.AppointmentStatus.CANCELLED)
+                .filter(this::isActiveAppointmentEntity)
+                .filter(appointment -> isActiveBookingStatus(appointment.getStatus()))
                 .count();
     }
 

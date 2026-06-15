@@ -1,6 +1,7 @@
 package com.genixo.education.search.dto.appointment;
 
 import com.genixo.education.search.enumaration.AppointmentStatus;
+import com.genixo.education.search.enumaration.ParentFollowUpOutcome;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,4 +26,12 @@ public class BulkAppointmentOperationDto {
     private LocalTime newStartTime;
     private LocalTime newEndTime;
     private String customMessage;
+
+    /** Veli takip sonucu — yalnızca operation=UPDATE_STATUS ile kullanılır */
+    private ParentFollowUpOutcome parentFollowUpOutcome;
+    private Boolean followUpRequired;
+    private LocalDate followUpDate;
+    private LocalTime followUpTime;
+    private String outcomeNotes;
+    private String noSaleReason;
 }

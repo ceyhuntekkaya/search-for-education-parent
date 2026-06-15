@@ -1,8 +1,9 @@
 package com.genixo.education.search.dto.appointment;
 
-import com.genixo.education.search.enumaration.AppointmentOutcome;
-import com.genixo.education.search.enumaration.AppointmentStatus;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.genixo.education.search.common.util.LenientLocalDateDeserializer;
 import com.genixo.education.search.enumaration.AppointmentType;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,7 +25,11 @@ public class AppointmentUpdateDto {
 
     private String studentName;
     private Integer studentAge;
+
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Optional student birth date")
+    @JsonDeserialize(using = LenientLocalDateDeserializer.class)
     private LocalDate studentBirthDate;
+
     private String studentGender;
     private String currentSchool;
     private String gradeInterested;

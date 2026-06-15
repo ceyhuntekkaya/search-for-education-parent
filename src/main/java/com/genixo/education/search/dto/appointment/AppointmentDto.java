@@ -4,6 +4,7 @@ import com.genixo.education.search.enumaration.AppointmentOutcome;
 import com.genixo.education.search.enumaration.AppointmentStatus;
 import com.genixo.education.search.enumaration.AppointmentType;
 import com.genixo.education.search.enumaration.CancelledByType;
+import com.genixo.education.search.enumaration.ParentFollowUpOutcome;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -74,6 +75,9 @@ public class AppointmentDto {
     private LocalDateTime reminderSentAt;
     private Boolean followUpRequired;
     private LocalDate followUpDate;
+    private LocalTime followUpTime;
+    private ParentFollowUpOutcome parentFollowUpOutcome;
+    private String noSaleReason;
 
     // Cancellation
     private LocalDateTime canceledAt;

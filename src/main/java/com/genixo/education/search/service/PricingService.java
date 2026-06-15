@@ -224,7 +224,7 @@ public class PricingService {
 
         validateUserCanManageSchoolPricing(user, existingPricing.getSchool().getId());
         createPriceHistoryIfNeeded(existingPricing, updateDto, user);
-        validatePricingUpdateData(updateDto);
+        validatePricingUpdateData(updateDto, existingPricing);
         updatePricingFields(existingPricing, updateDto, user);
         calculateTotals(existingPricing);
         if (hasMajorPriceChanges(existingPricing, updateDto)) {
@@ -578,9 +578,8 @@ public class PricingService {
             }
         }
 
-        // Validate fees are not negative
-        validatePositiveAmount(createDto.getAnnualTuition(), "Annual tuition", errors);
-        validatePositiveAmount(createDto.getMonthlyTuition(), "Monthly tuition", errors);
+        validateTuitionTypes(createDto.getAnnualTuition(), createDto.getMonthlyTuition(),
+                createDto.getSemesterTuition(), errors);
         validatePositiveAmount(createDto.getRegistrationFee(), "Registration fee", errors);
 
         // Validate payment terms
@@ -634,19 +633,61 @@ public class PricingService {
         }
     }
 
-    private void validatePricingUpdateData(SchoolPricingUpdateDto updateDto) {
+    private void validatePricingUpdateData(SchoolPricingUpdateDto updateDto, SchoolPricing existingPricing) {
         List<String> errors = new java.util.ArrayList<>();
 
-        // Similar validations as create but for update
         if (updateDto.getValidFrom() != null && updateDto.getValidUntil() != null) {
             if (updateDto.getValidFrom().isAfter(updateDto.getValidUntil())) {
                 errors.add("Valid from date must be before valid until date");
             }
         }
 
+        if (isAnyTuitionFieldProvided(updateDto)) {
+            BigDecimal annual = resolveTuitionValue(updateDto.getAnnualTuition(), existingPricing.getAnnualTuition());
+            BigDecimal monthly = resolveTuitionValue(updateDto.getMonthlyTuition(), existingPricing.getMonthlyTuition());
+            BigDecimal semester = resolveTuitionValue(updateDto.getSemesterTuition(), existingPricing.getSemesterTuition());
+            validateTuitionTypes(annual, monthly, semester, errors);
+        }
+
         if (!errors.isEmpty()) {
             throw BusinessException.validationFailed(errors);
         }
+    }
+
+    private void validateTuitionTypes(BigDecimal annual, BigDecimal monthly, BigDecimal semester,
+                                      List<String> errors) {
+        validatePositiveAmount(annual, "Annual tuition", errors);
+        validatePositiveAmount(monthly, "Monthly tuition", errors);
+        validatePositiveAmount(semester, "Semester tuition", errors);
+
+        int tuitionTypeCount = countTuitionTypesWithValue(annual, monthly, semester);
+        if (tuitionTypeCount == 0) {
+            errors.add("Exactly one tuition type (annual, monthly, or semester) must be provided");
+        } else if (tuitionTypeCount > 1) {
+            errors.add("Only one tuition type (annual, monthly, or semester) can be set at a time");
+        }
+    }
+
+    private boolean isAnyTuitionFieldProvided(SchoolPricingUpdateDto updateDto) {
+        return updateDto.getAnnualTuition() != null
+                || updateDto.getMonthlyTuition() != null
+                || updateDto.getSemesterTuition() != null;
+    }
+
+    private BigDecimal resolveTuitionValue(BigDecimal updatedValue, BigDecimal existingValue) {
+        return updatedValue != null ? updatedValue : existingValue;
+    }
+
+    private int countTuitionTypesWithValue(BigDecimal annual, BigDecimal monthly, BigDecimal semester) {
+        int count = 0;
+        if (hasTuitionValue(annual)) count++;
+        if (hasTuitionValue(monthly)) count++;
+        if (hasTuitionValue(semester)) count++;
+        return count;
+    }
+
+    private boolean hasTuitionValue(BigDecimal amount) {
+        return amount != null && amount.compareTo(BigDecimal.ZERO) > 0;
     }
 
     private void validatePositiveAmount(BigDecimal amount, String fieldName, List<String> errors) {
@@ -695,6 +736,7 @@ public class PricingService {
         pricing.setAnnualTuition(createDto.getAnnualTuition());
         pricing.setMonthlyTuition(createDto.getMonthlyTuition());
         pricing.setSemesterTuition(createDto.getSemesterTuition());
+        normalizeTuitionFields(pricing);
         pricing.setBookFee(createDto.getBookFee() != null ? createDto.getBookFee() : BigDecimal.ZERO);
         pricing.setUniformFee(createDto.getUniformFee() != null ? createDto.getUniformFee() : BigDecimal.ZERO);
         pricing.setActivityFee(createDto.getActivityFee() != null ? createDto.getActivityFee() : BigDecimal.ZERO);
@@ -719,30 +761,55 @@ public class PricingService {
         pricing.setPrivateLessonFee(createDto.getPrivateLessonFee() != null ? createDto.getPrivateLessonFee() : BigDecimal.ZERO);
     }
 
+    private void normalizeTuitionFields(SchoolPricing pricing) {
+        if (hasTuitionValue(pricing.getAnnualTuition())) {
+            pricing.setMonthlyTuition(null);
+            pricing.setSemesterTuition(null);
+        } else if (hasTuitionValue(pricing.getMonthlyTuition())) {
+            pricing.setAnnualTuition(null);
+            pricing.setSemesterTuition(null);
+        } else if (hasTuitionValue(pricing.getSemesterTuition())) {
+            pricing.setAnnualTuition(null);
+            pricing.setMonthlyTuition(null);
+        }
+    }
+
+    private BigDecimal nullSafeAmount(BigDecimal amount) {
+        return amount != null ? amount : BigDecimal.ZERO;
+    }
+
     private void calculateTotals(SchoolPricing pricing) {
         // Calculate one-time fees
         BigDecimal oneTimeFees = BigDecimal.ZERO
-                .add(pricing.getRegistrationFee())
-                .add(pricing.getApplicationFee())
-                .add(pricing.getEnrollmentFee())
-                .add(pricing.getBookFee())
-                .add(pricing.getUniformFee());
+                .add(nullSafeAmount(pricing.getRegistrationFee()))
+                .add(nullSafeAmount(pricing.getApplicationFee()))
+                .add(nullSafeAmount(pricing.getEnrollmentFee()))
+                .add(nullSafeAmount(pricing.getBookFee()))
+                .add(nullSafeAmount(pricing.getUniformFee()));
 
         pricing.setTotalOneTimeFees(oneTimeFees);
 
         // Calculate monthly recurring fees
         BigDecimal monthlyRecurring = BigDecimal.ZERO
-                .add(pricing.getMonthlyTuition() != null ? pricing.getMonthlyTuition() : BigDecimal.ZERO)
-                .add(pricing.getActivityFee())
-                .add(pricing.getTechnologyFee())
-                .add(pricing.getTransportationFee())
-                .add(pricing.getCafeteriaFee());
+                .add(hasTuitionValue(pricing.getMonthlyTuition()) ? pricing.getMonthlyTuition() : BigDecimal.ZERO)
+                .add(nullSafeAmount(pricing.getActivityFee()))
+                .add(nullSafeAmount(pricing.getTechnologyFee()))
+                .add(nullSafeAmount(pricing.getTransportationFee()))
+                .add(nullSafeAmount(pricing.getCafeteriaFee()));
 
         pricing.setTotalMonthlyCost(monthlyRecurring);
 
-        // Calculate annual cost
-        BigDecimal annualCost = pricing.getAnnualTuition() != null ?
-                pricing.getAnnualTuition() : monthlyRecurring.multiply(BigDecimal.valueOf(12));
+        // Calculate annual cost from the single active tuition type
+        BigDecimal annualCost;
+        if (hasTuitionValue(pricing.getAnnualTuition())) {
+            annualCost = pricing.getAnnualTuition();
+        } else if (hasTuitionValue(pricing.getMonthlyTuition())) {
+            annualCost = pricing.getMonthlyTuition().multiply(BigDecimal.valueOf(12));
+        } else if (hasTuitionValue(pricing.getSemesterTuition())) {
+            annualCost = pricing.getSemesterTuition().multiply(BigDecimal.valueOf(2));
+        } else {
+            annualCost = monthlyRecurring.multiply(BigDecimal.valueOf(12));
+        }
         annualCost = annualCost.add(oneTimeFees);
 
         pricing.setTotalAnnualCost(annualCost);
@@ -823,6 +890,21 @@ public class PricingService {
         priceHistoryRepository.save(history);
     }
 
+    private void applyTuitionFields(SchoolPricing pricing, SchoolPricingUpdateDto updateDto) {
+        if (!isAnyTuitionFieldProvided(updateDto)) {
+            return;
+        }
+
+        BigDecimal annual = resolveTuitionValue(updateDto.getAnnualTuition(), pricing.getAnnualTuition());
+        BigDecimal monthly = resolveTuitionValue(updateDto.getMonthlyTuition(), pricing.getMonthlyTuition());
+        BigDecimal semester = resolveTuitionValue(updateDto.getSemesterTuition(), pricing.getSemesterTuition());
+
+        pricing.setAnnualTuition(annual);
+        pricing.setMonthlyTuition(monthly);
+        pricing.setSemesterTuition(semester);
+        normalizeTuitionFields(pricing);
+    }
+
     private void updatePricingFields(SchoolPricing pricing, SchoolPricingUpdateDto updateDto, User user) {
         if (updateDto.getGradeLevel() != null) pricing.setGradeLevel(updateDto.getGradeLevel());
         if (updateDto.getClassLevel() != null) pricing.setClassLevel(updateDto.getClassLevel());
@@ -832,9 +914,7 @@ public class PricingService {
         if (updateDto.getRegistrationFee() != null) pricing.setRegistrationFee(updateDto.getRegistrationFee());
         if (updateDto.getApplicationFee() != null) pricing.setApplicationFee(updateDto.getApplicationFee());
         if (updateDto.getEnrollmentFee() != null) pricing.setEnrollmentFee(updateDto.getEnrollmentFee());
-        if (updateDto.getAnnualTuition() != null) pricing.setAnnualTuition(updateDto.getAnnualTuition());
-        if (updateDto.getMonthlyTuition() != null) pricing.setMonthlyTuition(updateDto.getMonthlyTuition());
-        if (updateDto.getSemesterTuition() != null) pricing.setSemesterTuition(updateDto.getSemesterTuition());
+        applyTuitionFields(pricing, updateDto);
 
         // Update additional fees
         if (updateDto.getBookFee() != null) pricing.setBookFee(updateDto.getBookFee());
@@ -879,7 +959,7 @@ public class PricingService {
 
     private boolean hasMajorPriceChanges(SchoolPricing existing, SchoolPricingUpdateDto update) {
         // Consider major changes as > 10% change in main tuition fees
-        if (update.getMonthlyTuition() != null && existing.getMonthlyTuition() != null) {
+        if (update.getMonthlyTuition() != null && hasTuitionValue(existing.getMonthlyTuition())) {
             BigDecimal changePercentage = update.getMonthlyTuition()
                     .subtract(existing.getMonthlyTuition())
                     .divide(existing.getMonthlyTuition(), 4, java.math.RoundingMode.HALF_UP)
@@ -888,10 +968,19 @@ public class PricingService {
             return Math.abs(changePercentage.doubleValue()) > 10.0;
         }
 
-        if (update.getAnnualTuition() != null && existing.getAnnualTuition() != null) {
+        if (update.getAnnualTuition() != null && hasTuitionValue(existing.getAnnualTuition())) {
             BigDecimal changePercentage = update.getAnnualTuition()
                     .subtract(existing.getAnnualTuition())
                     .divide(existing.getAnnualTuition(), 4, java.math.RoundingMode.HALF_UP)
+                    .multiply(BigDecimal.valueOf(100));
+
+            return Math.abs(changePercentage.doubleValue()) > 10.0;
+        }
+
+        if (update.getSemesterTuition() != null && hasTuitionValue(existing.getSemesterTuition())) {
+            BigDecimal changePercentage = update.getSemesterTuition()
+                    .subtract(existing.getSemesterTuition())
+                    .divide(existing.getSemesterTuition(), 4, java.math.RoundingMode.HALF_UP)
                     .multiply(BigDecimal.valueOf(100));
 
             return Math.abs(changePercentage.doubleValue()) > 10.0;

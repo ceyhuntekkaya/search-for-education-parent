@@ -43,6 +43,28 @@ public interface AppointmentNoteRepository extends JpaRepository<AppointmentNote
     List<AppointmentNote> findByAuthorUserIdAndIsActiveTrue(@Param("authorUserId") Long authorUserId);
 
     @Query("SELECT an FROM AppointmentNote an " +
+            "WHERE an.appointment.id = :appointmentId " +
+            "AND an.authorUser.id = :authorUserId " +
+            "AND an.noteType = :noteType " +
+            "AND an.isActive = true " +
+            "ORDER BY an.noteDate DESC")
+    List<AppointmentNote> findByAppointmentIdAndAuthorUserIdAndNoteType(
+            @Param("appointmentId") Long appointmentId,
+            @Param("authorUserId") Long authorUserId,
+            @Param("noteType") NoteType noteType);
+
+    @Query("SELECT an FROM AppointmentNote an " +
+            "WHERE an.appointment.id IN :appointmentIds " +
+            "AND an.authorUser.id = :authorUserId " +
+            "AND an.noteType = :noteType " +
+            "AND an.isActive = true " +
+            "ORDER BY an.noteDate DESC")
+    List<AppointmentNote> findByAppointmentIdsAndAuthorUserIdAndNoteType(
+            @Param("appointmentIds") List<Long> appointmentIds,
+            @Param("authorUserId") Long authorUserId,
+            @Param("noteType") NoteType noteType);
+
+    @Query("SELECT an FROM AppointmentNote an " +
             "WHERE an.appointment.school.id = :schoolId " +
             "AND an.isActive = true " +
             "AND an.isImportant = true " +

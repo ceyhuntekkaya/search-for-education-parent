@@ -111,13 +111,12 @@ public class AppointmentController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "School or staff user not found")
     })
     public ResponseEntity<ApiResponse<List<AppointmentSlotDto>>> searchSlotsWithUser(
-            @Parameter(description = "Appointment slot ID") @PathVariable Long userId,
+            @Parameter(description = "Parent user ID") @PathVariable Long userId,
             HttpServletRequest request) {
 
+        List<AppointmentSlotDto> slotDto = appointmentService.searchSlotsWithUser(userId, request);
 
-        List<AppointmentSlotDto> slotDto = appointmentService.searchSlotsWithUser(userId);
-
-        ApiResponse<List<AppointmentSlotDto>> response = ApiResponse.success(slotDto, "Appointment slot created successfully");
+        ApiResponse<List<AppointmentSlotDto>> response = ApiResponse.success(slotDto, "Parent appointment slots retrieved successfully");
         response.setPath(request.getRequestURI());
         response.setTimestamp(LocalDateTime.now());
 
@@ -134,14 +133,13 @@ public class AppointmentController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "School or staff user not found")
     })
     public ResponseEntity<ApiResponse<List<AppointmentSlotDto>>> searchSlotsWithUser(
-            @Parameter(description = "Appointment slot ID") @PathVariable Long userId,
-            @Parameter(description = "Appointment slot ID") @PathVariable Long schoolId,
+            @Parameter(description = "Parent user ID") @PathVariable Long userId,
+            @Parameter(description = "School ID") @PathVariable Long schoolId,
             HttpServletRequest request) {
 
+        List<AppointmentSlotDto> slotDto = appointmentService.searchSlotsWithUser(userId, schoolId, request);
 
-        List<AppointmentSlotDto> slotDto = appointmentService.searchSlotsWithUser(userId, schoolId);
-
-        ApiResponse<List<AppointmentSlotDto>> response = ApiResponse.success(slotDto, "Appointment slot created successfully");
+        ApiResponse<List<AppointmentSlotDto>> response = ApiResponse.success(slotDto, "Parent appointment slots retrieved successfully");
         response.setPath(request.getRequestURI());
         response.setTimestamp(LocalDateTime.now());
 
@@ -488,6 +486,49 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/slots/search/user/{userId}/appointments/{appointmentId}/notes")
+    @Operation(summary = "Add parent personal note", description = "Parent adds a personal note visible only to themselves on their appointment")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Note added successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Appointment not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Access denied")
+    })
+    public ResponseEntity<ApiResponse<AppointmentNoteDto>> addParentAppointmentNote(
+            @Parameter(description = "Parent user ID") @PathVariable Long userId,
+            @Parameter(description = "Appointment ID") @PathVariable Long appointmentId,
+            @Valid @RequestBody ParentAppointmentNoteCreateDto createDto,
+            HttpServletRequest request) {
+
+        AppointmentNoteDto noteDto = appointmentService.addParentAppointmentNote(userId, appointmentId, createDto, request);
+
+        ApiResponse<AppointmentNoteDto> response = ApiResponse.success(noteDto, "Parent note added successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/slots/search/user/{userId}/appointments/{appointmentId}/notes")
+    @Operation(summary = "Get parent personal notes", description = "Get personal notes written by the parent on their appointment")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Notes retrieved successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Appointment not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Access denied")
+    })
+    public ResponseEntity<ApiResponse<List<AppointmentNoteDto>>> getParentAppointmentNotes(
+            @Parameter(description = "Parent user ID") @PathVariable Long userId,
+            @Parameter(description = "Appointment ID") @PathVariable Long appointmentId,
+            HttpServletRequest request) {
+
+        List<AppointmentNoteDto> notes = appointmentService.getParentAppointmentNotes(userId, appointmentId, request);
+
+        ApiResponse<List<AppointmentNoteDto>> response = ApiResponse.success(notes, "Parent notes retrieved successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+
+        return ResponseEntity.ok(response);
+    }
+
     // ================================ STATISTICS AND REPORTING ================================
 
     @GetMapping("/schools/{schoolId}/statistics")
@@ -565,7 +606,9 @@ public class AppointmentController {
     // ================================ BULK OPERATIONS ================================
 
     @PostMapping("/bulk")
-    @Operation(summary = "Bulk update appointments", description = "Perform bulk operations on multiple appointments")
+    @Operation(summary = "Bulk update appointments",
+            description = "Perform bulk operations on multiple appointments. " +
+                    "For parent follow-up outcomes use operation=UPDATE_STATUS with parentFollowUpOutcome and required fields.")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Bulk operation completed"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Access denied"),

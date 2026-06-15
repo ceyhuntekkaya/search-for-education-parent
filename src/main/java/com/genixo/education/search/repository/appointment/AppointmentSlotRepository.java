@@ -114,12 +114,19 @@ public interface AppointmentSlotRepository extends JpaRepository<AppointmentSlot
     );
 
     @Query("SELECT DISTINCT a FROM AppointmentSlot a " +
-            "JOIN a.appointments app " +
-            "WHERE app.parentUser.id = :parentId")
+            "JOIN FETCH a.appointments app " +
+            "JOIN FETCH app.parentUser " +
+            "WHERE app.parentUser.id = :parentId " +
+            "AND app.isActive = true " +
+            "AND app.status <> 'CANCELLED'")
     List<AppointmentSlot> findByParentUserId(@Param("parentId") Long parentId);
 
     @Query("SELECT DISTINCT a FROM AppointmentSlot a " +
-            "JOIN a.appointments app " +
-            "WHERE app.parentUser.id = :parentId AND a.school.id= :schoolId")
+            "JOIN FETCH a.appointments app " +
+            "JOIN FETCH app.parentUser " +
+            "WHERE app.parentUser.id = :parentId " +
+            "AND a.school.id = :schoolId " +
+            "AND app.isActive = true " +
+            "AND app.status <> 'CANCELLED'")
     List<AppointmentSlot> findByParentUserIdAndSchoolId(@Param("parentId") Long parentId, @Param("schoolId") Long schoolId);
 }
