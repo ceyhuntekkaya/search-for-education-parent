@@ -35,6 +35,7 @@ public class InstitutionPropertyDto {
     private String regexPattern;
 
     private InstitutionTypeSummaryDto institutionType;
+    private Long propertyTypeId;
     private Boolean isActive;
     private LocalDateTime createdAt;
 }

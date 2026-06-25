@@ -21,6 +21,18 @@ public interface InstitutionPropertyRepository extends JpaRepository<Institution
             @Param("name") String name,
             @Param("institutionTypeId") Long institutionTypeId);
 
+    @Query("SELECT CASE WHEN COUNT(ip) > 0 THEN true ELSE false END " +
+            "FROM InstitutionProperty ip WHERE LOWER(ip.name) = LOWER(CAST(:name AS string)) " +
+            "AND ip.institutionType.id = :institutionTypeId AND ip.id != :id AND ip.isActive = true")
+    boolean existsByNameIgnoreCaseAndInstitutionTypeIdAndIdNotAndIsActiveTrue(
+            @Param("name") String name,
+            @Param("institutionTypeId") Long institutionTypeId,
+            @Param("id") Long id);
+
+    @Query("SELECT CASE WHEN COUNT(ip) > 0 THEN true ELSE false END " +
+            "FROM InstitutionProperty ip WHERE ip.propertyType.id = :propertyTypeId AND ip.isActive = true")
+    boolean existsByPropertyTypeIdAndIsActiveTrue(@Param("propertyTypeId") Long propertyTypeId);
+
     @Query("SELECT ip FROM InstitutionProperty ip " +
             "WHERE ip.institutionType.id = :institutionTypeId AND ip.isActive = true " +
             "ORDER BY ip.sortOrder ASC, ip.displayName ASC")

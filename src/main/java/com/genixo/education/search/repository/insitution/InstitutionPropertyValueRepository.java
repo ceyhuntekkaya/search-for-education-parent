@@ -94,4 +94,8 @@ public interface InstitutionPropertyValueRepository extends JpaRepository<Instit
             "JOIN FETCH ip.propertyType " +
             "WHERE ipv.school.id = :schoolId")
     List<InstitutionPropertyValue> findBySchoolIdWithProperty(@Param("schoolId") Long schoolId);
+
+    @Query("SELECT CASE WHEN COUNT(ipv) > 0 THEN true ELSE false END " +
+            "FROM InstitutionPropertyValue ipv WHERE ipv.property.id = :propertyId AND ipv.isActive = true")
+    boolean existsByPropertyIdAndIsActiveTrue(@Param("propertyId") Long propertyId);
 }

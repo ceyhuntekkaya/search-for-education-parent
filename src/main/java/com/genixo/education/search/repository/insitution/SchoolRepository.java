@@ -53,6 +53,10 @@ public interface SchoolRepository extends JpaRepository<School, Long> {
     @Query("SELECT s FROM School s WHERE s.institutionType.id = :typeId AND s.isActive = true ORDER BY s.name ASC")
     List<School> findByInstitutionTypeIdAndIsActiveTrueOrderByName(@Param("typeId") Long typeId);
 
+    @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END " +
+            "FROM School s WHERE s.institutionType.id = :institutionTypeId AND s.isActive = true")
+    boolean existsByInstitutionTypeIdAndIsActiveTrue(@Param("institutionTypeId") Long institutionTypeId);
+
     @Query("SELECT s FROM School s WHERE s.id IN :ids AND s.isActive = true ORDER BY s.name ASC")
     List<School> findByIdInAndIsActiveTrue(@Param("ids") List<Long> ids);
 

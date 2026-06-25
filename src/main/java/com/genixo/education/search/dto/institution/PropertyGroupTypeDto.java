@@ -18,6 +18,7 @@ public class PropertyGroupTypeDto {
     private String name;
     private String displayName;
     private Long institutionTypeId;
+    private Integer sortOrder;
     private Boolean isActive;
     private LocalDateTime createdAt;
     private List<PropertyTypeDto> propertyTypes;

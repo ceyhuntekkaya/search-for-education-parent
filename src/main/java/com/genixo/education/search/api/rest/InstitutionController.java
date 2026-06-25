@@ -717,6 +717,283 @@ public class InstitutionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @GetMapping("/institution-types/{id}")
+    @Operation(summary = "Get institution type by ID", description = "Get institution type details by ID")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Institution type retrieved successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Institution type not found")
+    })
+    public ResponseEntity<ApiResponse<InstitutionTypeDto>> getInstitutionTypeById(
+            @Parameter(description = "Institution type ID") @PathVariable Long id,
+            HttpServletRequest request) {
+
+        InstitutionTypeDto typeDto = institutionService.getInstitutionTypeById(id);
+        ApiResponse<InstitutionTypeDto> response = ApiResponse.success(typeDto, "Institution type retrieved successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/institution-types/{id}")
+    @Operation(summary = "Update institution type", description = "Update an existing institution type (admin only)")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Institution type updated successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Institution type not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Access denied"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "Institution type name already exists")
+    })
+    public ResponseEntity<ApiResponse<InstitutionTypeDto>> updateInstitutionType(
+            @Parameter(description = "Institution type ID") @PathVariable Long id,
+            @Valid @RequestBody InstitutionTypeDto typeDto,
+            HttpServletRequest request) {
+
+        InstitutionTypeDto updatedType = institutionService.updateInstitutionType(id, typeDto, request);
+        ApiResponse<InstitutionTypeDto> response = ApiResponse.success(updatedType, "Institution type updated successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/institution-types/{id}")
+    @Operation(summary = "Delete institution type", description = "Soft delete an institution type (admin only)")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Institution type deleted successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Institution type not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Access denied"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "Institution type has active schools")
+    })
+    public ResponseEntity<ApiResponse<Void>> deleteInstitutionType(
+            @Parameter(description = "Institution type ID") @PathVariable Long id,
+            HttpServletRequest request) {
+
+        institutionService.deleteInstitutionType(id, request);
+        ApiResponse<Void> response = ApiResponse.success(null, "Institution type deleted successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
+    // ================================ INSTITUTION TYPE GROUP OPERATIONS ================================
+
+    @GetMapping("/institution-type-groups")
+    @Operation(summary = "Get all institution type groups", description = "Get all active institution type groups")
+    public ResponseEntity<ApiResponse<List<InstitutionTypeGroupDto>>> getAllInstitutionTypeGroups(HttpServletRequest request) {
+        List<InstitutionTypeGroupDto> groups = institutionService.getAllInstitutionTypeGroups();
+        ApiResponse<List<InstitutionTypeGroupDto>> response = ApiResponse.success(groups, "Institution type groups retrieved successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/institution-type-groups/{id}")
+    @Operation(summary = "Get institution type group by ID", description = "Get institution type group details by ID")
+    public ResponseEntity<ApiResponse<InstitutionTypeGroupDto>> getInstitutionTypeGroupById(
+            @Parameter(description = "Institution type group ID") @PathVariable Long id,
+            HttpServletRequest request) {
+
+        InstitutionTypeGroupDto groupDto = institutionService.getInstitutionTypeGroupById(id);
+        ApiResponse<InstitutionTypeGroupDto> response = ApiResponse.success(groupDto, "Institution type group retrieved successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/institution-type-groups")
+    @Operation(summary = "Create institution type group", description = "Create a new institution type group (admin only)")
+    public ResponseEntity<ApiResponse<InstitutionTypeGroupDto>> createInstitutionTypeGroup(
+            @Valid @RequestBody InstitutionTypeGroupDto groupDto,
+            HttpServletRequest request) {
+
+        InstitutionTypeGroupDto created = institutionService.createInstitutionTypeGroup(groupDto, request);
+        ApiResponse<InstitutionTypeGroupDto> response = ApiResponse.success(created, "Institution type group created successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PutMapping("/institution-type-groups/{id}")
+    @Operation(summary = "Update institution type group", description = "Update an existing institution type group (admin only)")
+    public ResponseEntity<ApiResponse<InstitutionTypeGroupDto>> updateInstitutionTypeGroup(
+            @Parameter(description = "Institution type group ID") @PathVariable Long id,
+            @Valid @RequestBody InstitutionTypeGroupDto groupDto,
+            HttpServletRequest request) {
+
+        InstitutionTypeGroupDto updated = institutionService.updateInstitutionTypeGroup(id, groupDto, request);
+        ApiResponse<InstitutionTypeGroupDto> response = ApiResponse.success(updated, "Institution type group updated successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/institution-type-groups/{id}")
+    @Operation(summary = "Delete institution type group", description = "Soft delete an institution type group (admin only)")
+    public ResponseEntity<ApiResponse<Void>> deleteInstitutionTypeGroup(
+            @Parameter(description = "Institution type group ID") @PathVariable Long id,
+            HttpServletRequest request) {
+
+        institutionService.deleteInstitutionTypeGroup(id, request);
+        ApiResponse<Void> response = ApiResponse.success(null, "Institution type group deleted successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
+    // ================================ PROPERTY GROUP TYPE OPERATIONS ================================
+
+    @GetMapping("/property-group-types")
+    @Operation(summary = "Get all property group types", description = "Get all active property group types")
+    public ResponseEntity<ApiResponse<List<PropertyGroupTypeDto>>> getAllPropertyGroupTypes(HttpServletRequest request) {
+        List<PropertyGroupTypeDto> types = institutionService.getAllPropertyGroupTypes();
+        ApiResponse<List<PropertyGroupTypeDto>> response = ApiResponse.success(types, "Property group types retrieved successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/institution-types/{institutionTypeId}/property-group-types")
+    @Operation(summary = "Get property group types by institution type", description = "Get property group types for a specific institution type")
+    public ResponseEntity<ApiResponse<List<PropertyGroupTypeDto>>> getPropertyGroupTypesByInstitutionType(
+            @Parameter(description = "Institution type ID") @PathVariable Long institutionTypeId,
+            HttpServletRequest request) {
+
+        List<PropertyGroupTypeDto> types = institutionService.getPropertyGroupTypesByInstitutionType(institutionTypeId);
+        ApiResponse<List<PropertyGroupTypeDto>> response = ApiResponse.success(types, "Property group types retrieved successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/property-group-types/{id}")
+    @Operation(summary = "Get property group type by ID", description = "Get property group type details by ID")
+    public ResponseEntity<ApiResponse<PropertyGroupTypeDto>> getPropertyGroupTypeById(
+            @Parameter(description = "Property group type ID") @PathVariable Long id,
+            HttpServletRequest request) {
+
+        PropertyGroupTypeDto typeDto = institutionService.getPropertyGroupTypeById(id);
+        ApiResponse<PropertyGroupTypeDto> response = ApiResponse.success(typeDto, "Property group type retrieved successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/property-group-types")
+    @Operation(summary = "Create property group type", description = "Create a new property group type (admin only)")
+    public ResponseEntity<ApiResponse<PropertyGroupTypeDto>> createPropertyGroupType(
+            @Valid @RequestBody PropertyGroupTypeDto typeDto,
+            HttpServletRequest request) {
+
+        PropertyGroupTypeDto created = institutionService.createPropertyGroupType(typeDto, request);
+        ApiResponse<PropertyGroupTypeDto> response = ApiResponse.success(created, "Property group type created successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PutMapping("/property-group-types/{id}")
+    @Operation(summary = "Update property group type", description = "Update an existing property group type (admin only)")
+    public ResponseEntity<ApiResponse<PropertyGroupTypeDto>> updatePropertyGroupType(
+            @Parameter(description = "Property group type ID") @PathVariable Long id,
+            @Valid @RequestBody PropertyGroupTypeDto typeDto,
+            HttpServletRequest request) {
+
+        PropertyGroupTypeDto updated = institutionService.updatePropertyGroupType(id, typeDto, request);
+        ApiResponse<PropertyGroupTypeDto> response = ApiResponse.success(updated, "Property group type updated successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/property-group-types/{id}")
+    @Operation(summary = "Delete property group type", description = "Soft delete a property group type (admin only)")
+    public ResponseEntity<ApiResponse<Void>> deletePropertyGroupType(
+            @Parameter(description = "Property group type ID") @PathVariable Long id,
+            HttpServletRequest request) {
+
+        institutionService.deletePropertyGroupType(id, request);
+        ApiResponse<Void> response = ApiResponse.success(null, "Property group type deleted successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
+    // ================================ PROPERTY TYPE OPERATIONS ================================
+
+    @GetMapping("/property-types")
+    @Operation(summary = "Get all property types", description = "Get all active property types")
+    public ResponseEntity<ApiResponse<List<PropertyTypeDto>>> getAllPropertyTypes(HttpServletRequest request) {
+        List<PropertyTypeDto> types = institutionService.getAllPropertyTypes();
+        ApiResponse<List<PropertyTypeDto>> response = ApiResponse.success(types, "Property types retrieved successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/property-group-types/{propertyGroupTypeId}/property-types")
+    @Operation(summary = "Get property types by property group type", description = "Get property types for a specific property group type")
+    public ResponseEntity<ApiResponse<List<PropertyTypeDto>>> getPropertyTypesByPropertyGroupType(
+            @Parameter(description = "Property group type ID") @PathVariable Long propertyGroupTypeId,
+            HttpServletRequest request) {
+
+        List<PropertyTypeDto> types = institutionService.getPropertyTypesByPropertyGroupType(propertyGroupTypeId);
+        ApiResponse<List<PropertyTypeDto>> response = ApiResponse.success(types, "Property types retrieved successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/property-types/{id}")
+    @Operation(summary = "Get property type by ID", description = "Get property type details by ID")
+    public ResponseEntity<ApiResponse<PropertyTypeDto>> getPropertyTypeById(
+            @Parameter(description = "Property type ID") @PathVariable Long id,
+            HttpServletRequest request) {
+
+        PropertyTypeDto typeDto = institutionService.getPropertyTypeById(id);
+        ApiResponse<PropertyTypeDto> response = ApiResponse.success(typeDto, "Property type retrieved successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/property-types")
+    @Operation(summary = "Create property type", description = "Create a new property type (admin only)")
+    public ResponseEntity<ApiResponse<PropertyTypeDto>> createPropertyType(
+            @Valid @RequestBody PropertyTypeDto typeDto,
+            HttpServletRequest request) {
+
+        PropertyTypeDto created = institutionService.createPropertyType(typeDto, request);
+        ApiResponse<PropertyTypeDto> response = ApiResponse.success(created, "Property type created successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PutMapping("/property-types/{id}")
+    @Operation(summary = "Update property type", description = "Update an existing property type (admin only)")
+    public ResponseEntity<ApiResponse<PropertyTypeDto>> updatePropertyType(
+            @Parameter(description = "Property type ID") @PathVariable Long id,
+            @Valid @RequestBody PropertyTypeDto typeDto,
+            HttpServletRequest request) {
+
+        PropertyTypeDto updated = institutionService.updatePropertyType(id, typeDto, request);
+        ApiResponse<PropertyTypeDto> response = ApiResponse.success(updated, "Property type updated successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/property-types/{id}")
+    @Operation(summary = "Delete property type", description = "Soft delete a property type (admin only)")
+    public ResponseEntity<ApiResponse<Void>> deletePropertyType(
+            @Parameter(description = "Property type ID") @PathVariable Long id,
+            HttpServletRequest request) {
+
+        institutionService.deletePropertyType(id, request);
+        ApiResponse<Void> response = ApiResponse.success(null, "Property type deleted successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
     // ================================ INSTITUTION PROPERTY OPERATIONS ================================
 
     @PostMapping("/institution-properties")
@@ -758,6 +1035,46 @@ public class InstitutionController {
         response.setPath(request.getRequestURI());
         response.setTimestamp(LocalDateTime.now());
 
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/institution-properties/{id}")
+    @Operation(summary = "Get institution property by ID", description = "Get institution property details by ID")
+    public ResponseEntity<ApiResponse<InstitutionPropertyDto>> getInstitutionPropertyById(
+            @Parameter(description = "Institution property ID") @PathVariable Long id,
+            HttpServletRequest request) {
+
+        InstitutionPropertyDto propertyDto = institutionService.getInstitutionPropertyById(id);
+        ApiResponse<InstitutionPropertyDto> response = ApiResponse.success(propertyDto, "Institution property retrieved successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/institution-properties/{id}")
+    @Operation(summary = "Update institution property", description = "Update an existing institution property (admin only)")
+    public ResponseEntity<ApiResponse<InstitutionPropertyDto>> updateInstitutionProperty(
+            @Parameter(description = "Institution property ID") @PathVariable Long id,
+            @Valid @RequestBody InstitutionPropertyCreateDto updateDto,
+            HttpServletRequest request) {
+
+        InstitutionPropertyDto propertyDto = institutionService.updateInstitutionProperty(id, updateDto, request);
+        ApiResponse<InstitutionPropertyDto> response = ApiResponse.success(propertyDto, "Institution property updated successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/institution-properties/{id}")
+    @Operation(summary = "Delete institution property", description = "Soft delete an institution property (admin only)")
+    public ResponseEntity<ApiResponse<Void>> deleteInstitutionProperty(
+            @Parameter(description = "Institution property ID") @PathVariable Long id,
+            HttpServletRequest request) {
+
+        institutionService.deleteInstitutionProperty(id, request);
+        ApiResponse<Void> response = ApiResponse.success(null, "Institution property deleted successfully");
+        response.setPath(request.getRequestURI());
+        response.setTimestamp(LocalDateTime.now());
         return ResponseEntity.ok(response);
     }
 

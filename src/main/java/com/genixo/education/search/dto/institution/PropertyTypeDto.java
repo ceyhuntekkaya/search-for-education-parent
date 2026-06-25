@@ -16,6 +16,7 @@ public class PropertyTypeDto {
     private String name;
     private String displayName;
     private Long propertyGroupTypeId;
+    private Integer sortOrder;
     private Boolean isActive;
     private LocalDateTime createdAt;
 }

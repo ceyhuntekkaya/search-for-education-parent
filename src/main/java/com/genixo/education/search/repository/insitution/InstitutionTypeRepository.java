@@ -20,6 +20,15 @@ public interface InstitutionTypeRepository extends JpaRepository<InstitutionType
             "FROM InstitutionType it WHERE LOWER(it.name) = LOWER(CAST(:name AS string)) AND it.isActive = true")
     boolean existsByNameIgnoreCase(@Param("name") String name);
 
+    @Query("SELECT CASE WHEN COUNT(it) > 0 THEN true ELSE false END " +
+            "FROM InstitutionType it WHERE LOWER(it.name) = LOWER(CAST(:name AS string)) " +
+            "AND it.id != :id AND it.isActive = true")
+    boolean existsByNameIgnoreCaseAndIdNot(@Param("name") String name, @Param("id") Long id);
+
+    @Query("SELECT CASE WHEN COUNT(it) > 0 THEN true ELSE false END " +
+            "FROM InstitutionType it WHERE it.group.id = :groupId AND it.isActive = true")
+    boolean existsByGroupIdAndIsActiveTrue(@Param("groupId") Long groupId);
+
     @Query("SELECT it FROM InstitutionType it WHERE it.isActive = true ORDER BY it.sortOrder ASC, it.name ASC")
     List<InstitutionType> findAllByIsActiveTrueOrderBySortOrderAscNameAsc();
 

@@ -53,6 +53,25 @@ public interface PropertyGroupTypeRepository extends JpaRepository<PropertyGroup
      */
     Optional<PropertyGroupType> findByIdAndIsActiveTrue(Long id);
 
+    @Query("SELECT CASE WHEN COUNT(pgt) > 0 THEN true ELSE false END " +
+            "FROM PropertyGroupType pgt WHERE pgt.institutionType.id = :institutionTypeId " +
+            "AND LOWER(pgt.name) = LOWER(CAST(:name AS string)) AND pgt.isActive = true")
+    boolean existsByInstitutionTypeIdAndNameIgnoreCaseAndIsActiveTrue(
+            @Param("institutionTypeId") Long institutionTypeId,
+            @Param("name") String name);
+
+    @Query("SELECT CASE WHEN COUNT(pgt) > 0 THEN true ELSE false END " +
+            "FROM PropertyGroupType pgt WHERE pgt.institutionType.id = :institutionTypeId " +
+            "AND LOWER(pgt.name) = LOWER(CAST(:name AS string)) AND pgt.id != :id AND pgt.isActive = true")
+    boolean existsByInstitutionTypeIdAndNameIgnoreCaseAndIdNotAndIsActiveTrue(
+            @Param("institutionTypeId") Long institutionTypeId,
+            @Param("name") String name,
+            @Param("id") Long id);
+
+    @Query("SELECT CASE WHEN COUNT(pgt) > 0 THEN true ELSE false END " +
+            "FROM PropertyGroupType pgt WHERE pgt.institutionType.id = :institutionTypeId AND pgt.isActive = true")
+    boolean existsByInstitutionTypeIdAndIsActiveTrue(@Param("institutionTypeId") Long institutionTypeId);
+
 
 
 

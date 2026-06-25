@@ -39,15 +39,6 @@ public class InstitutionType extends BaseEntity {
     // Default properties for this institution type
     @Column(name = "default_properties")
     private String defaultProperties;
-/*
-    // Relationships
-    @OneToMany(mappedBy = "institutionType", fetch = FetchType.LAZY)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @JsonIgnore
-    private Set<School> schools = new HashSet<>();
-
- */
 
     @OneToMany(mappedBy = "institutionType", fetch = FetchType.LAZY)
     @ToString.Exclude
@@ -55,11 +46,8 @@ public class InstitutionType extends BaseEntity {
     @JsonIgnore
     private Set<InstitutionProperty> properties = new HashSet<>();
 
-
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "institution_type_group_id")
     @ToString.Exclude
     private InstitutionTypeGroup group;
-
 }

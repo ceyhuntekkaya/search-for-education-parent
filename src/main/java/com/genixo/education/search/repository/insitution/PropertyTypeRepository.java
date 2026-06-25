@@ -49,6 +49,25 @@ public interface PropertyTypeRepository extends JpaRepository<PropertyType, Long
      */
     Optional<PropertyType> findByIdAndIsActiveTrue(Long id);
 
+    @Query("SELECT CASE WHEN COUNT(pt) > 0 THEN true ELSE false END " +
+            "FROM PropertyType pt WHERE pt.propertyGroupType.id = :propertyGroupTypeId " +
+            "AND LOWER(pt.name) = LOWER(CAST(:name AS string)) AND pt.isActive = true")
+    boolean existsByPropertyGroupTypeIdAndNameIgnoreCaseAndIsActiveTrue(
+            @Param("propertyGroupTypeId") Long propertyGroupTypeId,
+            @Param("name") String name);
+
+    @Query("SELECT CASE WHEN COUNT(pt) > 0 THEN true ELSE false END " +
+            "FROM PropertyType pt WHERE pt.propertyGroupType.id = :propertyGroupTypeId " +
+            "AND LOWER(pt.name) = LOWER(CAST(:name AS string)) AND pt.id != :id AND pt.isActive = true")
+    boolean existsByPropertyGroupTypeIdAndNameIgnoreCaseAndIdNotAndIsActiveTrue(
+            @Param("propertyGroupTypeId") Long propertyGroupTypeId,
+            @Param("name") String name,
+            @Param("id") Long id);
+
+    @Query("SELECT CASE WHEN COUNT(pt) > 0 THEN true ELSE false END " +
+            "FROM PropertyType pt WHERE pt.propertyGroupType.id = :propertyGroupTypeId AND pt.isActive = true")
+    boolean existsByPropertyGroupTypeIdAndIsActiveTrue(@Param("propertyGroupTypeId") Long propertyGroupTypeId);
+
     /**
      * Belirli bir InstitutionType'a ait tüm PropertyType'ları getirir (nested query)
      */

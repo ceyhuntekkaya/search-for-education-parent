@@ -12,6 +12,7 @@ import lombok.Builder;
 @Builder
 public class InstitutionPropertyCreateDto {
     private Long institutionTypeId;
+    private Long propertyTypeId;
     private String name;
     private String displayName;
     private String description;

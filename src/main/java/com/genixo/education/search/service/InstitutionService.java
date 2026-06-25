@@ -12,8 +12,10 @@ import com.genixo.education.search.entity.location.Country;
 import com.genixo.education.search.entity.location.District;
 import com.genixo.education.search.entity.location.Neighborhood;
 import com.genixo.education.search.entity.location.Province;
+import com.genixo.education.search.entity.user.Role;
 import com.genixo.education.search.entity.user.User;
 import com.genixo.education.search.entity.user.UserInstitutionAccess;
+import com.genixo.education.search.entity.user.UserRole;
 import com.genixo.education.search.enumaration.*;
 import com.genixo.education.search.enumaration.AccessType;
 import com.genixo.education.search.repository.insitution.*;
@@ -651,6 +653,11 @@ public class InstitutionService {
         property.setMaxLength(createDto.getMaxLength());
         property.setRegexPattern(createDto.getRegexPattern());
         property.setInstitutionType(institutionType);
+        if (createDto.getPropertyTypeId() != null) {
+            PropertyType propertyType = propertyTypeRepository.findByIdAndIsActiveTrue(createDto.getPropertyTypeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Property type not found"));
+            property.setPropertyType(propertyType);
+        }
         property.setCreatedBy(user.getId());
 
         property = institutionPropertyRepository.save(property);
@@ -807,9 +814,28 @@ public class InstitutionService {
     }
 
     private void validateUserCanManageInstitutionTypes(User user) {
-        if (!hasSystemRole(user)) {
+        if (!canManageInstitutionMetadata(user)) {
             throw new BusinessException("User does not have permission to manage institution types");
         }
+    }
+
+    private boolean canManageInstitutionMetadata(User user) {
+        return hasSystemRole(user) || hasCompanyOrInstitutionManagerRole(user);
+    }
+
+    private boolean hasCompanyOrInstitutionManagerRole(User user) {
+        return user.getUserRoles().stream()
+                .anyMatch(userRole -> isRoleActive(userRole) && (
+                        userRole.getRole() == Role.COMPANY
+                                || userRole.getRoleLevel() == RoleLevel.BRAND
+                                || userRole.getRoleLevel() == RoleLevel.CAMPUS
+                                || userRole.getRoleLevel() == RoleLevel.INSTITUTION
+                ));
+    }
+
+    private boolean isRoleActive(UserRole userRole) {
+        return userRole.getExpiresAt() == null
+                || userRole.getExpiresAt().isAfter(LocalDateTime.now());
     }
 
     // ================================ HELPER METHODS ================================
@@ -1129,11 +1155,436 @@ public class InstitutionService {
         institutionType.setColorCode(typeDto.getColorCode());
         institutionType.setSortOrder(typeDto.getSortOrder() != null ? typeDto.getSortOrder() : 0);
         institutionType.setDefaultProperties(typeDto.getDefaultProperties());
+        if (typeDto.getGroupId() != null) {
+            InstitutionTypeGroup group = institutionTypeGroupRepository.findByIdAndIsActiveTrue(typeDto.getGroupId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Institution type group not found"));
+            institutionType.setGroup(group);
+        }
         institutionType.setCreatedBy(user.getId());
 
         institutionType = institutionTypeRepository.save(institutionType);
 
         return converterService.mapToDto(institutionType);
+    }
+
+    // ================================ INSTITUTION TYPE GROUP OPERATIONS ================================
+
+    public List<InstitutionTypeGroupDto> getAllInstitutionTypeGroups() {
+        return converterService.mapInstitutionTypeGroupsToDto(
+                institutionTypeGroupRepository.findByIsActiveTrueOrderBySortOrderAscNameAsc());
+    }
+
+    public InstitutionTypeGroupDto getInstitutionTypeGroupById(Long id) {
+        InstitutionTypeGroup group = institutionTypeGroupRepository.findByIdAndIsActiveTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Institution type group not found"));
+        return converterService.mapInstitutionTypeGroupToDto(group);
+    }
+
+    @Transactional
+    @CacheEvict(value = {"institution_types"}, allEntries = true)
+    public InstitutionTypeGroupDto createInstitutionTypeGroup(InstitutionTypeGroupDto dto, HttpServletRequest request) {
+        User user = jwtService.getUser(request);
+        validateUserCanManageInstitutionTypes(user);
+
+        if (institutionTypeGroupRepository.existsByNameIgnoreCaseAndIsActiveTrue(dto.getName())) {
+            throw new BusinessException("Institution type group name already exists: " + dto.getName());
+        }
+
+        InstitutionTypeGroup group = new InstitutionTypeGroup();
+        group.setName(dto.getName());
+        group.setDisplayName(dto.getDisplayName());
+        group.setDescription(dto.getDescription());
+        group.setIconUrl(dto.getIconUrl());
+        group.setColorCode(dto.getColorCode());
+        group.setSortOrder(dto.getSortOrder() != null ? dto.getSortOrder() : 0);
+        group.setDefaultProperties(dto.getDefaultProperties());
+        group.setCreatedBy(user.getId());
+
+        group = institutionTypeGroupRepository.save(group);
+        return converterService.mapInstitutionTypeGroupToDto(group);
+    }
+
+    @Transactional
+    @CacheEvict(value = {"institution_types"}, allEntries = true)
+    public InstitutionTypeGroupDto updateInstitutionTypeGroup(Long id, InstitutionTypeGroupDto dto, HttpServletRequest request) {
+        User user = jwtService.getUser(request);
+        validateUserCanManageInstitutionTypes(user);
+
+        InstitutionTypeGroup group = institutionTypeGroupRepository.findByIdAndIsActiveTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Institution type group not found"));
+
+        if (!group.getName().equalsIgnoreCase(dto.getName()) &&
+                institutionTypeGroupRepository.existsByNameIgnoreCaseAndIdNotAndIsActiveTrue(dto.getName(), id)) {
+            throw new BusinessException("Institution type group name already exists: " + dto.getName());
+        }
+
+        group.setName(dto.getName());
+        group.setDisplayName(dto.getDisplayName());
+        group.setDescription(dto.getDescription());
+        group.setIconUrl(dto.getIconUrl());
+        group.setColorCode(dto.getColorCode());
+        group.setSortOrder(dto.getSortOrder() != null ? dto.getSortOrder() : group.getSortOrder());
+        group.setDefaultProperties(dto.getDefaultProperties());
+        group.setUpdatedBy(user.getId());
+
+        group = institutionTypeGroupRepository.save(group);
+        return converterService.mapInstitutionTypeGroupToDto(group);
+    }
+
+    @Transactional
+    @CacheEvict(value = {"institution_types"}, allEntries = true)
+    public void deleteInstitutionTypeGroup(Long id, HttpServletRequest request) {
+        User user = jwtService.getUser(request);
+        validateUserCanManageInstitutionTypes(user);
+
+        InstitutionTypeGroup group = institutionTypeGroupRepository.findByIdAndIsActiveTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Institution type group not found"));
+
+        if (institutionTypeRepository.existsByGroupIdAndIsActiveTrue(id)) {
+            throw new BusinessException("Cannot delete institution type group with active institution types");
+        }
+
+        group.setIsActive(false);
+        group.setUpdatedBy(user.getId());
+        institutionTypeGroupRepository.save(group);
+    }
+
+    // ================================ INSTITUTION TYPE CRUD (extended) ================================
+
+    public InstitutionTypeDto getInstitutionTypeById(Long id) {
+        InstitutionType institutionType = institutionTypeRepository.findByIdAndIsActiveTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Institution type not found"));
+        return converterService.mapToDto(institutionType);
+    }
+
+    @Transactional
+    @CacheEvict(value = {"institution_types"}, allEntries = true)
+    public InstitutionTypeDto updateInstitutionType(Long id, InstitutionTypeDto typeDto, HttpServletRequest request) {
+        User user = jwtService.getUser(request);
+        validateUserCanManageInstitutionTypes(user);
+
+        InstitutionType institutionType = institutionTypeRepository.findByIdAndIsActiveTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Institution type not found"));
+
+        if (!institutionType.getName().equalsIgnoreCase(typeDto.getName()) &&
+                institutionTypeRepository.existsByNameIgnoreCaseAndIdNot(typeDto.getName(), id)) {
+            throw new BusinessException("Institution type name already exists: " + typeDto.getName());
+        }
+
+        institutionType.setName(typeDto.getName());
+        institutionType.setDisplayName(typeDto.getDisplayName());
+        institutionType.setDescription(typeDto.getDescription());
+        institutionType.setIconUrl(typeDto.getIconUrl());
+        institutionType.setColorCode(typeDto.getColorCode());
+        institutionType.setSortOrder(typeDto.getSortOrder() != null ? typeDto.getSortOrder() : institutionType.getSortOrder());
+        institutionType.setDefaultProperties(typeDto.getDefaultProperties());
+
+        if (typeDto.getGroupId() != null) {
+            InstitutionTypeGroup group = institutionTypeGroupRepository.findByIdAndIsActiveTrue(typeDto.getGroupId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Institution type group not found"));
+            institutionType.setGroup(group);
+        }
+
+        institutionType.setUpdatedBy(user.getId());
+        institutionType = institutionTypeRepository.save(institutionType);
+        return converterService.mapToDto(institutionType);
+    }
+
+    @Transactional
+    @CacheEvict(value = {"institution_types"}, allEntries = true)
+    public void deleteInstitutionType(Long id, HttpServletRequest request) {
+        User user = jwtService.getUser(request);
+        validateUserCanManageInstitutionTypes(user);
+
+        InstitutionType institutionType = institutionTypeRepository.findByIdAndIsActiveTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Institution type not found"));
+
+        if (schoolRepository.existsByInstitutionTypeIdAndIsActiveTrue(id)) {
+            throw new BusinessException("Cannot delete institution type with active schools");
+        }
+
+        institutionType.setIsActive(false);
+        institutionType.setUpdatedBy(user.getId());
+        institutionTypeRepository.save(institutionType);
+    }
+
+    // ================================ PROPERTY GROUP TYPE OPERATIONS ================================
+
+    public List<PropertyGroupTypeDto> getAllPropertyGroupTypes() {
+        return converterService.mapPropertyGroupTypesToDto(propertyGroupTypeRepository.findByIsActiveTrue());
+    }
+
+    public List<PropertyGroupTypeDto> getPropertyGroupTypesByInstitutionType(Long institutionTypeId) {
+        institutionTypeRepository.findByIdAndIsActiveTrue(institutionTypeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Institution type not found"));
+        return converterService.mapPropertyGroupTypesToDto(
+                propertyGroupTypeRepository.findByInstitutionTypeIdAndIsActiveTrue(institutionTypeId));
+    }
+
+    public PropertyGroupTypeDto getPropertyGroupTypeById(Long id) {
+        PropertyGroupType propertyGroupType = propertyGroupTypeRepository.findByIdAndIsActiveTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Property group type not found"));
+        return converterService.mapPropertyGroupTypeToDto(propertyGroupType);
+    }
+
+    @Transactional
+    @CacheEvict(value = {"institution_types", "institution_properties"}, allEntries = true)
+    public PropertyGroupTypeDto createPropertyGroupType(PropertyGroupTypeDto dto, HttpServletRequest request) {
+        User user = jwtService.getUser(request);
+        validateUserCanManageInstitutionTypes(user);
+
+        InstitutionType institutionType = institutionTypeRepository.findByIdAndIsActiveTrue(dto.getInstitutionTypeId())
+                .orElseThrow(() -> new ResourceNotFoundException("Institution type not found"));
+
+        if (propertyGroupTypeRepository.existsByInstitutionTypeIdAndNameIgnoreCaseAndIsActiveTrue(
+                dto.getInstitutionTypeId(), dto.getName())) {
+            throw new BusinessException("Property group type name already exists for this institution type");
+        }
+
+        PropertyGroupType propertyGroupType = new PropertyGroupType();
+        propertyGroupType.setName(dto.getName());
+        propertyGroupType.setDisplayName(dto.getDisplayName());
+        propertyGroupType.setInstitutionType(institutionType);
+        propertyGroupType.setSortOrder(dto.getSortOrder() != null ? dto.getSortOrder() : 0);
+        propertyGroupType.setIsMultiple(dto.getIsMultiple() != null ? dto.getIsMultiple() : true);
+        propertyGroupType.setCreatedBy(user.getId());
+
+        propertyGroupType = propertyGroupTypeRepository.save(propertyGroupType);
+        return converterService.mapPropertyGroupTypeToDto(propertyGroupType);
+    }
+
+    @Transactional
+    @CacheEvict(value = {"institution_types", "institution_properties"}, allEntries = true)
+    public PropertyGroupTypeDto updatePropertyGroupType(Long id, PropertyGroupTypeDto dto, HttpServletRequest request) {
+        User user = jwtService.getUser(request);
+        validateUserCanManageInstitutionTypes(user);
+
+        PropertyGroupType propertyGroupType = propertyGroupTypeRepository.findByIdAndIsActiveTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Property group type not found"));
+
+        Long institutionTypeId = dto.getInstitutionTypeId() != null
+                ? dto.getInstitutionTypeId()
+                : propertyGroupType.getInstitutionType().getId();
+
+        if (!propertyGroupType.getName().equalsIgnoreCase(dto.getName()) &&
+                propertyGroupTypeRepository.existsByInstitutionTypeIdAndNameIgnoreCaseAndIdNotAndIsActiveTrue(
+                        institutionTypeId, dto.getName(), id)) {
+            throw new BusinessException("Property group type name already exists for this institution type");
+        }
+
+        if (dto.getInstitutionTypeId() != null &&
+                !dto.getInstitutionTypeId().equals(propertyGroupType.getInstitutionType().getId())) {
+            InstitutionType institutionType = institutionTypeRepository.findByIdAndIsActiveTrue(dto.getInstitutionTypeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Institution type not found"));
+            propertyGroupType.setInstitutionType(institutionType);
+        }
+
+        propertyGroupType.setName(dto.getName());
+        propertyGroupType.setDisplayName(dto.getDisplayName());
+        propertyGroupType.setSortOrder(dto.getSortOrder() != null ? dto.getSortOrder() : propertyGroupType.getSortOrder());
+        if (dto.getIsMultiple() != null) {
+            propertyGroupType.setIsMultiple(dto.getIsMultiple());
+        }
+        propertyGroupType.setUpdatedBy(user.getId());
+
+        propertyGroupType = propertyGroupTypeRepository.save(propertyGroupType);
+        return converterService.mapPropertyGroupTypeToDto(propertyGroupType);
+    }
+
+    @Transactional
+    @CacheEvict(value = {"institution_types", "institution_properties"}, allEntries = true)
+    public void deletePropertyGroupType(Long id, HttpServletRequest request) {
+        User user = jwtService.getUser(request);
+        validateUserCanManageInstitutionTypes(user);
+
+        PropertyGroupType propertyGroupType = propertyGroupTypeRepository.findByIdAndIsActiveTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Property group type not found"));
+
+        if (propertyTypeRepository.existsByPropertyGroupTypeIdAndIsActiveTrue(id)) {
+            throw new BusinessException("Cannot delete property group type with active property types");
+        }
+
+        propertyGroupType.setIsActive(false);
+        propertyGroupType.setUpdatedBy(user.getId());
+        propertyGroupTypeRepository.save(propertyGroupType);
+    }
+
+    // ================================ PROPERTY TYPE OPERATIONS ================================
+
+    public List<PropertyTypeDto> getAllPropertyTypes() {
+        return converterService.mapPropertyTypesToDto(propertyTypeRepository.findByIsActiveTrue());
+    }
+
+    public List<PropertyTypeDto> getPropertyTypesByPropertyGroupType(Long propertyGroupTypeId) {
+        propertyGroupTypeRepository.findByIdAndIsActiveTrue(propertyGroupTypeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Property group type not found"));
+        return converterService.mapPropertyTypesToDto(
+                propertyTypeRepository.findByPropertyGroupTypeIdAndIsActiveTrue(propertyGroupTypeId));
+    }
+
+    public PropertyTypeDto getPropertyTypeById(Long id) {
+        PropertyType propertyType = propertyTypeRepository.findByIdAndIsActiveTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Property type not found"));
+        return converterService.mapPropertyTypeToDto(propertyType);
+    }
+
+    @Transactional
+    @CacheEvict(value = {"institution_types", "institution_properties"}, allEntries = true)
+    public PropertyTypeDto createPropertyType(PropertyTypeDto dto, HttpServletRequest request) {
+        User user = jwtService.getUser(request);
+        validateUserCanManageInstitutionTypes(user);
+
+        PropertyGroupType propertyGroupType = propertyGroupTypeRepository.findByIdAndIsActiveTrue(dto.getPropertyGroupTypeId())
+                .orElseThrow(() -> new ResourceNotFoundException("Property group type not found"));
+
+        if (propertyTypeRepository.existsByPropertyGroupTypeIdAndNameIgnoreCaseAndIsActiveTrue(
+                dto.getPropertyGroupTypeId(), dto.getName())) {
+            throw new BusinessException("Property type name already exists for this property group");
+        }
+
+        PropertyType propertyType = new PropertyType();
+        propertyType.setName(dto.getName());
+        propertyType.setDisplayName(dto.getDisplayName());
+        propertyType.setPropertyGroupType(propertyGroupType);
+        propertyType.setSortOrder(dto.getSortOrder() != null ? dto.getSortOrder() : 0);
+        propertyType.setCreatedBy(user.getId());
+
+        propertyType = propertyTypeRepository.save(propertyType);
+        return converterService.mapPropertyTypeToDto(propertyType);
+    }
+
+    @Transactional
+    @CacheEvict(value = {"institution_types", "institution_properties"}, allEntries = true)
+    public PropertyTypeDto updatePropertyType(Long id, PropertyTypeDto dto, HttpServletRequest request) {
+        User user = jwtService.getUser(request);
+        validateUserCanManageInstitutionTypes(user);
+
+        PropertyType propertyType = propertyTypeRepository.findByIdAndIsActiveTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Property type not found"));
+
+        Long propertyGroupTypeId = dto.getPropertyGroupTypeId() != null
+                ? dto.getPropertyGroupTypeId()
+                : propertyType.getPropertyGroupType().getId();
+
+        if (!propertyType.getName().equalsIgnoreCase(dto.getName()) &&
+                propertyTypeRepository.existsByPropertyGroupTypeIdAndNameIgnoreCaseAndIdNotAndIsActiveTrue(
+                        propertyGroupTypeId, dto.getName(), id)) {
+            throw new BusinessException("Property type name already exists for this property group");
+        }
+
+        if (dto.getPropertyGroupTypeId() != null &&
+                !dto.getPropertyGroupTypeId().equals(propertyType.getPropertyGroupType().getId())) {
+            PropertyGroupType propertyGroupType = propertyGroupTypeRepository.findByIdAndIsActiveTrue(dto.getPropertyGroupTypeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Property group type not found"));
+            propertyType.setPropertyGroupType(propertyGroupType);
+        }
+
+        propertyType.setName(dto.getName());
+        propertyType.setDisplayName(dto.getDisplayName());
+        propertyType.setSortOrder(dto.getSortOrder() != null ? dto.getSortOrder() : propertyType.getSortOrder());
+        propertyType.setUpdatedBy(user.getId());
+
+        propertyType = propertyTypeRepository.save(propertyType);
+        return converterService.mapPropertyTypeToDto(propertyType);
+    }
+
+    @Transactional
+    @CacheEvict(value = {"institution_types", "institution_properties"}, allEntries = true)
+    public void deletePropertyType(Long id, HttpServletRequest request) {
+        User user = jwtService.getUser(request);
+        validateUserCanManageInstitutionTypes(user);
+
+        PropertyType propertyType = propertyTypeRepository.findByIdAndIsActiveTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Property type not found"));
+
+        if (institutionPropertyRepository.existsByPropertyTypeIdAndIsActiveTrue(id)) {
+            throw new BusinessException("Cannot delete property type with active institution properties");
+        }
+
+        propertyType.setIsActive(false);
+        propertyType.setUpdatedBy(user.getId());
+        propertyTypeRepository.save(propertyType);
+    }
+
+    // ================================ INSTITUTION PROPERTY CRUD (extended) ================================
+
+    public InstitutionPropertyDto getInstitutionPropertyById(Long id) {
+        InstitutionProperty property = institutionPropertyRepository.findByIdAndIsActiveTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Institution property not found"));
+        return converterService.mapToDto(property);
+    }
+
+    @Transactional
+    @CacheEvict(value = {"institution_properties"}, allEntries = true)
+    public InstitutionPropertyDto updateInstitutionProperty(Long id, InstitutionPropertyCreateDto updateDto, HttpServletRequest request) {
+        User user = jwtService.getUser(request);
+        validateUserCanManageInstitutionTypes(user);
+
+        InstitutionProperty property = institutionPropertyRepository.findByIdAndIsActiveTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Institution property not found"));
+
+        Long institutionTypeId = updateDto.getInstitutionTypeId() != null
+                ? updateDto.getInstitutionTypeId()
+                : property.getInstitutionType().getId();
+
+        if (!property.getName().equalsIgnoreCase(updateDto.getName()) &&
+                institutionPropertyRepository.existsByNameIgnoreCaseAndInstitutionTypeIdAndIdNotAndIsActiveTrue(
+                        updateDto.getName(), institutionTypeId, id)) {
+            throw new BusinessException("Property name already exists for this institution type");
+        }
+
+        if (updateDto.getInstitutionTypeId() != null &&
+                !updateDto.getInstitutionTypeId().equals(property.getInstitutionType().getId())) {
+            InstitutionType institutionType = institutionTypeRepository.findByIdAndIsActiveTrue(updateDto.getInstitutionTypeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Institution type not found"));
+            property.setInstitutionType(institutionType);
+        }
+
+        property.setName(updateDto.getName());
+        property.setDisplayName(updateDto.getDisplayName());
+        property.setDescription(updateDto.getDescription());
+        property.setDataType(updateDto.getDataType());
+        property.setIsRequired(updateDto.getIsRequired());
+        property.setIsSearchable(updateDto.getIsSearchable());
+        property.setIsFilterable(updateDto.getIsFilterable());
+        property.setShowInCard(updateDto.getShowInCard());
+        property.setShowInProfile(updateDto.getShowInProfile());
+        property.setSortOrder(updateDto.getSortOrder());
+        property.setOptions(updateDto.getOptions());
+        property.setDefaultValue(updateDto.getDefaultValue());
+        property.setMinValue(updateDto.getMinValue());
+        property.setMaxValue(updateDto.getMaxValue());
+        property.setMinLength(updateDto.getMinLength());
+        property.setMaxLength(updateDto.getMaxLength());
+        property.setRegexPattern(updateDto.getRegexPattern());
+
+        if (updateDto.getPropertyTypeId() != null) {
+            PropertyType propertyType = propertyTypeRepository.findByIdAndIsActiveTrue(updateDto.getPropertyTypeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Property type not found"));
+            property.setPropertyType(propertyType);
+        }
+
+        property.setUpdatedBy(user.getId());
+        property = institutionPropertyRepository.save(property);
+        return converterService.mapToDto(property);
+    }
+
+    @Transactional
+    @CacheEvict(value = {"institution_properties"}, allEntries = true)
+    public void deleteInstitutionProperty(Long id, HttpServletRequest request) {
+        User user = jwtService.getUser(request);
+        validateUserCanManageInstitutionTypes(user);
+
+        InstitutionProperty property = institutionPropertyRepository.findByIdAndIsActiveTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Institution property not found"));
+
+        if (institutionPropertyValueRepository.existsByPropertyIdAndIsActiveTrue(id)) {
+            throw new BusinessException("Cannot delete institution property with active property values");
+        }
+
+        property.setIsActive(false);
+        property.setUpdatedBy(user.getId());
+        institutionPropertyRepository.save(property);
     }
 
 

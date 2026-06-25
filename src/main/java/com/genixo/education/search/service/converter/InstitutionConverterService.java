@@ -48,8 +48,8 @@ public class InstitutionConverterService {
                 .properties(mapInstitutionPropertiesToDto(entity.getProperties()))
                 .isActive(entity.getIsActive())
                 .createdAt(entity.getCreatedAt())
-                .groupName(entity.getGroup().getName())
-                .groupId(entity.getGroup().getId())
+                .groupName(entity.getGroup() != null ? entity.getGroup().getName() : null)
+                .groupId(entity.getGroup() != null ? entity.getGroup().getId() : null)
                 .build();
     }
 
@@ -124,6 +124,7 @@ public class InstitutionConverterService {
                 .maxLength(entity.getMaxLength())
                 .regexPattern(entity.getRegexPattern())
                 .institutionType(mapToSummaryDto(entity.getInstitutionType()))
+                .propertyTypeId(entity.getPropertyType() != null ? entity.getPropertyType().getId() : null)
                 .isActive(entity.getIsActive())
                 .createdAt(entity.getCreatedAt())
                 .build();
@@ -1416,6 +1417,7 @@ public class InstitutionConverterService {
                 .name(entity.getName())
                 .displayName(entity.getDisplayName())
                 .institutionTypeId(entity.getInstitutionType() != null ? entity.getInstitutionType().getId() : null)
+                .sortOrder(entity.getSortOrder())
                 .isActive(entity.getIsActive())
                 .createdAt(entity.getCreatedAt())
                 .isMultiple(entity.getIsMultiple())
@@ -1450,6 +1452,7 @@ public class InstitutionConverterService {
                 .name(entity.getName())
                 .displayName(entity.getDisplayName())
                 .propertyGroupTypeId(entity.getPropertyGroupType() != null ? entity.getPropertyGroupType().getId() : null)
+                .sortOrder(entity.getSortOrder())
                 .isActive(entity.getIsActive())
                 .createdAt(entity.getCreatedAt())
                 .build();
