@@ -8,7 +8,7 @@ import lombok.*;
 @Builder
 public class RegisterCampusDto {
     private Long userId;
-    private Long brandId;
+    private String brandName;
     private String name;
     private String email;
     private String phone;

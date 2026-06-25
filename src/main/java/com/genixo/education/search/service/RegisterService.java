@@ -140,14 +140,14 @@ public class RegisterService {
         return converterService.mapToDto(result);
     }
 
+    @Transactional
     public UserDto registerCampus(RegisterCampusDto registerCampusDto) {
         User user = userRepository.findById(registerCampusDto.getUserId()).orElse(null);
         if (user == null) {
             return null;
         }
 
-
-        Brand brand = institutionService.getBrandClassById(registerCampusDto.getBrandId());
+        Brand brand = institutionService.createBrandForRegistration(registerCampusDto.getBrandName(), user.getId());
         District district = locationService.getDistrictClassById(registerCampusDto.getDistrictId());
         Country country = locationService.getCountryClassById(registerCampusDto.getCountryId());
         Province province = locationService.getProvinceClassById(registerCampusDto.getProvinceId());

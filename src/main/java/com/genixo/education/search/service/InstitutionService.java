@@ -167,6 +167,29 @@ public class InstitutionService {
         return converterService.mapToDto(brand);
     }
 
+    @Transactional
+    @CacheEvict(value = {"brands", "brand_summaries"}, allEntries = true)
+    public Brand createBrandForRegistration(String brandName, Long userId) {
+        if (brandRepository.existsByNameIgnoreCase(brandName)) {
+            throw BusinessException.duplicateResource("Brand", "name", brandName);
+        }
+
+        String slug = generateUniqueSlug(brandName, "brand");
+        if (brandRepository.existsBySlug(slug)) {
+            slug = generateUniqueSlug(brandName + "-" + System.currentTimeMillis(), "brand");
+        }
+
+        Brand brand = new Brand();
+        brand.setName(brandName);
+        brand.setSlug(slug);
+        brand.setDescription("");
+        brand.setLogoUrl("default_logo.jpg");
+        brand.setCoverImageUrl("default_cover.jpg");
+        brand.setCreatedBy(userId);
+
+        return brandRepository.saveAndFlush(brand);
+    }
+
     @Cacheable(value = "brands", key = "#id")
     public BrandDto getBrandById(Long id, HttpServletRequest request) {
 
